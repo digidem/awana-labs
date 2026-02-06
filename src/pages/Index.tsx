@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Hero from "@/components/Hero";
 import ProjectsGallery from "@/components/ProjectsGallery";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import { Project, ProjectsData } from "@/types/project";
 
 const Index = () => {
@@ -36,6 +37,7 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
+      <Header />
       <Hero />
       <ProjectsGallery projects={projects} />
       <Footer />
