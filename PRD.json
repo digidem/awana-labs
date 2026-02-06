@@ -110,37 +110,37 @@
     },
     {
       "title": "Identify flaky or redundant tests and list tests to remove or merge",
-      "completed": false,
+      "completed": true,
       "parallel_group": 1,
       "description": "Name the exact test files/cases that are flaky or redundant and suggest consolidations."
     },
     {
       "title": "Propose new tests for high-risk areas with suggested filenames and locations",
-      "completed": false,
+      "completed": true,
       "parallel_group": 1,
       "description": "Provide concrete test ideas with suggested file names and locations."
     },
     {
       "title": "Draft best-in-class README.md tailored to repo goals and workflows",
-      "completed": false,
+      "completed": true,
       "parallel_group": 2,
       "description": "Update README.md to reflect the best-practice structure, usage, contribution, and verification details."
     },
     {
       "title": "Document recommended refactors and execution order with risks/dependencies",
-      "completed": false,
+      "completed": true,
       "parallel_group": 2,
       "description": "Create an ordered plan with risk notes and dependencies between refactors."
     },
     {
       "title": "Remove all Lovable-related artifacts and add neutral placeholders; list removals in PRD.md",
-      "completed": false,
+      "completed": true,
       "parallel_group": 2,
       "description": "Delete or replace any Lovable-related libraries, tags, images, text, or metadata and document the changes."
     },
     {
       "title": "Update GitHub issues and sample project entries to use Unsplash images; note updated issues",
-      "completed": false,
+      "completed": true,
       "parallel_group": 2,
       "description": "Edit GitHub issues and in-repo sample project data so Unsplash images are used; list updated issues."
     },
