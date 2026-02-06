@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -8,31 +8,50 @@ interface HeaderProps {
   className?: string;
 }
 
+// Logo fade animation thresholds (in pixels from viewport top)
+const LOGO_FADE_START = 150;
+const LOGO_FULL_OPACITY = 50;
+
 const Header = ({ className }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [logoOpacity, setLogoOpacity] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
+
+  const calculateLogoOpacity = useCallback(() => {
+    if (!heroTitleRef.current) return 0;
+
+    const currentTop = heroTitleRef.current.getBoundingClientRect().top;
+
+    if (currentTop <= LOGO_FULL_OPACITY) {
+      return 1;
+    } else if (currentTop <= LOGO_FADE_START) {
+      const progress =
+        (LOGO_FADE_START - currentTop) / (LOGO_FADE_START - LOGO_FULL_OPACITY);
+      return Math.max(0, Math.min(1, progress));
+    }
+    return 0;
+  }, []);
 
   useEffect(() => {
+    // Cache the hero title element reference
+    heroTitleRef.current =
+      document.getElementById("hero")?.querySelector("h1") || null;
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
+      setLogoOpacity(calculateLogoOpacity());
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial call
     return () => window.removeEventListener("scroll", handleScroll);
+  }, [calculateLogoOpacity]);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsMobileMenuOpen(false);
   }, []);
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      setIsMobileMenuOpen(false);
-    }
-  };
-
-  const navLinks = [
-    { id: "hero", label: "Home" },
-    { id: "projects", label: "Projects" },
-  ];
 
   return (
     <motion.header
@@ -49,40 +68,28 @@ const Header = ({ className }: HeaderProps) => {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo/Brand */}
+          {/* Logo/Brand - fades in with slide animation on scroll */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            animate={{
+              opacity: logoOpacity,
+              x: logoOpacity === 0 ? 100 : 0,
+            }}
+            transition={{
+              opacity: { duration: 0.3 },
+              x: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] },
+            }}
             className="flex items-center gap-2"
+            style={{ pointerEvents: logoOpacity === 0 ? "none" : "auto" }}
           >
             <button
-              onClick={() => scrollToSection("hero")}
+              onClick={scrollToTop}
               className="text-xl md:text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
-              aria-label="Go to home section"
+              aria-label="Scroll to top"
             >
               🧪 Awana Labs
             </button>
           </motion.div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link, index) => (
-              <motion.button
-                key={link.id}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-                onClick={() => scrollToSection(link.id)}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-accent transition-all"
-                aria-label={`Navigate to ${link.label}`}
-              >
-                {link.label}
-              </motion.button>
-            ))}
-          </nav>
-
-          {/* Right Section: Language Switcher & GitHub */}
           <div className="flex items-center gap-2 md:gap-4">
             {/* GitHub Link */}
             <motion.a
@@ -137,20 +144,12 @@ const Header = ({ className }: HeaderProps) => {
               className="md:hidden pb-4 overflow-hidden"
             >
               <div className="flex flex-col gap-1 pt-2 border-t border-border/50">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.id}
-                    onClick={() => scrollToSection(link.id)}
-                    className="px-4 py-3 rounded-lg text-left text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-accent transition-all"
-                  >
-                    {link.label}
-                  </button>
-                ))}
                 <a
                   href="https://github.com/awanadigital"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-3 rounded-lg text-left text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-accent transition-all flex items-center gap-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Github className="h-4 w-4" />
                   GitHub
