@@ -146,79 +146,79 @@
     },
     {
       "title": "Add npm run typecheck if missing; run and resolve all TypeScript errors; record clean run",
-      "completed": false,
+      "completed": true,
       "parallel_group": 3,
       "description": "Ensure typecheck script exists, run it, fix all errors, and log the clean run in VERIFICATION_REPORT.md."
     },
     {
       "title": "Run npm run lint and resolve all ESLint errors/warnings; record clean run",
-      "completed": false,
+      "completed": true,
       "parallel_group": 3,
       "description": "Run lint, fix all issues, and log the clean run in VERIFICATION_REPORT.md."
     },
     {
       "title": "Implement i18next + react-i18next and define translation file structure in PRD.md",
-      "completed": false,
+      "completed": true,
       "parallel_group": 3,
       "description": "Install and configure i18next/react-i18next, and document the translation file tree in PRD.md."
     },
     {
       "title": "Implement language detection with i18next-browser-languagedetector and document fallback rules in README.md",
-      "completed": false,
+      "completed": true,
       "parallel_group": 4,
       "description": "Install/configure i18next-browser-languagedetector and document fallback rules in README.md."
     },
     {
       "title": "Build a stylish language switcher menu and integrate into primary navigation; list files touched",
-      "completed": false,
+      "completed": true,
       "parallel_group": 4,
       "description": "Create a UI component for language selection and integrate into header/navigation; list modified files."
     },
     {
       "title": "Add translations for en/pt/es for all user-facing strings and verify locale switching",
-      "completed": false,
+      "completed": true,
       "parallel_group": 4,
       "description": "Translate all user-facing strings and verify UI updates when switching locales."
     },
     {
       "title": "Migrate GitHub issue fetching from raw fetch to Octokit.js and document files/config",
-      "completed": false,
+      "completed": true,
       "parallel_group": 4,
       "description": "Replace fetch calls with @octokit/core usage and document changed files/configuration."
     },
     {
       "title": "Adopt Husky and add .husky scripts explicitly",
-      "completed": false,
+      "completed": true,
       "parallel_group": 5,
       "description": "Install Husky and add hook scripts in .husky/ for lint/typecheck as decided."
     },
     {
       "title": "Add prepare script in package.json to install Husky hooks",
-      "completed": false,
+      "completed": true,
       "parallel_group": 5,
       "description": "Add or update package.json prepare script to run husky install."
     },
     {
       "title": "Configure lint-staged to run ESLint only on staged files",
-      "completed": false,
+      "completed": true,
       "parallel_group": 5,
       "description": "Add lint-staged config in package.json or dedicated config file and wire into Husky."
     },
     {
       "title": "Add typecheck script using tsc --noEmit and choose pre-commit or pre-push",
-      "completed": false,
+      "completed": true,
       "parallel_group": 5,
       "description": "Add typecheck script and wire to the chosen hook with rationale."
     },
     {
       "title": "Document how to skip hooks and align with CI enforcement in README.md",
-      "completed": false,
+      "completed": true,
       "parallel_group": 6,
       "description": "Add README.md instructions for skipping hooks and clarify CI enforcement expectations."
     },
     {
       "title": "Fix all responsiveness issues found so UI is fully responsive",
-      "completed": false,
+      "completed": true,
       "parallel_group": 6,
       "description": "Resolve all responsiveness issues identified and verify across breakpoints."
     }
