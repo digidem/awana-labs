@@ -1,73 +1,145 @@
-# Welcome to your Lovable project
+# Awana Labs Projects Showcase
 
-## Project info
+A modern, responsive web application for showcasing projects with multi-language support. Built with React, TypeScript, and Tailwind CSS.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Project Gallery**: Display projects with detailed information including status, tags, and media
+- **Internationalization**: Multi-language support with i18next
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Modern UI Components**: Built with shadcn/ui and Radix UI primitives
+- **Type Safety**: Full TypeScript support with Zod schemas for validation
+- **Testing**: Comprehensive unit and end-to-end testing with Vitest and Playwright
+- **State Management**: React Query for efficient data fetching and caching
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Framework**: React 19 with TypeScript 5
+- **Build Tool**: Vite 5
+- **Styling**: Tailwind CSS 3
+- **UI Components**: shadcn/ui, Radix UI
+- **Routing**: React Router DOM 7
+- **State Management**: TanStack React Query
+- **Internationalization**: i18next, react-i18next
+- **Forms**: React Hook Form with Zod validation
+- **Testing**: Vitest, Playwright, React Testing Library
+- **Package Manager**: npm (with Bun for scripts)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (recommended to use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) for version management)
+- npm
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Steps
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd awana-labs-showcase
 
-Follow these steps:
+# Install dependencies
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Build
 
-**Use GitHub Codespaces**
+```bash
+# Production build
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Preview production build locally
+npm run preview
+```
 
-## What technologies are used for this project?
+## Testing
 
-This project is built with:
+```bash
+# Run unit tests
+npm run test
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Run tests in watch mode
+npm run test:watch
 
-## How can I deploy this project?
+# Run end-to-end tests
+npm run test:e2e
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+# Run E2E tests with UI
+npm run test:e2e:ui
 
-## Can I connect a custom domain to my Lovable project?
+# Run E2E tests in debug mode
+npm run test:e2e:debug
+```
 
-Yes, you can!
+## Scripts
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- `npm run dev` - Start development server with hot module replacement
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development mode
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint
+- `npm run typecheck` - Run TypeScript type checking
+- `npm run test` - Run unit tests with Vitest
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:e2e` - Run Playwright end-to-end tests
+- `npm run test:e2e:ui` - Run Playwright tests with UI
+- `npm run test:e2e:debug` - Run Playwright tests in debug mode
+- `npm run fetch:projects` - Fetch projects data (requires Bun)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Project Structure
+
+```
+src/
+├── components/       # Reusable UI components
+│   ├── ui/          # shadcn/ui components
+│   ├── Header.tsx   # Site header with navigation
+│   ├── Footer.tsx   # Site footer
+│   ├── Hero.tsx     # Hero section
+│   └── Project*.tsx # Project-related components
+├── hooks/           # Custom React hooks
+│   └── use*.ts      # Hook implementations and tests
+├── lib/             # Utility functions and configurations
+│   ├── api.ts       # API utilities
+│   ├── i18n.ts      # Internationalization setup
+│   └── utils.ts     # General utilities
+├── pages/           # Route components
+│   ├── Index.tsx    # Home page
+│   └── NotFound.tsx # 404 page
+├── types/           # TypeScript type definitions
+│   └── *.ts         # Type definitions and schemas
+├── test/            # Test utilities and setup
+└── main.tsx         # Application entry point
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes following the existing code style
+4. Run tests and linting (`npm run test && npm run lint`)
+5. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## Development Guidelines
+
+- Follow the existing code style (2 spaces indentation)
+- Use TypeScript for type safety
+- Write tests for new features and utilities
+- Run `npm run typecheck` before committing
+- Ensure all tests pass before submitting a PR
+- Follow the project's commit message conventions
+
+## License
+
+[Add your license here]
+
+## Support
+
+For issues and questions, please open an issue on the repository.

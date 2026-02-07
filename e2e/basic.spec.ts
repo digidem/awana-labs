@@ -12,7 +12,7 @@ test.describe("Basic Page Tests", () => {
     expect(response?.status()).toBe(200);
 
     // Check page title
-    await expect(page).toHaveTitle(/Awana Labs|Lovable App/);
+    await expect(page).toHaveTitle(/Awana Labs/);
 
     // React root should exist
     const root = page.locator("#root");
