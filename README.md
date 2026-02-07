@@ -136,6 +136,72 @@ src/
 - Ensure all tests pass before submitting a PR
 - Follow the project's commit message conventions
 
+## Git Hooks & CI Enforcement
+
+This project uses a layered quality enforcement strategy to maintain code standards:
+
+### Local Development (Git Hooks)
+
+Husky and lint-staged are configured to run quality checks automatically:
+
+- **Pre-commit**: Runs ESLint on staged files via lint-staged
+- **Pre-push**: Runs full TypeScript type checking
+
+These hooks provide immediate feedback and prevent issues from being committed.
+
+#### Skipping Git Hooks (Use Sparingly)
+
+In rare cases where you need to bypass Git hooks, use the `--no-verify` flag:
+
+```bash
+# Skip pre-commit hooks (linting)
+git commit --no-verify -m "message"
+
+# Skip pre-push hooks (typecheck)
+git push --no-verify
+```
+
+**⚠️ Warning**: Skipping hooks should only be used for:
+
+- Documentation-only changes
+- Temporary work-in-progress commits
+- Emergency fixes that will be properly tested later
+- Known false positives from linters
+
+**Note**: Even if you skip local hooks, CI will still enforce all quality checks on pull requests.
+
+### CI Enforcement (GitHub Actions)
+
+The CI pipeline runs automatically on every push and pull request:
+
+1. **E2E Tests** ([test-e2e.yml](.github/workflows/test-e2e.yml)) - Runs Playwright tests on all push and PR events
+2. **Deployment** ([deploy.yml](.github/workflows/deploy.yml)) - Builds and deploys to GitHub Pages from main branch
+3. **Live Site Tests** ([test-deployed.yml](.github/workflows/test-deployed.yml)) - Tests the deployed site after successful deployment
+
+#### CI Quality Gates
+
+The CI pipeline enforces the following quality standards:
+
+- ✅ All Playwright E2E tests must pass
+- ✅ Build must complete successfully
+- ✅ Deployed site must pass live smoke tests
+
+These checks cannot be bypassed and must pass before any code is merged to main.
+
+### Alignment Strategy
+
+| Check      | Local Hook                | CI Pipeline           | Fallback                       |
+| ---------- | ------------------------- | --------------------- | ------------------------------ |
+| ESLint     | Pre-commit (staged files) | No (local only)       | Manual `npm run lint`          |
+| TypeScript | Pre-push (full check)     | Implicit in build     | Build will fail on type errors |
+| E2E Tests  | No                        | Yes, on every push/PR | Manual `npm run test:e2e`      |
+
+This strategy provides:
+
+- **Fast feedback** via local hooks
+- **Comprehensive validation** via CI
+- **No single point of failure** - if local hooks fail, CI still protects the codebase
+
 ## License
 
 [Add your license here]
