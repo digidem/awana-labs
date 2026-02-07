@@ -16,24 +16,13 @@ import {
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface ProjectModalProps {
   project: Project | null;
   isOpen: boolean;
   onClose: () => void;
 }
-
-const statusColors = {
-  active: "bg-green-500/10 text-green-700 border-green-500/20",
-  paused: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  archived: "bg-muted text-muted-foreground border-border",
-};
-
-const usageLabels = {
-  experimental: "Experimental",
-  used: "In Use",
-  "widely-used": "Widely Used",
-};
 
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const prefersReducedMotion = useReducedMotion();
@@ -226,15 +215,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       {project.title}
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      <Badge
-                        variant="outline"
-                        className={`capitalize ${statusColors[project.status.state]}`}
-                      >
-                        {project.status.state}
-                      </Badge>
-                      <Badge variant="secondary">
-                        {usageLabels[project.status.usage]}
-                      </Badge>
+                      <StatusBadge
+                        state={project.status.state}
+                        usage={project.status.usage}
+                      />
                     </div>
                   </div>
                 </div>
