@@ -51,12 +51,28 @@ The application will be available at `http://localhost:5173`
 ## Build
 
 ```bash
-# Production build
+# Production build (for GitHub Pages deployment)
 npm run build
+
+# Development build (for local testing without GitHub Pages base path)
+npm run build:dev
 
 # Preview production build locally
 npm run preview
 ```
+
+### Build Modes
+
+This project uses Vite's mode feature to configure different base paths:
+
+- **Production mode** (`npm run build`): Builds with base path `/awana-labs-showcase/` for GitHub Pages deployment
+- **Development mode** (`npm run build:dev`): Builds with base path `/` for local testing or alternative deployment environments
+
+Use `build:dev` when you need to:
+
+- Test the production build locally without the GitHub Pages prefix
+- Deploy to a custom domain or root path
+- Debug build-specific issues in development mode
 
 ## Testing
 
@@ -80,8 +96,8 @@ npm run test:e2e:debug
 ## Scripts
 
 - `npm run dev` - Start development server with hot module replacement
-- `npm run build` - Build for production
-- `npm run build:dev` - Build for development mode
+- `npm run build` - Build for production with GitHub Pages base path
+- `npm run build:dev` - Build for development mode with root base path (useful for local testing or custom deployments)
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint
 - `npm run typecheck` - Run TypeScript type checking

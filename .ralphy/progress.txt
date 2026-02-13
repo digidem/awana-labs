@@ -1,0 +1,30 @@
+# Task: Resolve build-dev script policy
+
+## Changes Made
+
+1. **Documented build:dev script usage in README.md**:
+   - Added detailed "Build Modes" section explaining the difference between production and development builds
+   - Clarified that `build:dev` builds with root base path (`/`) for local testing or custom deployments
+   - Clarified that `build` builds with GitHub Pages base path (`/awana-labs-showcase/`)
+   - Updated Scripts section with better descriptions for both build commands
+   - Listed concrete use cases: testing without GitHub Pages prefix, deploying to custom domain, debugging build issues
+
+## Verification
+
+1. ✅ Ran `npm run lint` - Passed (1 pre-existing warning unrelated to changes)
+2. ✅ Ran `npm run typecheck` - Passed with no errors
+3. ✅ Ran `npm run build:dev` - Successfully builds with root base path (/)
+4. ✅ Ran `npm run build` - Successfully builds with GitHub Pages path (/awana-labs-showcase/)
+5. ✅ Verified asset paths in dist/index.html confirm different base paths
+
+## Decision Rationale
+
+Chose to **document usage** rather than remove the script because:
+- The vite.config.ts explicitly checks for mode === "production" to set different base paths
+- Development mode build is useful for testing locally without GitHub Pages path prefix
+- Script serves legitimate use cases for alternative deployment scenarios
+- No changes to package.json needed - script remains as-is
+
+## Files Modified
+
+- README.md: Added Build Modes section and improved Scripts descriptions
