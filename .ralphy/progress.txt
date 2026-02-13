@@ -1,0 +1,19 @@
+# Task: Remove duplicate path alias from root tsconfig
+
+## What was done:
+- Removed duplicate `@/*` path alias from root `tsconfig.json`
+- The path alias is now only defined in `tsconfig.app.json` where it's actually used
+- Root tsconfig now only contains shared compiler options (noImplicitAny, skipLibCheck, etc.)
+
+## Verification completed:
+- ✅ ESLint passes (npm run lint)
+- ✅ TypeScript type checking passes (npx tsc --noEmit)
+- ✅ Production build succeeds (npm run build)
+- ✅ All unit tests pass (npm run test - 37 tests passed)
+- ✅ Path alias imports (@/) still resolve correctly throughout the codebase
+
+## Technical details:
+The duplicate was removed because:
+1. tsconfig.json uses project references to tsconfig.app.json
+2. The path alias is only needed in tsconfig.app.json for application code
+3. Having it in both locations was redundant and could lead to maintenance issues
