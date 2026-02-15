@@ -52,21 +52,21 @@ const Hero = () => {
 
         <motion.h1
           variants={itemVariants}
-          className="text-5xl md:text-7xl font-bold text-primary mb-6 leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-6 leading-tight"
         >
           {t("hero.title")}
         </motion.h1>
 
         <motion.p
           variants={itemVariants}
-          className="text-xl md:text-2xl text-muted-foreground mb-4 font-light"
+          className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-4 font-light"
         >
           {t("hero.tagline")}
         </motion.p>
 
         <motion.p
           variants={itemVariants}
-          className="text-base md:text-lg text-muted-foreground/80 max-w-2xl mx-auto mb-12"
+          className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-2xl mx-auto mb-12 px-4"
         >
           {t("hero.subtitle")}
         </motion.p>

@@ -85,7 +85,7 @@ const Header = ({ className }: HeaderProps) => {
           >
             <button
               onClick={scrollToTop}
-              className="text-xl md:text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
+              className="text-lg sm:text-xl md:text-2xl font-bold text-primary hover:text-primary/80 transition-colors truncate max-w-[200px] sm:max-w-none"
               aria-label={t("aria.scrollToTop")}
             >
               🧪 {t("hero.title")}

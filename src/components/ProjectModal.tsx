@@ -122,7 +122,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl bg-card border border-border shadow-2xl"
+            className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-lg sm:rounded-xl bg-card border border-border shadow-2xl mx-2 sm:mx-0"
           >
             {/* Close button */}
             <button
@@ -203,18 +203,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               )}
 
               {/* Content */}
-              <div className="p-6 md:p-8">
+              <div className="p-4 sm:p-6 md:p-8">
                 {/* Header */}
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-2xl font-bold text-primary">
+                <div className="flex items-start gap-3 sm:gap-4 mb-6">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-xl sm:text-2xl font-bold text-primary">
                       {project.title.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2
                       id="modal-title"
-                      className="text-2xl font-bold text-card-foreground mb-2"
+                      className="text-xl sm:text-2xl font-bold text-card-foreground mb-2"
                     >
                       {project.title}
                     </h2>
@@ -263,9 +263,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 </div>
 
                 {/* Links */}
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
                   {project.links.homepage && (
-                    <Button asChild variant="default">
+                    <Button
+                      asChild
+                      variant="default"
+                      className="w-full sm:w-auto"
+                    >
                       <a
                         href={project.links.homepage}
                         target="_blank"
@@ -277,7 +281,11 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                     </Button>
                   )}
                   {project.links.repository && (
-                    <Button asChild variant="outline">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
                       <a
                         href={project.links.repository}
                         target="_blank"
@@ -289,7 +297,11 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                     </Button>
                   )}
                   {project.links.documentation && (
-                    <Button asChild variant="outline">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
                       <a
                         href={project.links.documentation}
                         target="_blank"
