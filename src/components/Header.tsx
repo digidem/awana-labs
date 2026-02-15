@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github } from "lucide-react";
+import { Github } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import LanguageSwitcher from "./LanguageSwitcher";
+// import LanguageSwitcher from "./LanguageSwitcher";
 
 interface HeaderProps {
   className?: string;
@@ -93,7 +93,7 @@ const Header = ({ className }: HeaderProps) => {
           </motion.div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            {/* GitHub Link */}
+            {/* GitHub Link - shown on all screen sizes */}
             <motion.a
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -101,13 +101,13 @@ const Header = ({ className }: HeaderProps) => {
               href="https://github.com/awanadigital"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-accent transition-colors"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-accent transition-colors"
               aria-label={t("aria.visitGithub")}
             >
               <Github className="h-5 w-5" />
             </motion.a>
 
-            {/* Language Switcher */}
+            {/* Language Switcher - commented out pending translation strategy
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -115,8 +115,9 @@ const Header = ({ className }: HeaderProps) => {
             >
               <LanguageSwitcher variant="default" />
             </motion.div>
+            */}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - commented out for now
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -134,7 +135,7 @@ const Header = ({ className }: HeaderProps) => {
                 <Menu className="h-6 w-6" />
               )}
             </motion.button>
-          </div>
+            */}</div>
         </div>
 
         {/* Mobile Menu */}
