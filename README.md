@@ -257,63 +257,182 @@ This project uses a layered quality enforcement strategy to maintain code standa
 
 Husky and lint-staged are configured to run quality checks automatically:
 
-- **Pre-commit**: Runs ESLint on staged files via lint-staged
-- **Pre-push**: Runs full TypeScript type checking
+- **Pre-commit**: Runs ESLint on staged TypeScript files via lint-staged
+- **Pre-push**: Runs full TypeScript type checking across the entire project
 
-These hooks provide immediate feedback and prevent issues from being committed.
+These hooks provide immediate feedback and prevent issues from being committed or pushed.
 
-#### Skipping Git Hooks (Use Sparingly)
+#### When to Skip Git Hooks
 
-In rare cases where you need to bypass Git hooks, use the `--no-verify` flag:
+In rare cases, you may need to bypass Git hooks. Here's when it's appropriate:
+
+**Acceptable Use Cases:**
+
+- Documentation-only changes (`.md`, docs updates)
+- Configuration file updates (`.json`, `.yml`, `.config.*`)
+- Temporary work-in-progress commits (will be fixed before PR)
+- Known false positives from linters (should be addressed in config)
+- Emergency hotfixes (must be properly tested in follow-up PR)
+
+**How to Skip Hooks:**
 
 ```bash
-# Skip pre-commit hooks (linting)
-git commit --no-verify -m "message"
+# Skip pre-commit hooks (ESLint on staged files)
+git commit --no-verify -m "docs: update README"
 
-# Skip pre-push hooks (typecheck)
+# Skip pre-push hooks (full TypeScript typecheck)
 git push --no-verify
+
+# Skip both commit and push hooks
+git commit --no-verify -m "wip: temporary checkpoint" && git push --no-verify
 ```
 
-**⚠️ Warning**: Skipping hooks should only be used for:
+**⚠️ Important Notes:**
 
-- Documentation-only changes
-- Temporary work-in-progress commits
-- Emergency fixes that will be properly tested later
-- Known false positives from linters
+1. **Skipping is NOT a workaround for broken code** - Fix the underlying issues instead
+2. **CI will still run all checks** - Bypassing local hooks only defers validation, it doesn't eliminate it
+3. **Use sparingly** - Frequent use indicates a problem with your workflow or the hook configuration
+4. **Team responsibility** - If you skip hooks, ensure your code passes CI before requesting review
 
-**Note**: Even if you skip local hooks, CI will still enforce all quality checks on pull requests.
+**Common Mistake:**
+
+```bash
+# ❌ DON'T skip hooks to bypass legitimate type errors
+git commit --no-verify -m "fix: broken feature (has type errors)"
+
+# ✅ DO fix the errors first, then commit normally
+npm run typecheck  # Fix errors shown here
+git commit -m "fix: broken feature"
+```
 
 ### CI Enforcement (GitHub Actions)
 
-The CI pipeline runs automatically on every push and pull request:
+The CI pipeline runs automatically on every push and pull request, providing a safety net that catches issues even if local Git hooks are bypassed.
 
-1. **E2E Tests** ([test-e2e.yml](.github/workflows/test-e2e.yml)) - Runs Playwright tests on all push and PR events
-2. **Deployment** ([deploy.yml](.github/workflows/deploy.yml)) - Builds and deploys to GitHub Pages from main branch
-3. **Live Site Tests** ([test-deployed.yml](.github/workflows/test-deployed.yml)) - Tests the deployed site after successful deployment
+#### CI Workflows
+
+1. **E2E Tests** ([test-e2e.yml](.github/workflows/test-e2e.yml))
+   - **Triggers**: Every push and pull request
+   - **Runs**: Full Playwright test suite
+   - **Purpose**: Validates application functionality end-to-end
+   - **Bypass**: ❌ Not possible - required for PR merge
+
+2. **Deployment** ([deploy.yml](.github/workflows/deploy.yml))
+   - **Triggers**: Pushes to `main` branch
+   - **Runs**: Production build and deployment to GitHub Pages
+   - **Purpose**: Publishes the application
+   - **Implicit checks**: TypeScript compilation (build fails on type errors)
+
+3. **Live Site Tests** ([test-deployed.yml](.github/workflows/test-deployed.yml))
+   - **Triggers**: After successful deployment
+   - **Runs**: Smoke tests on the deployed site
+   - **Purpose**: Validates production environment
+   - **Bypass**: ❌ Not possible - ensures deployment quality
 
 #### CI Quality Gates
 
-The CI pipeline enforces the following quality standards:
+The CI pipeline enforces these **mandatory** quality standards:
 
-- ✅ All Playwright E2E tests must pass
-- ✅ Build must complete successfully
-- ✅ Deployed site must pass live smoke tests
+| Check            | Enforcement          | Bypass Possible? | Consequence                 |
+| ---------------- | -------------------- | ---------------- | --------------------------- |
+| E2E Tests        | ✅ Required          | ❌ No            | PR cannot be merged         |
+| Production Build | ✅ Required          | ❌ No            | Deployment fails            |
+| TypeScript Types | ✅ Implicit in build | ❌ No            | Build fails on type errors  |
+| Live Smoke Tests | ✅ Required          | ❌ No            | Deployment marked as failed |
 
-These checks cannot be bypassed and must pass before any code is merged to main.
+**Key Point**: Even if you use `--no-verify` to skip local hooks, these checks WILL run in CI and MUST pass before your code can be merged.
 
-### Alignment Strategy
+### Quality Enforcement Strategy
 
-| Check      | Local Hook                | CI Pipeline           | Fallback                       |
-| ---------- | ------------------------- | --------------------- | ------------------------------ |
-| ESLint     | Pre-commit (staged files) | No (local only)       | Manual `npm run lint`          |
-| TypeScript | Pre-push (full check)     | Implicit in build     | Build will fail on type errors |
-| E2E Tests  | No                        | Yes, on every push/PR | Manual `npm run test:e2e`      |
+This project uses a **defense-in-depth** approach with multiple validation layers:
 
-This strategy provides:
+| Check          | Local Hook                   | CI Pipeline          | Manual Fallback     | Notes                                            |
+| -------------- | ---------------------------- | -------------------- | ------------------- | ------------------------------------------------ |
+| **ESLint**     | ✅ Pre-commit (staged files) | ❌ Not enforced      | `npm run lint`      | Fast local feedback; optional in CI              |
+| **TypeScript** | ✅ Pre-push (full project)   | ✅ Implicit in build | `npm run typecheck` | Comprehensive local check; build fails on errors |
+| **Unit Tests** | ❌ Not hooked                | ❌ Not enforced      | `npm run test`      | Developer responsibility                         |
+| **E2E Tests**  | ❌ Not hooked (too slow)     | ✅ **Required**      | `npm run test:e2e`  | Only enforced in CI; must pass for merge         |
 
-- **Fast feedback** via local hooks
-- **Comprehensive validation** via CI
-- **No single point of failure** - if local hooks fail, CI still protects the codebase
+#### Why This Strategy?
+
+1. **Fast Local Feedback**
+   - ESLint runs only on staged files (< 5 seconds)
+   - TypeScript runs on pre-push, not pre-commit (doesn't slow down commits)
+   - E2E tests are too slow for hooks (run manually or in CI)
+
+2. **Comprehensive CI Validation**
+   - TypeScript is validated implicitly through the build process
+   - E2E tests ensure no regressions in critical user flows
+   - Live smoke tests verify the deployed application works
+
+3. **No Single Point of Failure**
+   - If you skip local hooks (`--no-verify`), CI still enforces standards
+   - If CI is temporarily unavailable, local hooks provide protection
+   - Manual commands available for explicit validation
+
+4. **Developer Productivity**
+   - Immediate feedback on common issues (linting, types)
+   - Flexibility to defer some checks when needed
+   - Clear separation between "nice to have" and "must pass" checks
+
+#### Expected Developer Workflow
+
+**Normal Flow (Recommended):**
+
+```bash
+# 1. Make changes
+vim src/components/MyComponent.tsx
+
+# 2. Commit (ESLint runs automatically)
+git commit -m "feat: add new component"
+# → Pre-commit hook runs ESLint on staged files
+# → Commit succeeds if no lint errors
+
+# 3. Push (TypeScript runs automatically)
+git push
+# → Pre-push hook runs full typecheck
+# → Push succeeds if no type errors
+
+# 4. CI validates
+# → E2E tests run automatically
+# → Build completes
+# → All checks must pass for merge
+```
+
+**Bypass Flow (Use Sparingly):**
+
+```bash
+# 1. Skip local hooks for documentation change
+git commit --no-verify -m "docs: update README"
+git push --no-verify
+
+# 2. CI still validates
+# → E2E tests run (may be overkill for docs)
+# → Build completes (ensures no broken syntax)
+# → Live tests verify deployment
+
+# 3. Result: Slower feedback, but CI catches issues
+```
+
+#### Troubleshooting CI Failures
+
+**If CI E2E tests fail but local tests pass:**
+
+1. Check for environment differences (browser versions, screen sizes)
+2. Run `npm run test:e2e` locally to reproduce
+3. Check CI logs for specific test failures
+
+**If CI build fails but local build succeeds:**
+
+1. Ensure you're using the same Node version as CI
+2. Run `npm run typecheck` to catch type errors
+3. Check for uncommitted changes or local config files
+
+**If you need to merge urgent changes despite CI failures:**
+
+1. ❌ **DO NOT** force-merge - this breaks the codebase
+2. ✅ **DO** create a hotfix branch, fix the issue, then merge
+3. ✅ **DO** disable specific tests temporarily if they're flaky (document why)
 
 ## License
 
