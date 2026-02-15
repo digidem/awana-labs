@@ -13,6 +13,7 @@ import {
   Github,
   BookOpen,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ interface ProjectModalProps {
 }
 
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -126,7 +128,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             <button
               onClick={onClose}
               className="absolute top-4 right-4 z-20 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-              aria-label="Close modal"
+              aria-label={t("projectModal.closeModal")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -160,7 +162,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                           )
                         }
                         className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                        aria-label="Previous image"
+                        aria-label={t("projectModal.previousImage")}
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
@@ -173,7 +175,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                           )
                         }
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                        aria-label="Next image"
+                        aria-label={t("projectModal.nextImage")}
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -189,7 +191,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                                 ? "bg-primary"
                                 : "bg-background/50 hover:bg-background/80"
                             }`}
-                            aria-label={`Go to image ${index + 1}`}
+                            aria-label={t("projectModal.goToImage", {
+                              index: index + 1,
+                            })}
                           />
                         ))}
                       </div>
@@ -232,7 +236,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 {project.status.notes && (
                   <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
                     <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">Status:</span>{" "}
+                      <span className="font-medium">
+                        {t("projects.statusLabel")}:
+                      </span>{" "}
                       {project.status.notes}
                     </p>
                   </div>
@@ -241,7 +247,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 {/* Tags */}
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-card-foreground mb-3">
-                    Tags
+                    {t("projects.tags")}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
@@ -266,7 +272,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                         rel="noopener noreferrer"
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
-                        Homepage
+                        {t("projectModal.homepage")}
                       </a>
                     </Button>
                   )}
@@ -278,7 +284,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                         rel="noopener noreferrer"
                       >
                         <Github className="w-4 h-4 mr-2" />
-                        Repository
+                        {t("projectModal.repository")}
                       </a>
                     </Button>
                   )}
@@ -290,7 +296,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                         rel="noopener noreferrer"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
-                        Docs
+                        {t("projectModal.docs")}
                       </a>
                     </Button>
                   )}
@@ -299,13 +305,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 {/* Timestamps */}
                 <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
                   <span>
-                    Created:{" "}
+                    {t("projects.created")}:{" "}
                     {new Date(
                       project.timestamps.created_at,
                     ).toLocaleDateString()}
                   </span>
                   <span>
-                    Updated:{" "}
+                    {t("projects.updated")}:{" "}
                     {new Date(
                       project.timestamps.last_updated_at,
                     ).toLocaleDateString()}

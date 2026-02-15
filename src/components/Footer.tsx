@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   return (
     <motion.footer
       initial={{ opacity: 0 }}
@@ -12,7 +15,9 @@ const Footer = () => {
     >
       <div className="max-w-7xl mx-auto text-center">
         <p className="text-muted-foreground flex items-center justify-center gap-1.5">
-          Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by{" "}
+          {t("footer.madeWith")}{" "}
+          <Heart className="w-4 h-4 text-red-500 fill-red-500" />{" "}
+          {t("footer.by")}{" "}
           <a
             href="https://awanadigital.com"
             target="_blank"

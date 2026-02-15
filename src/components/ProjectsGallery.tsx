@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Input } from "@/components/ui/input";
 import ProjectCard from "./ProjectCard";
@@ -12,15 +13,16 @@ interface ProjectsGalleryProps {
 
 type StatusFilter = "all" | "active" | "paused" | "archived";
 
-const filterOptions: { value: StatusFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "paused", label: "Paused" },
-  { value: "archived", label: "Archived" },
-];
-
 const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
+
+  const filterOptions: { value: StatusFilter; label: string }[] = [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("status.active") },
+    { value: "paused", label: t("status.paused") },
+    { value: "archived", label: t("status.archived") },
+  ];
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -68,11 +70,10 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Our Projects
+            {t("projects.title")}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Practical tools forged from real partner needs and platform
-            challenges
+            {t("projects.subtitle")}
           </p>
         </motion.div>
 
@@ -89,7 +90,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search projects..."
+              placeholder={t("projects.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-card/50"
@@ -139,7 +140,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             className="text-center py-16"
           >
             <p className="text-muted-foreground text-lg">
-              No projects found matching your criteria.
+              {t("projects.noResults")}
             </p>
             <button
               onClick={() => {
@@ -148,7 +149,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
               }}
               className="mt-4 text-primary hover:underline"
             >
-              Clear filters
+              {t("projects.clearFilters")}
             </button>
           </motion.div>
         )}

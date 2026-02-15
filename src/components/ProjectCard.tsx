@@ -1,8 +1,10 @@
 import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
+import { getUsageLabel } from "@/lib/status-utils";
 
 interface ProjectCardProps {
   project: Project;
@@ -11,6 +13,7 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
 
   const cardVariants: Variants = {
@@ -47,7 +50,7 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
         className="h-full cursor-pointer transition-shadow duration-300 hover:shadow-xl border-border/50 bg-card/80 backdrop-blur-sm group"
         tabIndex={0}
         role="button"
-        aria-label={`View details for ${project.title}`}
+        aria-label={t("aria.viewDetails", { title: project.title })}
         onKeyDown={(e) => e.key === "Enter" && onClick()}
       >
         <CardHeader className="pb-3">
@@ -89,15 +92,9 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
           </div>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{getUsageLabel(project.status.usage, t)}</span>
             <span>
-              {project.status.usage === "widely-used"
-                ? "Widely Used"
-                : project.status.usage === "used"
-                  ? "In Use"
-                  : "Experimental"}
-            </span>
-            <span>
-              Updated{" "}
+              {t("projects.updated")}{" "}
               {new Date(
                 project.timestamps.last_updated_at,
               ).toLocaleDateString()}

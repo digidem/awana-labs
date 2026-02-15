@@ -16,12 +16,12 @@ export const statusColors: Record<ProjectStatusState, string> = {
 };
 
 /**
- * Human-readable labels for usage status
+ * Translation key mappings for usage status
  */
-export const usageLabels: Record<ProjectStatusUsage, string> = {
-  experimental: "Experimental",
-  used: "In Use",
-  "widely-used": "Widely Used",
+export const usageTranslationKeys: Record<ProjectStatusUsage, string> = {
+  experimental: "status.experimental",
+  used: "status.used",
+  "widely-used": "status.widelyUsed",
 };
 
 /**
@@ -36,8 +36,12 @@ export function getStatusClasses(state: ProjectStatusState): string {
 /**
  * Get usage label for a given usage status
  * @param usage - The project usage status
- * @returns Human-readable label
+ * @param t - Translation function from useTranslation hook
+ * @returns Translated human-readable label
  */
-export function getUsageLabel(usage: ProjectStatusUsage): string {
-  return usageLabels[usage];
+export function getUsageLabel(
+  usage: ProjectStatusUsage,
+  t: (key: string) => string,
+): string {
+  return t(usageTranslationKeys[usage]);
 }

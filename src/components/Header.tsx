@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Github } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -13,6 +14,7 @@ const LOGO_FADE_START = 150;
 const LOGO_FULL_OPACITY = 50;
 
 const Header = ({ className }: HeaderProps) => {
+  const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [logoOpacity, setLogoOpacity] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -84,9 +86,9 @@ const Header = ({ className }: HeaderProps) => {
             <button
               onClick={scrollToTop}
               className="text-xl md:text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
-              aria-label="Scroll to top"
+              aria-label={t("aria.scrollToTop")}
             >
-              🧪 Awana Labs
+              🧪 {t("hero.title")}
             </button>
           </motion.div>
 
@@ -100,7 +102,7 @@ const Header = ({ className }: HeaderProps) => {
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Visit GitHub repository"
+              aria-label={t("aria.visitGithub")}
             >
               <Github className="h-5 w-5" />
             </motion.a>
@@ -121,7 +123,9 @@ const Header = ({ className }: HeaderProps) => {
               transition={{ delay: 0.5 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-lg text-foreground hover:bg-accent transition-colors"
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={
+                isMobileMenuOpen ? t("aria.closeMenu") : t("aria.openMenu")
+              }
               aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? (

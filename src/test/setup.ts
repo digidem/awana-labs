@@ -74,3 +74,24 @@ Object.defineProperty(window, "sessionStorage", {
   value: sessionStorageMock,
   writable: true,
 });
+
+// Mock IntersectionObserver for framer-motion
+class IntersectionObserverMock {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  takeRecords() {
+    return [];
+  }
+  unobserve() {}
+}
+
+Object.defineProperty(window, "IntersectionObserver", {
+  writable: true,
+  value: IntersectionObserverMock,
+});
+
+Object.defineProperty(global, "IntersectionObserver", {
+  writable: true,
+  value: IntersectionObserverMock,
+});

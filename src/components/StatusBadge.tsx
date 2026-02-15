@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { getStatusClasses, getUsageLabel } from "@/lib/status-utils";
 import type {
@@ -34,15 +35,17 @@ export function StatusBadge({
   variant = "outline",
   className = "",
 }: StatusBadgeProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Badge
         variant={variant}
         className={`capitalize ${getStatusClasses(state)}`}
       >
-        {state}
+        {t(`status.${state}`)}
       </Badge>
-      {usage && <Badge variant="secondary">{getUsageLabel(usage)}</Badge>}
+      {usage && <Badge variant="secondary">{getUsageLabel(usage, t)}</Badge>}
     </div>
   );
 }

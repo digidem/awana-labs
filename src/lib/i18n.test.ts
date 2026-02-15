@@ -44,7 +44,7 @@ describe("i18n configuration", () => {
   it("should translate keys correctly", () => {
     const titleKey = "hero.title";
     const enTitle = i18n.t(titleKey);
-    expect(enTitle).toBe("Building Digital Experiences");
+    expect(enTitle).toBe("Awana Labs");
   });
 
   it("should translate differently based on language", async () => {
@@ -67,10 +67,10 @@ describe("i18n configuration", () => {
   });
 
   it("should handle interpolation correctly", () => {
-    const copyrightKey = "footer.copyright";
-    const year = 2024;
-    const copyright = i18n.t(copyrightKey, { year });
-    expect(copyright).toContain(year.toString());
+    const imageKey = "projectModal.goToImage";
+    const index = 3;
+    const translation = i18n.t(imageKey, { index });
+    expect(translation).toContain(index.toString());
   });
 
   it("should fallback to default language for missing translations", () => {
@@ -81,9 +81,9 @@ describe("i18n configuration", () => {
   });
 
   it("should support nested translation keys", () => {
-    const nestedKey = "status.inProgress";
+    const nestedKey = "status.used";
     const translation = i18n.t(nestedKey);
-    expect(translation).toBe("In Progress");
+    expect(translation).toBe("In Use");
   });
 
   describe("language detector", () => {
