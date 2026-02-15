@@ -5,7 +5,7 @@ A modern, responsive web application for showcasing projects with multi-language
 ## Features
 
 - **Project Gallery**: Display projects with detailed information including status, tags, and media
-- **Internationalization**: Multi-language support with i18next
+- **Internationalization**: Multi-language support with i18next and automatic language detection
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 - **Modern UI Components**: Built with shadcn/ui and Radix UI primitives
 - **Type Safety**: Full TypeScript support with Zod schemas for validation
@@ -108,6 +108,99 @@ npm run test:e2e:debug
 - `npm run test:e2e:debug` - Run Playwright tests in debug mode
 - `npm run fetch:projects` - Fetch projects data (requires Bun)
 
+## Internationalization (i18n)
+
+This project uses [i18next](https://www.i18next.com/) with automatic language detection via [i18next-browser-languagedetector](https://github.com/i18next/i18next-browser-languageDetector).
+
+### Supported Languages
+
+- **English (en)** - Default
+- **Portuguese (pt)**
+- **Spanish (es)**
+
+### Language Detection & Fallback Rules
+
+The application automatically detects the user's preferred language using the following priority order:
+
+1. **Query String Parameter** (`?lng=pt`)
+   - Highest priority
+   - Useful for sharing links with specific language
+   - Example: `https://example.com?lng=es`
+
+2. **Cookie** (`i18next`)
+   - Persisted language preference
+   - Set automatically when user changes language
+
+3. **localStorage** (`i18nextLng`)
+   - Browser-stored preference
+   - Survives page reloads
+   - Most common persistence method
+
+4. **sessionStorage** (`i18nextLng`)
+   - Session-based preference
+   - Cleared when browser tab closes
+
+5. **Browser Navigator Language**
+   - Detects from `navigator.language` or `navigator.languages`
+   - Uses browser's language settings
+   - Automatically maps regional variants (e.g., `pt-BR` → `pt`)
+
+6. **HTML Tag** (`<html lang="...">`)
+   - Fallback to HTML document language attribute
+
+### Fallback Behavior
+
+- **Unsupported Languages**: If a detected language is not in the supported list, the application falls back to **English (en)**
+- **Missing Translations**: If a translation key is missing in the selected language, it falls back to the English translation
+- **Invalid Language Codes**: Non-standard or malformed language codes default to English
+
+### Changing Language Programmatically
+
+```typescript
+import i18n from "./lib/i18n";
+
+// Change language
+await i18n.changeLanguage("pt");
+
+// Get current language
+const currentLang = i18n.language;
+
+// Get supported languages
+import { supportedLanguages } from "./lib/i18n";
+console.log(supportedLanguages); // ['en', 'pt', 'es']
+```
+
+### Adding a New Language
+
+1. Create a new translation file in `src/locales/[language-code]/common.json`
+2. Add the language to the resources object in `src/lib/i18n.ts`
+3. Add the language code to the `supportedLanguages` array
+4. Add translations for all existing keys
+
+Example:
+
+```typescript
+// src/lib/i18n.ts
+const resources = {
+  en: { translation: en },
+  pt: { translation: pt },
+  es: { translation: es },
+  fr: { translation: fr }, // New language
+};
+
+export const supportedLanguages = ["en", "pt", "es", "fr"] as const;
+```
+
+### Language Detection Configuration
+
+The language detector is configured with the following settings:
+
+- **Detection Order**: Prioritizes explicit user preferences (query params, cookies, localStorage) over implicit detection (browser settings)
+- **Caching**: User language selections are cached in both localStorage and cookies for persistence
+- **Whitelist Checking**: Only languages in `supportedLngs` are accepted, ensuring fallback to default for unsupported languages
+
+See `src/lib/i18n.ts` for the complete configuration.
+
 ## Project Structure
 
 ```
@@ -124,6 +217,10 @@ src/
 │   ├── api.ts       # API utilities
 │   ├── i18n.ts      # Internationalization setup
 │   └── utils.ts     # General utilities
+├── locales/         # Translation files
+│   ├── en/          # English translations
+│   ├── pt/          # Portuguese translations
+│   └── es/          # Spanish translations
 ├── pages/           # Route components
 │   ├── Index.tsx    # Home page
 │   └── NotFound.tsx # 404 page
