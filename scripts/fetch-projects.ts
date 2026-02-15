@@ -165,13 +165,15 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
       if (error.message.includes("Bad credentials")) {
         throw new Error(
           "GitHub API authentication failed. Please check your GITHUB_TOKEN is valid.",
-        );
+        ) as Error & { cause: unknown };
       } else if (error.message.includes("Not Found")) {
         throw new Error(
           `Repository ${owner}/${name} not found or token lacks access.`,
-        );
+        ) as Error & { cause: unknown };
       } else if (error.message.includes("rate limit")) {
-        throw new Error(`GitHub API rate limit exceeded. ${error.message}`);
+        throw new Error(`GitHub API rate limit exceeded. ${error.message}`) as Error & {
+          cause: unknown;
+        };
       }
 
       // Re-throw environment variable errors
@@ -183,9 +185,13 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
         throw error;
       }
 
-      throw new Error(`GitHub API error: ${error.message}`);
+      throw new Error(`GitHub API error: ${error.message}`) as Error & {
+        cause: unknown;
+      };
     }
-    throw new Error("Unknown error occurred while fetching issues");
+    throw new Error("Unknown error occurred while fetching issues") as Error & {
+      cause: unknown;
+    };
   }
 }
 
