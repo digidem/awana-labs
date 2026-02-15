@@ -16,7 +16,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:install": "playwright install --with-deps",
-    "fetch:projects": "bun scripts/fetch-projects.ts"
+    "fetch:projects": "bun scripts/fetch-projects.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -89,6 +90,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.0",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
