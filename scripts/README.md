@@ -6,7 +6,7 @@ This directory contains TypeScript build scripts for the Awana Labs Showcase pro
 
 ### fetch-projects.ts
 
-Fetches all issues from `luandro/awana-labs-showcase` with the `publish:yes` label using the GitHub API.
+Fetches all issues from `luandro/awana-labs-showcase` with the `publish:yes` label using the GitHub API via @octokit/core.
 
 **Usage:**
 
@@ -21,6 +21,7 @@ bun scripts/fetch-projects.ts
 **Environment Variables:**
 
 - `GITHUB_TOKEN` (required): GitHub Personal Access Token with `public_repo` scope
+- `GITHUB_REPOSITORY` (optional): Repository in format "owner/repo" (auto-detected in GitHub Actions)
 
 **Setup:**
 
@@ -29,6 +30,7 @@ bun scripts/fetch-projects.ts
 3. Set the environment variable:
    ```bash
    export GITHUB_TOKEN=your_token_here
+   export GITHUB_REPOSITORY=owner/repo  # Optional, auto-detected in GitHub Actions
    ```
 
 **Output:**
@@ -56,10 +58,21 @@ console.log(`Found ${issues.length} publishable issues`);
 
 **Features:**
 
-- Automatic pagination handling (fetches all issues)
+- Uses official @octokit/core SDK for GitHub API
+- Automatic pagination handling (fetches all issues using Octokit's paginate iterator)
 - Rate limit detection with helpful messages
 - Authentication error handling
 - Network error handling with clear messages
 - Progress logging for large result sets
 - Can be used as a module or executed standalone
 - JSON output for piping to other tools
+
+**Implementation Details:**
+
+The script uses `@octokit/core` instead of raw fetch calls for improved:
+
+- Type safety with GitHub API responses
+- Built-in pagination support via `octokit.paginate.iterator()`
+- Automatic retry logic and error handling
+- Better authentication management
+- Consistent API versioning

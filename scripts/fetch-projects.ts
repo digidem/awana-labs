@@ -9,8 +9,9 @@
  *   GITHUB_REPOSITORY - Repository in format "owner/repo" (provided by Actions)
  */
 
-// Import the parser
+// Import the parser and Octokit
 import { parseIssueBody } from "./parse-issue.js";
+import { Octokit } from "@octokit/core";
 
 // TypeScript types for GitHub API responses
 interface GitHubLabel {
@@ -76,10 +77,8 @@ interface ProjectsData {
 }
 
 // Configuration constants
-const GITHUB_API_BASE = "https://api.github.com";
 const PUBLISH_LABEL = "publish:yes";
 const ISSUES_PER_PAGE = 100;
-const REQUEST_TIMEOUT = 30000; // 30 seconds
 
 /**
  * Fetch all issues with the publish:yes label from GitHub
@@ -104,81 +103,39 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
     );
   }
   const [owner, name] = parts;
-  const allIssues: GitHubIssue[] = [];
-  let page = 1;
-  let hasMore = true;
 
   console.log(
     `Fetching issues with label "${PUBLISH_LABEL}" from ${owner}/${name}...`,
   );
 
+  // Initialize Octokit with authentication
+  const octokit = new Octokit({
+    auth: token,
+    userAgent: "awana-labs-showcase-fetch-projects",
+  });
+
   try {
-    while (hasMore) {
-      const url = `${GITHUB_API_BASE}/repos/${owner}/${name}/issues`;
-      const searchParams = new URLSearchParams({
+    const allIssues: GitHubIssue[] = [];
+
+    // Use Octokit's paginate to automatically handle pagination
+    const iterator = octokit.paginate.iterator(
+      "GET /repos/{owner}/{repo}/issues",
+      {
+        owner,
+        repo: name,
         labels: PUBLISH_LABEL,
         state: "all",
         per_page: ISSUES_PER_PAGE,
-        page: page,
         sort: "created",
         direction: "desc",
-      });
+      },
+    );
 
-      const response = await fetch(`${url}?${searchParams}`, {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-          Authorization: `Bearer ${token}`,
-          "User-Agent": "awana-labs-showcase-fetch-projects",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      });
+    for await (const response of iterator) {
+      const issues = response.data as GitHubIssue[];
+      allIssues.push(...issues);
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error(
-            "GitHub API authentication failed. Please check your GITHUB_TOKEN is valid.",
-          );
-        } else if (response.status === 404) {
-          throw new Error(
-            `Repository ${owner}/${name} not found or token lacks access.`,
-          );
-        } else if (response.status === 403) {
-          const rateLimitReset = response.headers.get("X-RateLimit-Reset");
-          const resetTime = rateLimitReset
-            ? new Date(parseInt(rateLimitReset) * 1000).toISOString()
-            : "unknown";
-          throw new Error(
-            `GitHub API rate limit exceeded. Resets at: ${resetTime}`,
-          );
-        }
-        throw new Error(
-          `GitHub API request failed: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const contentType = response.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        throw new Error(
-          `Expected JSON response from GitHub API, got: ${contentType}`,
-        );
-      }
-      const issues: GitHubIssue[] = await response.json();
-
-      if (issues.length === 0) {
-        hasMore = false;
-      } else if (issues.length < ISSUES_PER_PAGE) {
-        allIssues.push(...issues);
-        hasMore = false;
-      } else {
-        allIssues.push(...issues);
-        page++;
-      }
-
-      if (allIssues.length > 0) {
-        console.log(
-          `Fetched ${allIssues.length} issues${hasMore ? "..." : " (complete)"}`,
-        );
-      }
+      console.log(`Fetched ${allIssues.length} issues...`);
     }
 
     console.log(
@@ -187,15 +144,29 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
     return allIssues;
   } catch (error) {
     if (error instanceof Error) {
+      // Handle Octokit-specific errors
+      if (error.message.includes("Bad credentials")) {
+        throw new Error(
+          "GitHub API authentication failed. Please check your GITHUB_TOKEN is valid.",
+        );
+      } else if (error.message.includes("Not Found")) {
+        throw new Error(
+          `Repository ${owner}/${name} not found or token lacks access.`,
+        );
+      } else if (error.message.includes("rate limit")) {
+        throw new Error(`GitHub API rate limit exceeded. ${error.message}`);
+      }
+
+      // Re-throw environment variable errors
       if (
         error.message.includes("GITHUB_TOKEN") ||
         error.message.includes("GITHUB_REPOSITORY") ||
-        error.message.includes("Invalid GITHUB_REPOSITORY format") ||
-        error.message.includes("GitHub API")
+        error.message.includes("Invalid GITHUB_REPOSITORY format")
       ) {
         throw error;
       }
-      throw new Error(`Network error fetching issues: ${error.message}`);
+
+      throw new Error(`GitHub API error: ${error.message}`);
     }
     throw new Error("Unknown error occurred while fetching issues");
   }
