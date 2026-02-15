@@ -13,9 +13,11 @@ import {
   Github,
   BookOpen,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -23,19 +25,8 @@ interface ProjectModalProps {
   onClose: () => void;
 }
 
-const statusColors = {
-  active: "bg-green-500/10 text-green-700 border-green-500/20",
-  paused: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  archived: "bg-muted text-muted-foreground border-border",
-};
-
-const usageLabels = {
-  experimental: "Experimental",
-  used: "In Use",
-  "widely-used": "Widely Used",
-};
-
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -131,13 +122,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl bg-card border border-border shadow-2xl"
+            className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-lg sm:rounded-xl bg-card border border-border shadow-2xl mx-2 sm:mx-0"
           >
             {/* Close button */}
             <button
               onClick={onClose}
               className="absolute top-4 right-4 z-20 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-              aria-label="Close modal"
+              aria-label={t("projectModal.closeModal")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -171,7 +162,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                           )
                         }
                         className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                        aria-label="Previous image"
+                        aria-label={t("projectModal.previousImage")}
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
@@ -184,7 +175,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                           )
                         }
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                        aria-label="Next image"
+                        aria-label={t("projectModal.nextImage")}
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -200,7 +191,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                                 ? "bg-primary"
                                 : "bg-background/50 hover:bg-background/80"
                             }`}
-                            aria-label={`Go to image ${index + 1}`}
+                            aria-label={t("projectModal.goToImage", {
+                              index: index + 1,
+                            })}
                           />
                         ))}
                       </div>
@@ -210,31 +203,26 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               )}
 
               {/* Content */}
-              <div className="p-6 md:p-8">
+              <div className="p-4 sm:p-6 md:p-8">
                 {/* Header */}
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-2xl font-bold text-primary">
+                <div className="flex items-start gap-3 sm:gap-4 mb-6">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-xl sm:text-2xl font-bold text-primary">
                       {project.title.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2
                       id="modal-title"
-                      className="text-2xl font-bold text-card-foreground mb-2"
+                      className="text-xl sm:text-2xl font-bold text-card-foreground mb-2"
                     >
                       {project.title}
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      <Badge
-                        variant="outline"
-                        className={`capitalize ${statusColors[project.status.state]}`}
-                      >
-                        {project.status.state}
-                      </Badge>
-                      <Badge variant="secondary">
-                        {usageLabels[project.status.usage]}
-                      </Badge>
+                      <StatusBadge
+                        state={project.status.state}
+                        usage={project.status.usage}
+                      />
                     </div>
                   </div>
                 </div>
@@ -248,7 +236,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 {project.status.notes && (
                   <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
                     <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">Status:</span>{" "}
+                      <span className="font-medium">
+                        {t("projects.statusLabel")}:
+                      </span>{" "}
                       {project.status.notes}
                     </p>
                   </div>
@@ -257,7 +247,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 {/* Tags */}
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-card-foreground mb-3">
-                    Tags
+                    {t("projects.tags")}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag) => (
@@ -273,40 +263,52 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 </div>
 
                 {/* Links */}
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
                   {project.links.homepage && (
-                    <Button asChild variant="default">
+                    <Button
+                      asChild
+                      variant="default"
+                      className="w-full sm:w-auto"
+                    >
                       <a
                         href={project.links.homepage}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
-                        Homepage
+                        {t("projectModal.homepage")}
                       </a>
                     </Button>
                   )}
                   {project.links.repository && (
-                    <Button asChild variant="outline">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
                       <a
                         href={project.links.repository}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Github className="w-4 h-4 mr-2" />
-                        Repository
+                        {t("projectModal.repository")}
                       </a>
                     </Button>
                   )}
                   {project.links.documentation && (
-                    <Button asChild variant="outline">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
                       <a
                         href={project.links.documentation}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
-                        Docs
+                        {t("projectModal.docs")}
                       </a>
                     </Button>
                   )}
@@ -315,13 +317,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 {/* Timestamps */}
                 <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
                   <span>
-                    Created:{" "}
+                    {t("projects.created")}:{" "}
                     {new Date(
                       project.timestamps.created_at,
                     ).toLocaleDateString()}
                   </span>
                   <span>
-                    Updated:{" "}
+                    {t("projects.updated")}:{" "}
                     {new Date(
                       project.timestamps.last_updated_at,
                     ).toLocaleDateString()}

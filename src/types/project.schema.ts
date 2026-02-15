@@ -23,11 +23,7 @@ import { z } from "zod";
  * - paused: Temporarily suspended, may resume
  * - archived: No longer maintained, kept for reference
  */
-export const ProjectStateEnum = z.enum(["active", "paused", "archived"], {
-  errorMap: () => ({
-    message: "State must be one of: active, paused, archived",
-  }),
-});
+export const ProjectStateEnum = z.enum(["active", "paused", "archived"]);
 export type ProjectState = z.infer<typeof ProjectStateEnum>;
 
 /**
@@ -36,14 +32,7 @@ export type ProjectState = z.infer<typeof ProjectStateEnum>;
  * - used: Used in specific contexts/deployments
  * - widely-used: Used across multiple deployments/projects
  */
-export const ProjectUsageEnum = z.enum(
-  ["experimental", "used", "widely-used"],
-  {
-    errorMap: () => ({
-      message: "Usage must be one of: experimental, used, widely-used",
-    }),
-  },
-);
+export const ProjectUsageEnum = z.enum(["experimental", "used", "widely-used"]);
 export type ProjectUsage = z.infer<typeof ProjectUsageEnum>;
 
 // ============================================================================

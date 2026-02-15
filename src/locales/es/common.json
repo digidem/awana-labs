@@ -6,21 +6,37 @@
     "contact": "Contacto"
   },
   "hero": {
-    "title": "Construyendo Experiencias Digitales",
-    "subtitle": "Creando soluciones web innovadoras con tecnologías modernas",
-    "cta": "Ver Proyectos"
+    "badge": "Experimental",
+    "title": "Awana Labs",
+    "tagline": "Donde los experimentos se convierten en herramientas esenciales",
+    "subtitle": "Prototipamos, probamos y refinamos herramientas para abordar necesidades genuinas de los socios—creando utilidades, APIs y recursos que amplifican nuestras plataformas principales.",
+    "cta": "Explorar Proyectos"
   },
   "projects": {
-    "title": "Proyectos Destacados",
-    "subtitle": "Explora nuestros trabajos e innovaciones más recientes",
+    "title": "Nuestros Proyectos",
+    "subtitle": "Herramientas prácticas forjadas a partir de necesidades reales de socios y desafíos de plataforma",
     "viewProject": "Ver Proyecto",
     "technologies": "Tecnologías",
-    "status": "Estado"
+    "searchPlaceholder": "Buscar proyectos...",
+    "updated": "Actualizado",
+    "created": "Creado",
+    "tags": "Etiquetas",
+    "statusLabel": "Estado",
+    "noResults": "No se encontraron proyectos que coincidan con sus criterios.",
+    "clearFilters": "Limpiar filtros"
+  },
+  "projectModal": {
+    "homepage": "Página Principal",
+    "repository": "Repositorio",
+    "docs": "Documentación",
+    "closeModal": "Cerrar modal",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Siguiente imagen",
+    "goToImage": "Ir a imagen {{index}}"
   },
   "footer": {
-    "copyright": "© {{year}} Awana Labs. Todos los derechos reservados.",
     "madeWith": "Hecho con",
-    "love": "amor"
+    "by": "por"
   },
   "common": {
     "loading": "Cargando...",
@@ -35,12 +51,28 @@
     "filter": "Filtrar",
     "sort": "Ordenar",
     "noResults": "No se encontraron resultados",
-    "viewMore": "Ver Más"
+    "viewMore": "Ver Más",
+    "all": "Todos"
   },
   "status": {
     "active": "Activo",
-    "completed": "Completado",
-    "inProgress": "En Progreso",
-    "planned": "Planeado"
+    "paused": "Pausado",
+    "archived": "Archivado",
+    "experimental": "Experimental",
+    "used": "En Uso",
+    "widelyUsed": "Ampliamente Usado"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "¡Ups! Página no encontrada",
+    "returnHome": "Volver al Inicio"
+  },
+  "aria": {
+    "scrollToTop": "Desplazarse hacia arriba",
+    "scrollToProjects": "Desplazarse a proyectos",
+    "viewDetails": "Ver detalles de {{title}}",
+    "visitGithub": "Visitar repositorio de GitHub",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
   }
 }

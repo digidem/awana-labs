@@ -6,21 +6,37 @@
     "contact": "Contact"
   },
   "hero": {
-    "title": "Building Digital Experiences",
-    "subtitle": "Crafting innovative web solutions with modern technologies",
-    "cta": "View Projects"
+    "badge": "Experimental",
+    "title": "Awana Labs",
+    "tagline": "Where experiments become essential tools",
+    "subtitle": "We prototype, test, and refine tools to address genuine partner needs—creating the utilities, APIs, and resources that amplify our flagship platforms.",
+    "cta": "Explore Projects"
   },
   "projects": {
-    "title": "Featured Projects",
-    "subtitle": "Explore our latest work and innovations",
+    "title": "Our Projects",
+    "subtitle": "Practical tools forged from real partner needs and platform challenges",
     "viewProject": "View Project",
     "technologies": "Technologies",
-    "status": "Status"
+    "searchPlaceholder": "Search projects...",
+    "updated": "Updated",
+    "created": "Created",
+    "tags": "Tags",
+    "statusLabel": "Status",
+    "noResults": "No projects found matching your criteria.",
+    "clearFilters": "Clear filters"
+  },
+  "projectModal": {
+    "homepage": "Homepage",
+    "repository": "Repository",
+    "docs": "Docs",
+    "closeModal": "Close modal",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "goToImage": "Go to image {{index}}"
   },
   "footer": {
-    "copyright": "© {{year}} Awana Labs. All rights reserved.",
     "madeWith": "Made with",
-    "love": "love"
+    "by": "by"
   },
   "common": {
     "loading": "Loading...",
@@ -35,12 +51,28 @@
     "filter": "Filter",
     "sort": "Sort",
     "noResults": "No results found",
-    "viewMore": "View More"
+    "viewMore": "View More",
+    "all": "All"
   },
   "status": {
     "active": "Active",
-    "completed": "Completed",
-    "inProgress": "In Progress",
-    "planned": "Planned"
+    "paused": "Paused",
+    "archived": "Archived",
+    "experimental": "Experimental",
+    "used": "In Use",
+    "widelyUsed": "Widely Used"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Oops! Page not found",
+    "returnHome": "Return to Home"
+  },
+  "aria": {
+    "scrollToTop": "Scroll to top",
+    "scrollToProjects": "Scroll to projects",
+    "viewDetails": "View details for {{title}}",
+    "visitGithub": "Visit GitHub repository",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   }
 }
