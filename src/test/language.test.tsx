@@ -220,10 +220,10 @@ describe("LanguageSwitcher Component", () => {
     const button = screen.getByRole("button", { name: /select language/i });
     expect(button).toHaveTextContent("English");
 
-    rerender(<LanguageSwitcher variant="compact" />, { wrapper });
+    rerender(<LanguageSwitcher variant="compact" />);
     expect(button).toHaveTextContent("EN");
 
-    rerender(<LanguageSwitcher variant="icon-only" />, { wrapper });
+    rerender(<LanguageSwitcher variant="icon-only" />);
     expect(button).not.toHaveTextContent("EN");
   });
 });

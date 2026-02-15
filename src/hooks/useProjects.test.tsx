@@ -97,7 +97,7 @@ describe("useProjects", () => {
     const mockError = new Error("Failed to fetch");
     mockFetchProjectsQuery.mockRejectedValue(mockError);
 
-    const { result } = renderHook(() => useProjects({ retry: false }), {
+    const { result } = renderHook(() => useProjects({ retry: 0 }), {
       wrapper: createWrapper(queryClient),
     });
 
@@ -189,7 +189,7 @@ describe("useProjectsWithError", () => {
     mockFetchProjectsQuery.mockRejectedValue(mockError);
 
     const { result } = renderHook(
-      () => useProjectsWithError({ retry: false }),
+      () => useProjectsWithError({ retry: 0 }),
       {
         wrapper: createWrapper(queryClient),
       },

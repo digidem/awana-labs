@@ -55,6 +55,9 @@ i18n
       // Only detect languages in supportedLngs
       checkWhitelist: true,
     },
-  });
+  } as Parameters<typeof i18n.init>[0]);
+
+// Export a typed t function that accepts any string key
+export const t = i18n.t.bind(i18n);
 
 export default i18n;

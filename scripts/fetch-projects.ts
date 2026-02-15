@@ -13,6 +13,23 @@
 import { parseIssueBody } from "./parse-issue.js";
 import { Octokit } from "@octokit/core";
 
+// Extend Octokit to add paginate support
+declare module "@octokit/core" {
+  interface Octokit {
+    paginate: {
+      iterator: (
+        route: string,
+        options?: Record<string, unknown>
+      ) => AsyncIterableIterator<{ data: unknown[] }>;
+    };
+  }
+}
+
+// Declare Bun global for TypeScript
+declare const Bun: {
+  write: (path: string, content: string) => Promise<void>;
+};
+
 // TypeScript types for GitHub API responses
 interface GitHubLabel {
   id: number;
