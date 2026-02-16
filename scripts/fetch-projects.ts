@@ -11,19 +11,9 @@
 
 // Import the parser and Octokit
 import { parseIssueBody } from "./parse-issue.js";
-import { Octokit } from "@octokit/core";
+import { Octokit } from "@octokit/rest";
 
-// Extend Octokit to add paginate support
-declare module "@octokit/core" {
-  interface Octokit {
-    paginate: {
-      iterator: (
-        route: string,
-        options?: Record<string, unknown>
-      ) => AsyncIterableIterator<{ data: unknown[] }>;
-    };
-  }
-}
+// Octokit from @octokit/rest includes pagination support built-in
 
 // Declare Bun global for TypeScript
 declare const Bun: {
