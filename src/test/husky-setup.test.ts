@@ -54,11 +54,11 @@ describe("Husky Setup", () => {
     }).not.toThrow();
   });
 
-  it("pre-commit hook should contain lint command", () => {
+  it("pre-commit hook should contain lint-staged command", () => {
     const preCommitPath = join(huskyDir, "pre-commit");
     const fs = require("fs");
     const content = fs.readFileSync(preCommitPath, "utf-8");
-    expect(content).toContain("npm run lint");
+    expect(content).toContain("lint-staged");
   });
 
   it("pre-push hook should contain typecheck command", () => {
