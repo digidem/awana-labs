@@ -1,67 +1,64 @@
 # Repository Guidelines
 
-## Quick Commands
+## Do
 
-- `npm run dev`: start the Vite dev server with HMR.
-- `npm run build`: production build to `dist/`.
-- `npm run preview`: serve the production build locally.
-- `npm run lint`: run ESLint across the repo.
-- `npm run typecheck`: run TypeScript type checking without emitting files.
-- `npm run test`: run Vitest in CI mode.
-- `npm run test:e2e`: run Playwright tests headlessly.
-- `npm run test:e2e:ui`: open the Playwright UI runner.
-- `npm run fetch:projects`: run `scripts/fetch-projects.ts` via Bun.
+- Follow existing patterns in `src/` and keep UI work in React components.
+- Run relevant verification after changes (`lint`, `typecheck`, tests).
+- Use explicit shared types in `src/types/` when adding cross-module models.
+- Keep component names in `PascalCase` and hooks in `useX` format.
+- Keep changes scoped to source, tests, and docs; leave generated artifacts alone.
 
-## Tech Stack & Boundaries
+## Don't
 
-- Stack: React 18, TypeScript 5, Vite 5, Tailwind CSS 3, shadcn/ui, Vitest, Playwright. citeturn1view0
-- Always: follow existing patterns in `src/`, keep UI changes in React components, and run relevant tests for changes.
-- Ask first: adding new dependencies, changing build/test tooling, or altering verification scripts.
-- Never: edit `node_modules/`, commit secrets, or change generated `dist/` outputs.
+- Don't edit `node_modules/` or commit generated `dist/` output.
+- Don't commit secrets or `.env` values.
+- Don't add dependencies or change build/test tooling without user approval.
+- Don't alter verification scripts in `scripts/` without user approval.
 
-## Project Structure & Module Organization
+## Commands
 
-- `src/` contains app code: `src/pages/` (route views), `src/components/` (reusable UI), `src/hooks/` (React hooks), `src/lib/` (helpers), `src/types/` (shared TS types), `src/test/` (unit test utilities/specs).
-- `public/` holds static assets served as-is.
-- `e2e/` and `e2e-live/` contain Playwright end-to-end tests.
-- `scripts/` contains automation scripts.
-- `dist/` is build output (generated).
+- `npm run dev` - Start Vite dev server with HMR.
+- `npm run build` - Create production build in `dist/`.
+- `npm run preview` - Serve production build locally.
+- `npm run lint` - Run ESLint.
+- `npm run typecheck` - Run TypeScript checks without emit.
+- `npm run test` - Run Vitest in CI mode.
+- `npm run test:e2e` - Run Playwright tests headlessly.
+- `npm run test:e2e:ui` - Open Playwright UI runner.
+- `npm run fetch:projects` - Run `scripts/fetch-projects.ts` via Bun.
+- `npm run test:e2e -- verify-projects.spec.ts` - Run targeted E2E verification.
+- `node scripts/verify-site.mjs` - Run site verification script.
+- `node scripts/verify-detailed.mjs` - Run detailed verification script.
+- `node scripts/final-verification.mjs` - Run final verification script.
 
-## Coding Style & Naming Conventions
+## Safety and Permissions
 
-- Indentation follows existing files (2 spaces typical). Prefer explicit types for shared models in `src/types/`.
-- Component names use `PascalCase` (e.g., `ProjectCard.tsx`). Hooks use `useX` (e.g., `useProjects.ts`).
-- Linting is enforced with ESLint (`eslint.config.js`).
+- Ask first before adding dependencies.
+- Ask first before changing build tooling, test tooling, or verification scripts.
+- Keep secrets out of version control; use local `.env` files only.
 
-Example style:
+## Project Structure Hints
 
-```tsx
-type Project = { id: string; title: string };
+- `src/pages/` - Route views.
+- `src/components/` - Reusable UI components.
+- `src/hooks/` - React hooks.
+- `src/lib/` - Utility helpers.
+- `src/types/` - Shared TypeScript types.
+- `src/test/` - Unit/integration test utilities and specs.
+- `public/` - Static assets served as-is.
+- `e2e/` and `e2e-live/` - Playwright end-to-end tests.
+- `scripts/` - Automation and verification scripts.
 
-export function ProjectCard({ project }: { project: Project }) {
-  return <div className="rounded-lg p-4">{project.title}</div>;
-}
-```
+## PR Checklist
 
-## Testing & Verification
+- Use Conventional Commits (`feat:`, `fix:`, `chore:`).
+- Include a clear change summary and testing notes.
+- Include screenshots for UI changes.
+- Link related issues when applicable.
+- Ensure Husky hooks pass (`pre-commit` lint-staged, `pre-push` typecheck).
 
-- Unit/integration tests use Vitest. Place tests near source or under `src/test/` and name with `.test.ts`/`.test.tsx`.
-- E2E tests use Playwright under `e2e/` (and `e2e-live/` for live scenarios).
-- Verification scripts live in `scripts/` with results tracked in `VERIFICATION_REPORT.md`.
+## When Stuck
 
-Common verification commands:
-
-- `npm run test:e2e -- verify-projects.spec.ts`
-- `node scripts/verify-site.mjs`
-- `node scripts/verify-detailed.mjs`
-- `node scripts/final-verification.mjs`
-
-## Commit & Pull Request Guidelines
-
-- Commit messages follow Conventional Commits (examples in history: `feat: …`, `fix: …`, `chore: …`).
-- PRs should include a clear description, testing notes, and screenshots for UI changes. Link relevant issues when applicable.
-- **Git Hooks**: Husky enforces pre-commit (lint-staged) and pre-push (typecheck) validation. See `docs/TYPECHECK_RATIONALE.md` for details.
-
-## Security & Configuration Tips
-
-- Keep secrets out of the repo. Use `.env` files for local configuration (do not commit). Document any new env vars added.
+- Re-read nearby code to match existing patterns before introducing new abstractions.
+- Prefer the smallest safe change, then validate with `npm run lint` and `npm run typecheck`.
+- If behavior is unclear, add or run the closest relevant test before refactoring.
