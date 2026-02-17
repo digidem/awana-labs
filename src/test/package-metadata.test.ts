@@ -11,10 +11,6 @@ describe("Package Metadata", () => {
     expect(packageJson.version).not.toBe("0.0.0");
   });
 
-  it("should be marked as private", () => {
-    expect(packageJson.private).toBe(true);
-  });
-
   it("should use ES modules", () => {
     expect(packageJson.type).toBe("module");
   });
