@@ -6,7 +6,11 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { queryKeys, fetchProjectsQuery, getErrorMessage } from "@/lib/api";
+import {
+  queryKeys,
+  fetchProjectsQuery,
+  getErrorMessage,
+} from "@/lib/api";
 import type { ProjectsData } from "@/types/project";
 
 interface UseProjectsOptions {
@@ -34,9 +38,12 @@ export function useProjects(options: UseProjectsOptions = {}) {
     retry = 2,
   } = options;
 
+  // Always uses GitHub API now
+  const queryFn = fetchProjectsQuery;
+
   return useQuery<ProjectsData, Error>({
     queryKey: queryKeys.projects,
-    queryFn: fetchProjectsQuery,
+    queryFn,
     enabled,
     staleTime,
     gcTime,

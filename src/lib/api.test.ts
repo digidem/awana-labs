@@ -106,57 +106,50 @@ describe("API Client", () => {
   });
 
   describe("fetchProjects", () => {
-    it("should fetch projects data", async () => {
-      const mockProjects = {
-        projects: [
-          {
-            id: "1",
-            issue_number: 1,
-            title: "Test Project",
-            slug: "test-project",
-            description: "A test project",
-            organization: {
-              name: "Test Org",
-              short_name: "Test",
-              url: "https://example.com",
+    it("should fetch projects data from GitHub API", async () => {
+      vi.mock("./github-projects", () => ({
+        fetchProjectsFromGitHub: vi.fn().mockResolvedValue({
+          projects: [
+            {
+              id: "1",
+              issue_number: 1,
+              title: "Test Project",
+              slug: "test-project",
+              description: "A test project",
+              organization: {
+                name: "Test Org",
+                short_name: "Test",
+                url: "https://example.com",
+              },
+              status: {
+                state: "active" as const,
+                usage: "experimental" as const,
+                notes: "",
+              },
+              tags: ["test"],
+              media: {
+                logo: "https://example.com/logo.png",
+                images: [],
+              },
+              links: {
+                homepage: "https://example.com",
+                repository: "https://github.com/test/repo",
+                documentation: "https://docs.example.com",
+              },
+              timestamps: {
+                created_at: "2024-01-01T00:00:00Z",
+                last_updated_at: "2024-01-01T00:00:00Z",
+              },
             },
-            status: {
-              state: "active",
-              usage: "experimental",
-              notes: "",
-            },
-            tags: ["test"],
-            media: {
-              logo: "https://example.com/logo.png",
-              images: [],
-            },
-            links: {
-              homepage: "https://example.com",
-              repository: "https://github.com/test/repo",
-              documentation: "https://docs.example.com",
-            },
-            timestamps: {
-              created_at: "2024-01-01T00:00:00Z",
-              last_updated_at: "2024-01-01T00:00:00Z",
-            },
-          },
-        ],
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        headers: new Headers({
-          "content-type": "application/json",
+          ],
         }),
-        json: async () => mockProjects,
-      } as Response);
+      }));
 
       const result = await fetchProjects();
 
-      expect(result.data).toEqual(mockProjects);
       expect(result.status).toBe(200);
+      expect(result.data?.projects).toHaveLength(1);
+      expect(result.data?.projects[0].title).toBe("Test Project");
     });
   });
 

@@ -189,29 +189,66 @@ export function createQueryFunction<T>(
 // =============================================================================
 
 import type { ProjectsData } from "@/types/project";
-import { parseProjectsData } from "@/types/project.schema";
 
-const PROJECTS_URL = `${import.meta.env.BASE_URL}projects.json`;
+// =============================================================================
+// GitHub API Configuration
+// =============================================================================
+
+// Flag to switch between static JSON and GitHub API
+// Now defaults to true - GitHub API is the primary source
+const USE_GITHUB_API = import.meta.env.VITE_USE_GITHUB_API !== "false";
 
 /**
- * Fetch all projects from projects.json with Zod validation
+ * Fetch projects from GitHub API
+ * Uses the GitHub client to fetch issues with 'publish:yes' label
  */
-export async function fetchProjects(
-  options?: FetchOptions,
+export async function fetchProjectsFromGitHub(
+  token?: string,
 ): Promise<ApiResponse<ProjectsData>> {
-  const response = await fetchJson<ProjectsData>(PROJECTS_URL, options);
+  // Dynamic import to avoid issues when Octokit is not available
+  const { fetchProjectsFromGitHub: fetchFromGitHub } = await import(
+    "./github-projects"
+  );
 
-  // Validate the data with Zod schema
-  const validatedData = parseProjectsData(response.data);
+  const data = await fetchFromGitHub(
+    import.meta.env.VITE_GITHUB_OWNER || "luandro",
+    import.meta.env.VITE_GITHUB_REPO || "awana-labs-showcase",
+    import.meta.env.VITE_GITHUB_LABEL || "publish:yes",
+    token,
+  );
 
   return {
-    ...response,
-    data: validatedData,
+    data,
+    status: 200,
+    statusText: "OK",
+    headers: new Headers(),
   };
 }
 
 /**
- * TanStack Query function for fetching projects
+ * Main fetch function - now always uses GitHub API
+ * Set VITE_USE_GITHUB_API=false in .env to disable (not recommended)
+ */
+export async function fetchProjects(
+  options?: FetchOptions,
+): Promise<ApiResponse<ProjectsData>> {
+  if (!USE_GITHUB_API) {
+    throw new Error(
+      "Static projects.json has been removed. Use VITE_USE_GITHUB_API=true",
+    );
+  }
+
+  console.log("Using GitHub API for projects");
+  try {
+    return await fetchProjectsFromGitHub();
+  } catch (error) {
+    console.error("GitHub API error:", error);
+    throw error;
+  }
+}
+
+/**
+ * TanStack Query function for fetching projects - uses GitHub API
  */
 export const fetchProjectsQuery: QueryFunction<
   ProjectsData,
