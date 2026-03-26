@@ -5,7 +5,7 @@ import {
   useMotionValue,
   useTransform,
 } from "framer-motion";
-import { Github } from "lucide-react";
+import { GithubIcon } from "./GithubIcon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 // import LanguageSwitcher from "./LanguageSwitcher";
@@ -151,7 +151,7 @@ const Header = ({ className }: HeaderProps) => {
               className="inline-flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-accent transition-colors"
               aria-label={t("aria.visitGithub")}
             >
-              <Github className="h-5 w-5" />
+              <GithubIcon className="h-5 w-5" />
             </motion.a>
 
             {/* Language Switcher - commented out pending translation strategy
@@ -203,7 +203,7 @@ const Header = ({ className }: HeaderProps) => {
                   className="px-4 py-3 rounded-lg text-left text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-accent transition-all flex items-center gap-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Github className="h-4 w-4" />
+                  <GithubIcon className="h-4 w-4" />
                   GitHub
                 </a>
               </div>

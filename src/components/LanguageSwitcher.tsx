@@ -91,7 +91,7 @@ const LanguageSwitcher = ({
             </span>
             {option.code === language && (
               <Check
-                className="h-4 w-4 text-primary opacity-0 group-[.aria-selected\\:true]:opacity-100"
+                className="h-4 w-4 text-primary"
                 aria-hidden="true"
               />
             )}

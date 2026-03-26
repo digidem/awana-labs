@@ -16,14 +16,14 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Github,
   BookOpen,
 } from "lucide-react";
+import { GithubIcon } from "./GithubIcon";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/StatusBadge";
+import StatusBadge from "@/components/StatusBadge";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -363,7 +363,7 @@ const ProjectModal = ({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Github className="w-4 h-4 mr-2" />
+                        <GithubIcon className="w-4 h-4 mr-2" />
                         {t("projectModal.repository")}
                       </a>
                     </Button>
