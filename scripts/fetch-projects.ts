@@ -44,6 +44,10 @@ interface GitHubIssue {
   };
 }
 
+type GitHubErrorLike = Error & {
+  status?: number;
+};
+
 // Configuration constants
 const PUBLISH_LABEL = "publish:yes";
 const ISSUES_PER_PAGE = 100;
@@ -112,21 +116,6 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
     return allIssues;
   } catch (error) {
     if (error instanceof Error) {
-      // Handle Octokit-specific errors
-      if (error.message.includes("Bad credentials")) {
-        throw new Error(
-          "GitHub API authentication failed. Please check your GITHUB_TOKEN is valid.",
-        ) as Error & { cause: unknown };
-      } else if (error.message.includes("Not Found")) {
-        throw new Error(
-          `Repository ${owner}/${name} not found or token lacks access.`,
-        ) as Error & { cause: unknown };
-      } else if (error.message.includes("rate limit")) {
-        throw new Error(`GitHub API rate limit exceeded. ${error.message}`) as Error & {
-          cause: unknown;
-        };
-      }
-
       // Re-throw environment variable errors
       if (
         error.message.includes("GITHUB_TOKEN") ||
@@ -136,13 +125,33 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
         throw error;
       }
 
-      throw new Error(`GitHub API error: ${error.message}`) as Error & {
-        cause: unknown;
-      };
+      const status = (error as GitHubErrorLike).status;
+      const message = error.message;
+      const normalizedMessage = message.toLowerCase();
+
+      if (status === 401 || normalizedMessage.includes("bad credentials")) {
+        throw new Error(
+          "GitHub API authentication failed. Please check your GITHUB_TOKEN is valid.",
+        );
+      }
+
+      if (status === 404 || normalizedMessage.includes("not found")) {
+        throw new Error(
+          `Repository ${owner}/${name} not found or token lacks access.`,
+        );
+      }
+
+      if (
+        status === 429 ||
+        normalizedMessage.includes("rate limit") ||
+        normalizedMessage.includes("secondary rate limit")
+      ) {
+        throw new Error(`GitHub API rate limit exceeded. ${message}`);
+      }
+
+      throw new Error(`GitHub API error: ${message}`);
     }
-    throw new Error("Unknown error occurred while fetching issues") as Error & {
-      cause: unknown;
-    };
+    throw new Error("Unknown error occurred while fetching issues");
   }
 }
 

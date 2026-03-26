@@ -3,8 +3,12 @@ cd "$(dirname "$0")/.." || exit 1
 
 echo "=== Cleaning up Ralphy worktrees ==="
 
+count_ralphy_worktrees() {
+    git worktree list --porcelain | awk '/^worktree / && /\.ralphy-worktrees/ { count++ } END { print count + 0 }'
+}
+
 # Count worktrees before
-BEFORE=$(git worktree list | grep -c ".ralphy-worktrees" || echo "0")
+BEFORE=$(count_ralphy_worktrees)
 echo "Worktrees before cleanup: $BEFORE"
 
 # Remove each worktree
@@ -20,6 +24,6 @@ echo "=== Pruning stale worktree references ==="
 git worktree prune
 
 # Count worktrees after
-AFTER=$(git worktree list | grep -c ".ralphy-worktrees" || echo "0")
+AFTER=$(count_ralphy_worktrees)
 echo "Worktrees after cleanup: $AFTER"
 echo "=== Cleanup complete ==="
