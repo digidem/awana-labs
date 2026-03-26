@@ -1,8 +1,11 @@
 /**
- * Fetch Publishable Projects from GitHub Issues
+ * Fetch publishable projects from GitHub Issues
  *
  * This script fetches all issues from the repository that have the 'publish:yes'
- * label and generates the public/projects.json file.
+ * label, parses them with the shared project schema, and prints a validation
+ * summary. The runtime app fetches project data from GitHub, validates it, and
+ * caches the payload in browser localStorage; there is no committed or generated
+ * data file.
  *
  * Environment Variables:
  *   GITHUB_TOKEN - GitHub token for API authentication (provided by Actions)
@@ -10,15 +13,10 @@
  */
 
 // Import the parser and Octokit
-import { parseIssueBody } from "./parse-issue.js";
+import { parseIssueBody, type ProjectData } from "./parse-issue.js";
 import { Octokit } from "@octokit/rest";
 
 // Octokit from @octokit/rest includes pagination support built-in
-
-// Declare Bun global for TypeScript
-declare const Bun: {
-  write: (path: string, content: string) => Promise<void>;
-};
 
 // TypeScript types for GitHub API responses
 interface GitHubLabel {
@@ -44,43 +42,6 @@ interface GitHubIssue {
     login: string;
     type: string;
   };
-}
-
-// Project data structure matching the expected public/projects.json format
-interface Project {
-  id: string;
-  issue_number: number;
-  title: string;
-  slug: string;
-  description: string;
-  organization: {
-    name: string;
-    short_name: string;
-    url: string;
-  };
-  status: {
-    state: string;
-    usage: string;
-    notes: string;
-  };
-  tags: string[];
-  media: {
-    logo: string;
-    images: string[];
-  };
-  links: {
-    homepage: string;
-    repository: string;
-    documentation: string;
-  };
-  timestamps: {
-    created_at: string;
-    last_updated_at: string;
-  };
-}
-
-interface ProjectsData {
-  projects: Project[];
 }
 
 // Configuration constants
@@ -188,7 +149,7 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
 /**
  * Parse project metadata from issue body using the dedicated parser
  */
-function parseProjectFromIssue(issue: GitHubIssue): Project | null {
+function parseProjectFromIssue(issue: GitHubIssue): ProjectData | null {
   try {
     if (!issue.body) {
       console.error(`Issue #${issue.number} has no body content`);
@@ -208,8 +169,8 @@ function parseProjectFromIssue(issue: GitHubIssue): Project | null {
       return null;
     }
 
-    // The parser returns ProjectData which matches our Project interface
-    return parsed as Project;
+    // The parser returns ProjectData from the shared schema layer.
+    return parsed;
   } catch (error) {
     console.error(`Error parsing issue #${issue.number}:`, error);
     return null;
@@ -231,16 +192,6 @@ function slugify(text: string): string {
 }
 
 /**
- * Write projects data to public/projects.json
- */
-async function writeProjectsFile(projects: Project[]): Promise<void> {
-  const data: ProjectsData = { projects };
-  const content = JSON.stringify(data, null, 2);
-  await Bun.write("public/projects.json", content);
-  console.log("Updated public/projects.json");
-}
-
-/**
  * Main execution function
  */
 async function main(): Promise<void> {
@@ -249,7 +200,7 @@ async function main(): Promise<void> {
     const issues = await fetchPublishableIssues();
 
     console.log("Parsing issues into project data...");
-    const projects: Project[] = [];
+    const projects: ProjectData[] = [];
     const failedIssues: number[] = [];
 
     for (const issue of issues) {
@@ -269,8 +220,9 @@ async function main(): Promise<void> {
 
     console.log(`Successfully parsed ${projects.length} projects`);
 
-    console.log("Writing projects.json...");
-    await writeProjectsFile(projects);
+    console.log(
+      "Validation complete. No build-time artifact was written; runtime consumers fetch and cache the validated payload directly from GitHub.",
+    );
 
     // Print summary
     console.log(`\n--- SUMMARY ---`);

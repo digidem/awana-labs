@@ -10,6 +10,7 @@ import * as api from "@/lib/api";
 
 // Mock the API module
 vi.mock("@/lib/api", () => ({
+  PROJECTS_CACHE_MAX_AGE_MS: 60 * 60 * 1000,
   queryKeys: {
     projects: ["projects"] as const,
   },

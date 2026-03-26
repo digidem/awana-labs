@@ -3,7 +3,52 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchJson, fetchProjects, ApiError, getErrorMessage } from "./api";
+import * as githubProjects from "./github-projects";
+import {
+  fetchJson,
+  fetchProjects,
+  ApiError,
+  getErrorMessage,
+  PROJECTS_CACHE_KEY,
+} from "./api";
+
+function createProjectsData() {
+  return {
+    projects: [
+      {
+        id: "test-project",
+        issue_number: 1,
+        title: "Test Project",
+        slug: "test-project",
+        description: "A test project",
+        organization: {
+          name: "Test Org",
+          short_name: "Test",
+          url: "https://example.com",
+        },
+        status: {
+          state: "active" as const,
+          usage: "experimental" as const,
+          notes: "",
+        },
+        tags: ["test"],
+        media: {
+          logo: "https://example.com/logo.png",
+          images: ["https://example.com/image.png"],
+        },
+        links: {
+          homepage: "https://example.com",
+          repository: "https://github.com/test/repo",
+          documentation: "https://docs.example.com",
+        },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-01-02T00:00:00.000Z",
+        },
+      },
+    ],
+  };
+}
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -12,6 +57,7 @@ global.fetch = mockFetch;
 describe("API Client", () => {
   beforeEach(() => {
     mockFetch.mockClear();
+    localStorage.clear();
   });
 
   afterEach(() => {
@@ -106,50 +152,21 @@ describe("API Client", () => {
   });
 
   describe("fetchProjects", () => {
-    it("should fetch projects data from GitHub API", async () => {
-      vi.mock("./github-projects", () => ({
-        fetchProjectsFromGitHub: vi.fn().mockResolvedValue({
-          projects: [
-            {
-              id: "1",
-              issue_number: 1,
-              title: "Test Project",
-              slug: "test-project",
-              description: "A test project",
-              organization: {
-                name: "Test Org",
-                short_name: "Test",
-                url: "https://example.com",
-              },
-              status: {
-                state: "active" as const,
-                usage: "experimental" as const,
-                notes: "",
-              },
-              tags: ["test"],
-              media: {
-                logo: "https://example.com/logo.png",
-                images: [],
-              },
-              links: {
-                homepage: "https://example.com",
-                repository: "https://github.com/test/repo",
-                documentation: "https://docs.example.com",
-              },
-              timestamps: {
-                created_at: "2024-01-01T00:00:00Z",
-                last_updated_at: "2024-01-01T00:00:00Z",
-              },
-            },
-          ],
-        }),
-      }));
+    it("fetches validated project data from GitHub on cold start", async () => {
+      const mockData = createProjectsData();
+      const fetchValidatedProjectsFromGitHub = vi
+        .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+        .mockResolvedValue(mockData);
 
       const result = await fetchProjects();
 
       expect(result.status).toBe(200);
-      expect(result.data?.projects).toHaveLength(1);
-      expect(result.data?.projects[0].title).toBe("Test Project");
+      expect(result.headers.get("x-awana-projects-source")).toBe("github");
+      expect(result.data.projects).toEqual(mockData.projects);
+      expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+
+      const cached = localStorage.getItem(PROJECTS_CACHE_KEY);
+      expect(cached).not.toBeNull();
     });
   });
 

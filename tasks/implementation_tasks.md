@@ -13,7 +13,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 
 - `[x]` T0. Restore a reliable local test baseline.
 - `[ ]` T1. Stabilize E2E coverage against the current UI and data flow.
-- `[ ]` T2. Define the runtime GitHub-fetch plus local cache contract.
+- `[x]` T2. Define the runtime GitHub-fetch plus local cache contract.
 - `[ ]` T3. Improve project loading, error, and offline UX.
 - `[ ]` T4. Fix project card and gallery interaction semantics.
 - `[ ]` T5. Harden the project modal state, focus behavior, and media loading.
@@ -73,7 +73,7 @@ Blockers:
 
 ## T2. Define The Runtime GitHub-Fetch Plus Local Cache Contract
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P0
 Files: `src/lib/api.ts`, `src/lib/api-cache.test.ts`, `src/lib/github-projects.ts`, `src/hooks/useProjects.ts`, `scripts/fetch-projects.ts`, `scripts/parse-issue.ts`, `src/types/project.schema.ts`, `e2e/projects.spec.ts`
 Problem: The app currently mixes two incompatible stories: browser-side GitHub fetching in `src/lib/api.ts` and stale test assumptions about a static `projects.json` asset. The implementation decision is now explicit: there is no built-time or committed `projects.json`; instead, the app fetches validated project data from GitHub on cold start and persists that payload in `localStorage` for subsequent loads and offline fallback.
@@ -101,6 +101,8 @@ Dependencies:
 Notes:
 - This task is intentionally client-cache based. Do not introduce `public/projects.json`, build-time data generation, or deploy-time artifact generation unless the product decision changes.
 - This approach keeps a cold-start dependency on GitHub availability and rate limits. That is an accepted tradeoff for this implementation plan, not an unresolved ambiguity.
+Completion Note:
+- Changed `src/lib/api.ts`, `src/lib/api.test.ts`, `src/lib/api-cache.test.ts`, `src/lib/github-projects.ts`, `src/hooks/useProjects.ts`, `src/hooks/useProjects.test.tsx`, `scripts/fetch-projects.ts`, `scripts/parse-issue.ts`, `src/types/project.schema.ts`, `e2e/basic.spec.ts`, and `e2e/projects.spec.ts`; verified with `npm run test -- src/lib/api.test.ts`, `npm run test -- src/lib/api-cache.test.ts`, `npm run test -- src/hooks/useProjects.test.tsx`, `npm run lint`, `npm run typecheck`, and `npm run test`. Playwright execution remains blocked in this sandbox by the preview-server limitation already documented under T1.
 
 ## T3. Improve Project Loading, Error, And Offline UX
 

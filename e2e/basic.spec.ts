@@ -1,5 +1,46 @@
 import { test, expect } from "@playwright/test";
 
+const runtimeProjectsCacheEntry = {
+  version: 1,
+  cachedAt: new Date().toISOString(),
+  data: {
+    projects: [
+      {
+        id: "comapeo-config-spreadsheet-plugin",
+        issue_number: 2,
+        title: "CoMapeo Config Spreadsheet Plugin",
+        slug: "comapeo-config-spreadsheet-plugin",
+        description: "Google Sheets plugin for CoMapeo configurations.",
+        organization: {
+          name: "Digital Democracy",
+          short_name: "Awana Digital",
+          url: "https://www.digital-democracy.org",
+        },
+        status: {
+          state: "active",
+          usage: "widely-used",
+          notes: "Used in multiple deployments.",
+        },
+        tags: ["CoMapeo", "Mapping", "Spreadsheet"],
+        media: {
+          logo: "https://images.unsplash.com/photo-1",
+          images: ["https://images.unsplash.com/photo-2"],
+        },
+        links: {
+          homepage: "https://www.digital-democracy.org/comapeo",
+          repository:
+            "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
+          documentation: "https://docs.example.com/comapeo",
+        },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-01-02T00:00:00.000Z",
+        },
+      },
+    ],
+  },
+} as const;
+
 /**
  * Basic page load and rendering tests
  * These tests ensure the website loads correctly and displays content
@@ -158,22 +199,22 @@ test.describe("Asset Loading Tests", () => {
     expect(cssRequests.length).toBeGreaterThan(0);
   });
 
-  test("projects.json data loads", async ({ page }) => {
-    const dataRequests: string[] = [];
-
-    page.on("request", (request) => {
-      if (request.url().includes("projects.json")) {
-        dataRequests.push(request.url());
-      }
-    });
+  test("project data loads through the runtime cache contract", async ({
+    page,
+  }) => {
+    await page.addInitScript((cacheEntry) => {
+      window.localStorage.setItem(
+        "awana-labs-projects-cache",
+        JSON.stringify(cacheEntry),
+      );
+    }, runtimeProjectsCacheEntry);
 
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
 
-    // Wait for data fetch
-    await page.waitForTimeout(2000);
-
-    // projects.json should be requested (unless already cached)
-    // This is a soft check - if it doesn't load, the page should still work
+    await expect(page.locator("#projects")).toContainText(
+      "CoMapeo Config Spreadsheet Plugin",
+    );
   });
 });
 

@@ -6,7 +6,11 @@
  */
 
 import { GitHubClient, type GitHubIssue } from "./github";
-import { parseProjectsData, type ProjectsData, type Project } from "@/types/project.schema";
+import {
+  parseProjectsData,
+  type ProjectsData,
+  type Project,
+} from "@/types/project.schema";
 
 // Configuration
 const GITHUB_OWNER = "luandro";
@@ -284,7 +288,9 @@ function createClient(token?: string): GitHubClient {
 
 /**
  * Fetch projects from GitHub issues
- * Fetches issues with 'publish:yes' label and parses them into projects
+ * Fetches issues with 'publish:yes' label and parses them into projects.
+ * The runtime path reads issues directly from GitHub; it does not depend on a
+ * generated static asset.
  */
 export async function fetchProjectsFromGitHub(
   owner = GITHUB_OWNER,
@@ -300,6 +306,7 @@ export async function fetchProjectsFromGitHub(
     const issues = await client.getIssues(owner, repo, {
       labels: label,
       state: "all",
+      per_page: 100,
     });
 
     console.log(`Found ${issues.length} issues, parsing projects...`);

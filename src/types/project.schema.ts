@@ -3,7 +3,7 @@
  *
  * Runtime type validation for project data structures.
  * Provides Zod schemas for validating project data from external sources
- * (GitHub API, projects.json, user input).
+ * (GitHub issue fetches, browser localStorage cache, user input).
  *
  * Usage:
  *   import { projectSchema, projectsDataSchema } from '@/types/project.schema';
@@ -175,7 +175,8 @@ export type Project = z.infer<typeof projectSchema>;
 
 /**
  * Container schema for projects array
- * Matches the structure of public/projects.json
+ * Matches the runtime projects payload returned from GitHub-backed fetches
+ * and persisted in browser localStorage.
  */
 export const projectsDataSchema = z.object({
   projects: z.array(projectSchema),

@@ -7,9 +7,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
-  queryKeys,
   fetchProjectsQuery,
   getErrorMessage,
+  PROJECTS_CACHE_MAX_AGE_MS,
+  queryKeys,
 } from "@/lib/api";
 import type { ProjectsData } from "@/types/project";
 
@@ -23,7 +24,10 @@ interface UseProjectsOptions {
 }
 
 /**
- * Hook for fetching projects data
+ * Hook for fetching projects data.
+ *
+ * React Query caches within the current session, while the runtime fetcher
+ * persists validated payloads in localStorage for reload and offline fallback.
  *
  * @param options - TanStack Query options
  * @returns Query result with projects data
@@ -31,8 +35,8 @@ interface UseProjectsOptions {
 export function useProjects(options: UseProjectsOptions = {}) {
   const {
     enabled = true,
-    staleTime = 5 * 60 * 1000, // 5 minutes
-    gcTime = 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    staleTime = PROJECTS_CACHE_MAX_AGE_MS,
+    gcTime = PROJECTS_CACHE_MAX_AGE_MS * 2,
     refetchOnWindowFocus = false,
     refetchOnReconnect = true,
     retry = 2,

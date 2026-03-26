@@ -1,8 +1,8 @@
 /**
  * parse-issue.ts - GitHub Issue to Project JSON Parser
  *
- * Parses GitHub issue Markdown body into the project JSON schema
- * following the format defined in public/projects.json
+ * Parses GitHub issue Markdown body into the shared project schema used by
+ * the runtime GitHub fetch path and the browser localStorage cache.
  *
  * This module uses Zod schemas defined in ../src/types/project.schema.ts
  * for runtime validation of parsed project data.
