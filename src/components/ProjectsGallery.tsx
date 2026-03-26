@@ -87,8 +87,12 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
         >
           {/* Search */}
           <div className="relative w-full sm:max-w-md mx-auto sm:mx-0">
+            <label htmlFor="project-search" className="sr-only">
+              {t("projects.searchLabel")}
+            </label>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
+              id="project-search"
               type="text"
               placeholder={t("projects.searchPlaceholder")}
               value={searchQuery}
@@ -98,12 +102,18 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
           </div>
 
           {/* Status Filter Pills */}
-          <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+          <div
+            role="group"
+            aria-label={t("projects.statusFilterLabel")}
+            className="flex gap-2 flex-wrap justify-center sm:justify-start"
+          >
             {filterOptions.map((option) => (
               <button
                 key={option.value}
+                type="button"
                 onClick={() => setStatusFilter(option.value)}
-                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
+                aria-pressed={statusFilter === option.value}
+                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   statusFilter === option.value
                     ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-card hover:bg-secondary text-foreground border border-border"
@@ -122,6 +132,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
+            id="projects-grid"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {filteredProjects.map((project, index) => (

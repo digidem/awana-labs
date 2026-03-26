@@ -2,7 +2,7 @@ import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { getUsageLabel } from "@/lib/status-utils";
 
@@ -35,7 +35,9 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
   };
 
   return (
-    <motion.div
+    <motion.button
+      type="button"
+      onClick={onClick}
       variants={cardVariants}
       initial="hidden"
       whileInView="visible"
@@ -43,66 +45,52 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
       whileHover={
         prefersReducedMotion ? {} : { y: -8, transition: { duration: 0.2 } }
       }
-      className="h-full"
+      className="h-full w-full rounded-lg border border-border/50 bg-card/80 text-left text-card-foreground shadow-sm backdrop-blur-sm transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
+      aria-label={t("aria.viewDetails", { title: project.title })}
     >
-      <Card
-        onClick={onClick}
-        className="h-full cursor-pointer transition-shadow duration-300 hover:shadow-xl border-border/50 bg-card/80 backdrop-blur-sm group"
-        tabIndex={0}
-        role="button"
-        aria-label={t("aria.viewDetails", { title: project.title })}
-        onKeyDown={(e) => e.key === "Enter" && onClick()}
-      >
-        <CardHeader className="pb-3">
-          {/* Logo placeholder */}
-          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <span className="text-xl font-bold text-primary">
-              {project.title.charAt(0)}
-            </span>
-          </div>
+      <CardHeader className="pb-3">
+        {/* Logo placeholder */}
+        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+          <span className="text-xl font-bold text-primary">
+            {project.title.charAt(0)}
+          </span>
+        </div>
 
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
-              {project.title}
-            </h3>
-            <StatusBadge state={project.status.state} />
-          </div>
-        </CardHeader>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
+            {project.title}
+          </h3>
+          <StatusBadge state={project.status.state} />
+        </div>
+      </CardHeader>
 
-        <CardContent className="pt-0">
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-            {project.description}
-          </p>
+      <CardContent className="pt-0">
+        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+          {project.description}
+        </p>
 
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {project.tags.slice(0, 3).map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="text-xs bg-secondary/50"
-              >
-                {tag}
-              </Badge>
-            ))}
-            {project.tags.length > 3 && (
-              <Badge variant="secondary" className="text-xs bg-secondary/50">
-                +{project.tags.length - 3}
-              </Badge>
-            )}
-          </div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {project.tags.slice(0, 3).map((tag) => (
+            <Badge key={tag} variant="secondary" className="text-xs bg-secondary/50">
+              {tag}
+            </Badge>
+          ))}
+          {project.tags.length > 3 && (
+            <Badge variant="secondary" className="text-xs bg-secondary/50">
+              +{project.tags.length - 3}
+            </Badge>
+          )}
+        </div>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{getUsageLabel(project.status.usage, t)}</span>
-            <span>
-              {t("projects.updated")}{" "}
-              {new Date(
-                project.timestamps.last_updated_at,
-              ).toLocaleDateString()}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{getUsageLabel(project.status.usage, t)}</span>
+          <span>
+            {t("projects.updated")}{" "}
+            {new Date(project.timestamps.last_updated_at).toLocaleDateString()}
+          </span>
+        </div>
+      </CardContent>
+    </motion.button>
   );
 };
 

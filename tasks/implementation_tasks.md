@@ -15,7 +15,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 - `[x]` T1. Stabilize E2E coverage against the current UI and data flow.
 - `[x]` T2. Define the runtime GitHub-fetch plus local cache contract.
 - `[x]` T3. Improve project loading, error, and offline UX.
-- `[ ]` T4. Fix project card and gallery interaction semantics.
+- `[x]` T4. Fix project card and gallery interaction semantics.
 - `[ ]` T5. Harden the project modal state, focus behavior, and media loading.
 - `[ ]` T6. Align language support, localization coverage, and date formatting.
 - `[ ]` T7. Reduce scroll-driven rendering work in the header and hero background.
@@ -134,7 +134,7 @@ Completion Note:
 
 ## T4. Fix Project Card And Gallery Interaction Semantics
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P0
 Files: `src/components/ProjectCard.tsx`, `src/components/ProjectsGallery.tsx`, `src/components/StatusBadge.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, `src/locales/es/common.json`
 Problem: `src/components/ProjectCard.tsx` uses a generic card with `role="button"` and only handles the Enter key. `src/components/ProjectsGallery.tsx` has a search input with no visible or programmatic label and filter pills without pressed-state semantics.
@@ -155,6 +155,8 @@ Validation:
 - `npm run typecheck`
 Dependencies:
 - None.
+Completion Note:
+- Changed `src/components/ProjectCard.tsx`, `src/components/ProjectsGallery.tsx`, `src/components/ProjectCard.test.tsx`, `src/components/ProjectsGallery.test.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, and `src/locales/es/common.json`; verified with `npm run test -- src/components/ProjectCard.test.tsx`, `npm run test -- src/components/ProjectsGallery.test.tsx`, `npm run test`, `npm run lint`, and `npm run typecheck`.
 
 ## T5. Harden The Project Modal State, Focus Behavior, And Media Loading
 
