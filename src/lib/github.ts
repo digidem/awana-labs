@@ -55,6 +55,17 @@ export interface GitHubRateLimit {
   used: number;
 }
 
+function normalizeLabels(
+  labels: Array<string | { name?: string | null }>,
+): string[] {
+  return labels
+    .map((label) =>
+      typeof label === "string" ? label : label.name ?? "",
+    )
+    .map((label) => label.trim())
+    .filter((label): label is string => label.length > 0);
+}
+
 /** Custom GitHub API error class */
 export class GitHubApiError extends Error {
   constructor(
@@ -163,9 +174,7 @@ export class GitHubClient {
         html_url: issue.html_url,
         created_at: issue.created_at,
         updated_at: issue.updated_at,
-        labels: issue.labels.map((label) =>
-          typeof label === "string" ? label : (label.name || ""),
-        ),
+        labels: normalizeLabels(issue.labels),
         user: {
           login: issue.user?.login || "",
           type: issue.user?.type || "User",
@@ -203,9 +212,7 @@ export class GitHubClient {
         html_url: issue.html_url,
         created_at: issue.created_at,
         updated_at: issue.updated_at,
-        labels: issue.labels.map((label) =>
-          typeof label === "string" ? label : label.name,
-        ),
+        labels: normalizeLabels(issue.labels),
         user: {
           login: issue.user?.login || "",
           type: issue.user?.type || "User",

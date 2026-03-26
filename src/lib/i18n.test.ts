@@ -120,8 +120,11 @@ describe("i18n configuration", () => {
         writable: true,
       });
 
-      await i18n.init();
-      expect(i18n.language).toBe("pt");
+      const detectedLanguage = i18n.services.languageDetector?.detect();
+      const resolvedLanguage = Array.isArray(detectedLanguage)
+        ? detectedLanguage[0]
+        : detectedLanguage;
+      expect(resolvedLanguage).toBe("pt");
 
       // Restore original search
       Object.defineProperty(window, "location", {

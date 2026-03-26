@@ -8,6 +8,8 @@
 import { GitHubClient, type GitHubIssue } from "./github";
 import {
   parseProjectsData,
+  isValidProjectState,
+  isValidProjectUsage,
   type ProjectsData,
   type Project,
 } from "@/types/project.schema";
@@ -203,7 +205,7 @@ function parseIssueToProject(issue: GitHubIssue): Project | null {
 
   // Extract title from first heading
   const titleMatch = body.match(/^#\s+(.+)$/m);
-  const title = titleMatch ? titleMatch[1].trim() : "";
+  const title = titleMatch ? titleMatch[1].trim() : issue.title.trim();
 
   if (!title) return null;
 
@@ -239,6 +241,13 @@ function parseIssueToProject(issue: GitHubIssue): Project | null {
     return null;
   }
 
+  if (!isValidProjectState(statusState)) {
+    console.error(`Invalid project state for project: ${title}`);
+    return null;
+  }
+
+  const usage = isValidProjectUsage(statusUsage) ? statusUsage : "experimental";
+
   // Build project object
   const project: Project = {
     id,
@@ -252,8 +261,8 @@ function parseIssueToProject(issue: GitHubIssue): Project | null {
       url: orgUrl,
     },
     status: {
-      state: statusState as Project["status"]["state"],
-      usage: (statusUsage || "experimental") as Project["status"]["usage"],
+      state: statusState,
+      usage,
       notes: statusNotes,
     },
     tags,
