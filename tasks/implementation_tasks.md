@@ -12,7 +12,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 ## Task Index
 
 - `[x]` T0. Restore a reliable local test baseline.
-- `[ ]` T1. Stabilize E2E coverage against the current UI and data flow.
+- `[x]` T1. Stabilize E2E coverage against the current UI and data flow.
 - `[x]` T2. Define the runtime GitHub-fetch plus local cache contract.
 - `[ ]` T3. Improve project loading, error, and offline UX.
 - `[ ]` T4. Fix project card and gallery interaction semantics.
@@ -46,7 +46,7 @@ Completion Note:
 
 ## T1. Stabilize E2E Coverage Against The Current UI And Data Flow
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P0
 Files: `e2e/basic.spec.ts`, `e2e/responsive.spec.ts`, `e2e/projects.spec.ts`, `src/components/Header.tsx`, `src/components/ProjectsGallery.tsx`, `src/components/ProjectCard.tsx`, `src/components/ProjectModal.tsx`
 Problem: The current Playwright suite encodes assumptions that do not match the app. `e2e/responsive.spec.ts` expects a language switcher and mobile menu that are commented out in `src/components/Header.tsx`. `e2e/projects.spec.ts` still targets `projects.json`, but the supported runtime contract is a GitHub-backed fetch with a validated `localStorage` cache and there is no real `projects.json` asset.
@@ -68,8 +68,10 @@ Validation:
 - `npm run test:e2e -- e2e/projects.spec.ts --project=chromium`
 Dependencies:
 - T2 for the final project-data assertions.
-Blockers:
-- In the current sandbox, `vite preview` cannot bind to port `4173`, so Playwright verification must run in a normal local shell or another environment that allows the preview server to start.
+Environment Note:
+- In the default sandbox, `vite preview` could not start the Playwright web server; verification was completed successfully outside the sandbox with the listed Playwright commands.
+Completion Note:
+- Changed `e2e/basic.spec.ts`, `e2e/projects.spec.ts`, and `e2e/responsive.spec.ts`; verified with `npm run test:e2e -- e2e/responsive.spec.ts --project=chromium`, `npm run test:e2e -- e2e/projects.spec.ts --project=chromium`, `npm run lint`, and `npm run typecheck`.
 
 ## T2. Define The Runtime GitHub-Fetch Plus Local Cache Contract
 
