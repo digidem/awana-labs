@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the migration from raw `fetch` calls to `@octokit/core` for GitHub API interactions.
+This document describes the migration from raw `fetch` calls to `@octokit/rest` for GitHub API interactions.
 
 ## Changes Made
 
@@ -11,7 +11,7 @@ This document describes the migration from raw `fetch` calls to `@octokit/core` 
 **Affected Files:**
 
 - `scripts/fetch-projects.ts` - Main script for fetching GitHub issues
-- `package.json` - Added @octokit/core dependency
+- `package.json` - Added @octokit/rest dependency
 - `scripts/README.md` - Updated documentation
 
 ### Migration Details
@@ -77,8 +77,7 @@ for await (const response of iterator) {
 
 ```json
 {
-  "@octokit/rest": "^22.x.x",
-  "@octokit/core": "^7.x.x"
+  "@octokit/rest": "^22.x.x"
 }
 ```
 
@@ -101,7 +100,7 @@ No changes to required environment variables:
 
 ## Migration Checklist
 
-- [x] Install @octokit/core package
+- [x] Install @octokit/rest package
 - [x] Replace fetch calls with Octokit API
 - [x] Remove manual pagination logic
 - [x] Update error handling for Octokit errors
@@ -115,7 +114,7 @@ No changes to required environment variables:
 If issues arise, the migration can be rolled back by:
 
 1. Reverting the changes in `scripts/fetch-projects.ts`
-2. Removing `@octokit/core` from package.json
+2. Removing `@octokit/rest` from package.json
 3. Running `npm install` to remove the dependency
 
 ## Related Documentation

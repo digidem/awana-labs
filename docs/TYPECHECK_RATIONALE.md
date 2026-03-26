@@ -30,8 +30,8 @@ Configuration in `package.json`:
 
 ```json
 "lint-staged": {
-  "*.{ts,tsx}": [
-    "tsc --noEmit --skipLibCheck"
+  "*.{ts,tsx,js,jsx}": [
+    "eslint --fix"
   ]
 }
 ```

@@ -6,7 +6,7 @@ This directory contains TypeScript build scripts for the Awana Labs Showcase pro
 
 ### fetch-projects.ts
 
-Fetches all issues from `luandro/awana-labs-showcase` with the `publish:yes` label using the GitHub API via @octokit/core.
+Fetches all issues from `luandro/awana-labs-showcase` with the `publish:yes` label using the GitHub API via @octokit/rest.
 
 **Usage:**
 
@@ -58,7 +58,7 @@ console.log(`Found ${issues.length} publishable issues`);
 
 **Features:**
 
-- Uses official @octokit/core SDK for GitHub API
+- Uses official @octokit/rest SDK for GitHub API
 - Automatic pagination handling (fetches all issues using Octokit's paginate iterator)
 - Rate limit detection with helpful messages
 - Authentication error handling
@@ -69,7 +69,7 @@ console.log(`Found ${issues.length} publishable issues`);
 
 **Implementation Details:**
 
-The script uses `@octokit/core` instead of raw fetch calls for improved:
+The script uses `@octokit/rest` instead of raw fetch calls for improved:
 
 - Type safety with GitHub API responses
 - Built-in pagination support via `octokit.paginate.iterator()`
