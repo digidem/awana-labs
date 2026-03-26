@@ -13,8 +13,12 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const lastUpdatedLabel = new Intl.DateTimeFormat(locale).format(
+    new Date(project.timestamps.last_updated_at),
+  );
 
   const cardVariants: Variants = {
     hidden: {
@@ -85,8 +89,7 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{getUsageLabel(project.status.usage, t)}</span>
           <span>
-            {t("projects.updated")}{" "}
-            {new Date(project.timestamps.last_updated_at).toLocaleDateString()}
+            {t("projects.updated")} {lastUpdatedLabel}
           </span>
         </div>
       </CardContent>

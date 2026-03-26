@@ -1,4 +1,6 @@
-export type Language = "en" | "es" | "fr" | "pt";
+export const SUPPORTED_LANGUAGES = ["en", "pt", "es"] as const;
+
+export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
 export interface LanguageOption {
   code: Language;
@@ -9,14 +11,17 @@ export interface LanguageOption {
 
 export const LANGUAGE_OPTIONS: LanguageOption[] = [
   { code: "en", name: "English", nativeName: "English", flag: "🇺🇸" },
-  { code: "es", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
-  { code: "fr", name: "French", nativeName: "Français", flag: "🇫🇷" },
   { code: "pt", name: "Portuguese", nativeName: "Português", flag: "🇧🇷" },
+  { code: "es", name: "Spanish", nativeName: "Español", flag: "🇪🇸" },
 ];
 
-export const DEFAULT_LANGUAGE: Language = "en";
+export const DEFAULT_LANGUAGE: Language = SUPPORTED_LANGUAGES[0];
 
-export const getLanguageOption = (code: Language): LanguageOption => {
+export const isLanguage = (value: string): value is Language => {
+  return SUPPORTED_LANGUAGES.includes(value as Language);
+};
+
+export const getLanguageOption = (code: string): LanguageOption => {
   return (
     LANGUAGE_OPTIONS.find((lang) => lang.code === code) || LANGUAGE_OPTIONS[0]
   );

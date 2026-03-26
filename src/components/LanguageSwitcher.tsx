@@ -1,4 +1,5 @@
 import { Check, Languages } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ const LanguageSwitcher = ({
   className,
   variant = "default",
 }: LanguageSwitcherProps) => {
+  const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
   const currentLang = getLanguageOption(language);
 
@@ -58,7 +60,7 @@ const LanguageSwitcher = ({
           "bg-background/50 backdrop-blur-sm",
           className,
         )}
-        aria-label="Select language"
+        aria-label={t("aria.selectLanguage")}
       >
         {getTriggerContent()}
         <Languages className="h-4 w-4 opacity-50" />
@@ -72,7 +74,9 @@ const LanguageSwitcher = ({
             key={option.code}
             onClick={() => setLanguage(option.code)}
             className="flex items-center justify-between cursor-pointer group"
-            aria-label={`Switch to ${option.name}`}
+            aria-label={t("aria.switchLanguage", {
+              language: option.nativeName,
+            })}
           >
             <span className="flex items-center gap-3">
               <span className="text-xl" aria-hidden="true">

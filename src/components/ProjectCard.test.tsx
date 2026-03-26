@@ -64,4 +64,26 @@ describe("ProjectCard", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onClick.mock.calls[0][0]).toBe(button);
   });
+
+  it("formats project dates using the active app language", async () => {
+    await act(async () => {
+      await i18n.changeLanguage("pt");
+    });
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ProjectCard project={project} index={0} onClick={vi.fn()} />
+      </I18nextProvider>,
+    );
+
+    const formattedDate = new Intl.DateTimeFormat("pt").format(
+      new Date(project.timestamps.last_updated_at),
+    );
+
+    expect(
+      screen.getByText((_, node) => {
+        return node?.textContent === `Atualizado ${formattedDate}`;
+      }),
+    ).toBeInTheDocument();
+  });
 });

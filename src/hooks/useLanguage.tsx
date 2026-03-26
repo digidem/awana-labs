@@ -6,7 +6,8 @@ import {
   ReactNode,
 } from "react";
 import type { Language } from "@/types/language";
-import { DEFAULT_LANGUAGE } from "@/types/language";
+import { DEFAULT_LANGUAGE, isLanguage } from "@/types/language";
+import i18n from "@/lib/i18n";
 
 interface LanguageContextType {
   language: Language;
@@ -19,19 +20,26 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 
 const LANGUAGE_STORAGE_KEY = "awana-labs-language";
 
+const getInitialLanguage = (): Language => {
+  const detectedLanguage = i18n.resolvedLanguage ?? i18n.language;
+  return detectedLanguage && isLanguage(detectedLanguage)
+    ? detectedLanguage
+    : DEFAULT_LANGUAGE;
+};
+
 const getStoredLanguage = (): Language => {
-  if (typeof window === "undefined") return DEFAULT_LANGUAGE;
+  if (typeof window === "undefined") return getInitialLanguage();
 
   try {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (stored && ["en", "es", "fr", "pt"].includes(stored)) {
-      return stored as Language;
+    if (stored && isLanguage(stored)) {
+      return stored;
     }
   } catch (e) {
     console.warn("Failed to read language from localStorage:", e);
   }
 
-  return DEFAULT_LANGUAGE;
+  return getInitialLanguage();
 };
 
 const storeLanguage = (language: Language) => {
@@ -46,13 +54,9 @@ const storeLanguage = (language: Language) => {
 
 interface LanguageProviderProps {
   children: ReactNode;
-  defaultLanguage?: Language;
 }
 
-export const LanguageProvider = ({
-  children,
-  defaultLanguage,
-}: LanguageProviderProps) => {
+export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   const [language, setLanguageState] = useState<Language>(() =>
     getStoredLanguage(),
   );
@@ -68,6 +72,10 @@ export const LanguageProvider = ({
   };
 
   useEffect(() => {
+    if (i18n.resolvedLanguage !== language) {
+      void i18n.changeLanguage(language);
+    }
+
     // Set initial document lang
     if (typeof document !== "undefined") {
       document.documentElement.lang = language;

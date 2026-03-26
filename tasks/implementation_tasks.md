@@ -17,7 +17,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 - `[x]` T3. Improve project loading, error, and offline UX.
 - `[x]` T4. Fix project card and gallery interaction semantics.
 - `[x]` T5. Harden the project modal state, focus behavior, and media loading.
-- `[ ]` T6. Align language support, localization coverage, and date formatting.
+- `[x]` T6. Align language support, localization coverage, and date formatting.
 - `[ ]` T7. Reduce scroll-driven rendering work in the header and hero background.
 - `[!]` T8. Audit TypeScript and test/build configuration strictness.
 
@@ -187,14 +187,15 @@ Completion Note:
 
 ## T6. Align Language Support, Localization Coverage, And Date Formatting
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P1
-Files: `src/types/language.ts`, `src/hooks/useLanguage.tsx`, `src/lib/i18n.ts`, `src/components/ProjectCard.tsx`, `src/components/ProjectModal.tsx`, `src/pages/Index.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, `src/locales/es/common.json`, `src/test/language.test.tsx`, `src/lib/i18n.test.ts`
-Problem: The language model is inconsistent. `src/types/language.ts` and `src/hooks/useLanguage.tsx` allow `fr`, but `src/lib/i18n.ts` only configures `en`, `pt`, and `es`. `LanguageProvider` also accepts `defaultLanguage` but does not use it. Dates in the UI use `toLocaleDateString()` without reference to the active app language.
+Files: `src/types/language.ts`, `src/hooks/useLanguage.tsx`, `src/lib/i18n.ts`, `src/components/LanguageSwitcher.tsx`, `src/components/ProjectCard.tsx`, `src/components/ProjectModal.tsx`, `src/pages/Index.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, `src/locales/es/common.json`, `src/test/language.test.tsx`, `src/lib/i18n.test.ts`
+Problem: The language model is inconsistent. `src/types/language.ts` and `src/hooks/useLanguage.tsx` allow `fr`, but `src/lib/i18n.ts` only configures `en`, `pt`, and `es`. `LanguageProvider` also accepts `defaultLanguage` but does not use it, and its state is not the source of truth for `react-i18next`, so the switcher and rendered translations can drift apart. Dates in the UI use `toLocaleDateString()` without reference to the active app language.
 Implementation:
 - Choose a single supported-language set and use it everywhere.
 - Either implement French resources end to end or remove French from the available language model.
 - Use or remove `defaultLanguage` so the provider API matches behavior.
+- Make the language provider and `react-i18next` agree on the active language.
 - Format project dates using the active app language instead of the browser default alone.
 - Localize any remaining shell copy surfaced by T3, T4, and T5.
 Acceptance Criteria:
@@ -209,6 +210,8 @@ Validation:
 - `npm run typecheck`
 Dependencies:
 - T3, T4, and T5 for final copy alignment and UI text coverage.
+Completion Note:
+- Changed `src/types/language.ts`, `src/hooks/useLanguage.tsx`, `src/lib/i18n.ts`, `src/components/LanguageSwitcher.tsx`, `src/components/ProjectCard.tsx`, `src/components/ProjectModal.tsx`, `src/components/ProjectCard.test.tsx`, `src/test/language.test.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, and `src/locales/es/common.json`; verified with `npm run test -- src/test/language.test.tsx`, `npm run test -- src/lib/i18n.test.ts`, `npm run test -- src/components/ProjectCard.test.tsx`, `npm run test`, and `npm run typecheck`. `npm run lint` is currently blocked by unrelated untracked `.claude/helpers/statusline.cjs`, so the changed T6 source files were verified with targeted `npx eslint src/components/LanguageSwitcher.tsx src/components/ProjectCard.tsx src/components/ProjectModal.tsx src/hooks/useLanguage.tsx src/lib/i18n.ts src/test/language.test.tsx src/components/ProjectCard.test.tsx src/types/language.ts`.
 
 ## T7. Reduce Scroll-Driven Rendering Work In The Header And Hero Background
 

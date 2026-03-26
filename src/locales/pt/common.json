@@ -35,6 +35,7 @@
     "previousImage": "Imagem anterior",
     "nextImage": "Próxima imagem",
     "goToImage": "Ir para imagem {{index}}",
+    "imageAlt": "Captura de tela de {{title}} {{index}}",
     "imageLoading": "Carregando imagem...",
     "imageUnavailable": "Não foi possível carregar esta imagem."
   },
@@ -85,6 +86,8 @@
     "scrollToTop": "Rolar para o topo",
     "scrollToProjects": "Rolar para projetos",
     "viewDetails": "Ver detalhes de {{title}}",
+    "selectLanguage": "Selecionar idioma",
+    "switchLanguage": "Mudar para {{language}}",
     "visitGithub": "Visitar repositório GitHub",
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu"

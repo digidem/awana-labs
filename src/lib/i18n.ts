@@ -1,6 +1,10 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import {
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
+} from "@/types/language";
 
 // Import translation files
 import en from "../locales/en/common.json";
@@ -20,14 +24,14 @@ const resources = {
 };
 
 // Supported languages for the application
-export const supportedLanguages = ["en", "pt", "es"] as const;
+export const supportedLanguages = SUPPORTED_LANGUAGES;
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: "en",
+    fallbackLng: DEFAULT_LANGUAGE,
     supportedLngs: supportedLanguages,
     interpolation: {
       escapeValue: false, // React already escapes values

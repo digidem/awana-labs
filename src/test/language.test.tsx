@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { I18nextProvider } from "react-i18next";
 import { LanguageProvider, useLanguage } from "@/hooks/useLanguage";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import i18n from "@/lib/i18n";
 import {
   LANGUAGE_OPTIONS,
   DEFAULT_LANGUAGE,
@@ -39,7 +41,9 @@ Object.defineProperty(document.documentElement, "lang", {
 });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <LanguageProvider>{children}</LanguageProvider>
+  <I18nextProvider i18n={i18n}>
+    <LanguageProvider>{children}</LanguageProvider>
+  </I18nextProvider>
 );
 
 describe("Language Types", () => {
@@ -48,12 +52,11 @@ describe("Language Types", () => {
   });
 
   it("should have all required language options", () => {
-    expect(LANGUAGE_OPTIONS).toHaveLength(4);
+    expect(LANGUAGE_OPTIONS).toHaveLength(3);
     expect(LANGUAGE_OPTIONS.map((lang) => lang.code)).toEqual([
       "en",
-      "es",
-      "fr",
       "pt",
+      "es",
     ]);
   });
 
@@ -63,7 +66,7 @@ describe("Language Types", () => {
       expect(option).toHaveProperty("name");
       expect(option).toHaveProperty("nativeName");
       expect(option).toHaveProperty("flag");
-      expect(["en", "es", "fr", "pt"]).toContain(option.code);
+      expect(["en", "pt", "es"]).toContain(option.code);
     });
   });
 
@@ -74,23 +77,17 @@ describe("Language Types", () => {
     expect(en.nativeName).toBe("English");
     expect(en.flag).toBe("🇺🇸");
 
-    const es = getLanguageOption("es");
-    expect(es.code).toBe("es");
-    expect(es.name).toBe("Spanish");
-    expect(es.nativeName).toBe("Español");
-    expect(es.flag).toBe("🇪🇸");
-
-    const fr = getLanguageOption("fr");
-    expect(fr.code).toBe("fr");
-    expect(fr.name).toBe("French");
-    expect(fr.nativeName).toBe("Français");
-    expect(fr.flag).toBe("🇫🇷");
-
     const pt = getLanguageOption("pt");
     expect(pt.code).toBe("pt");
     expect(pt.name).toBe("Portuguese");
     expect(pt.nativeName).toBe("Português");
     expect(pt.flag).toBe("🇧🇷");
+
+    const es = getLanguageOption("es");
+    expect(es.code).toBe("es");
+    expect(es.name).toBe("Spanish");
+    expect(es.nativeName).toBe("Español");
+    expect(es.flag).toBe("🇪🇸");
   });
 
   it("should return default language option for invalid code", () => {
@@ -100,9 +97,10 @@ describe("Language Types", () => {
 });
 
 describe("useLanguage Hook", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
     document.documentElement.lang = "";
+    await i18n.changeLanguage("en");
   });
 
   it("should use default language when no stored language", () => {
@@ -120,16 +118,20 @@ describe("useLanguage Hook", () => {
     expect(result.current.language).toBe("es");
   });
 
-  it("should set language and update localStorage", () => {
+  it("should set language, update localStorage, and sync i18n", async () => {
     const { result } = renderHook(() => useLanguage(), { wrapper });
 
     act(() => {
-      result.current.setLanguage("fr");
+      result.current.setLanguage("pt");
     });
 
-    expect(result.current.language).toBe("fr");
-    expect(localStorage.getItem("awana-labs-language")).toBe("fr");
-    expect(document.documentElement.lang).toBe("fr");
+    expect(result.current.language).toBe("pt");
+    expect(localStorage.getItem("awana-labs-language")).toBe("pt");
+    expect(document.documentElement.lang).toBe("pt");
+
+    await waitFor(() => {
+      expect(i18n.resolvedLanguage).toBe("pt");
+    });
   });
 
   it("should update document lang attribute when language changes", () => {
@@ -148,6 +150,14 @@ describe("useLanguage Hook", () => {
     expect(document.documentElement.lang).toBe("en");
   });
 
+  it("should fall back to the default language for unsupported stored values", () => {
+    localStorage.setItem("awana-labs-language", "fr");
+
+    const { result } = renderHook(() => useLanguage(), { wrapper });
+
+    expect(result.current.language).toBe(DEFAULT_LANGUAGE);
+  });
+
   it("should throw error when used outside provider", () => {
     // Suppress console.error for this test
     const originalError = console.error;
@@ -162,9 +172,10 @@ describe("useLanguage Hook", () => {
 });
 
 describe("LanguageSwitcher Component", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
     document.documentElement.lang = "";
+    await i18n.changeLanguage("en");
   });
 
   it("should render language switcher", () => {
@@ -198,7 +209,7 @@ describe("LanguageSwitcher Component", () => {
 
   it("should show all language options when clicked", () => {
     // Verify that the language options are properly defined
-    expect(LANGUAGE_OPTIONS).toHaveLength(4);
+    expect(LANGUAGE_OPTIONS).toHaveLength(3);
     LANGUAGE_OPTIONS.forEach((option) => {
       expect(option.code).toBeDefined();
       expect(option.name).toBeDefined();

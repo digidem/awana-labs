@@ -40,7 +40,7 @@ const ProjectModal = ({
   triggerElement = null,
   onClose,
 }: ProjectModalProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoadStates, setImageLoadStates] = useState<
@@ -48,6 +48,10 @@ const ProjectModal = ({
   >({});
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previousTriggerRef = useRef<HTMLElement | null>(null);
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+
+  const formatDate = (value: string) =>
+    new Intl.DateTimeFormat(locale).format(new Date(value));
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -191,7 +195,10 @@ const ProjectModal = ({
                       <motion.img
                         key={`${project.id}-${currentImageIndex}`}
                         src={project.media.images[currentImageIndex]}
-                        alt={`${project.title} screenshot ${currentImageIndex + 1}`}
+                        alt={t("projectModal.imageAlt", {
+                          title: project.title,
+                          index: currentImageIndex + 1,
+                        })}
                         initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
                         animate={{ opacity: currentImageState === "loading" ? 0 : 1 }}
                         exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
@@ -382,16 +389,11 @@ const ProjectModal = ({
                 {/* Timestamps */}
                 <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
                   <span>
-                    {t("projects.created")}:{" "}
-                    {new Date(
-                      project.timestamps.created_at,
-                    ).toLocaleDateString()}
+                    {t("projects.created")}: {formatDate(project.timestamps.created_at)}
                   </span>
                   <span>
                     {t("projects.updated")}:{" "}
-                    {new Date(
-                      project.timestamps.last_updated_at,
-                    ).toLocaleDateString()}
+                    {formatDate(project.timestamps.last_updated_at)}
                   </span>
                 </div>
               </div>
