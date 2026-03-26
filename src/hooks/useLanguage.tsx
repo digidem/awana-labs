@@ -20,11 +20,21 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 
 const LANGUAGE_STORAGE_KEY = "awana-labs-language";
 
-const getInitialLanguage = (): Language => {
+const getCurrentI18nLanguage = (): Language | null => {
   const detectedLanguage = i18n.resolvedLanguage ?? i18n.language;
   return detectedLanguage && isLanguage(detectedLanguage)
     ? detectedLanguage
-    : DEFAULT_LANGUAGE;
+    : null;
+};
+
+const updateDocumentLanguage = (language: Language) => {
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = language;
+  }
+};
+
+const getInitialLanguage = (): Language => {
+  return getCurrentI18nLanguage() ?? DEFAULT_LANGUAGE;
 };
 
 const getStoredLanguage = (): Language => {
@@ -64,11 +74,7 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage);
     storeLanguage(newLanguage);
-
-    // Update document lang attribute for accessibility
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = newLanguage;
-    }
+    updateDocumentLanguage(newLanguage);
   };
 
   useEffect(() => {
@@ -76,11 +82,32 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
       void i18n.changeLanguage(language);
     }
 
-    // Set initial document lang
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = language;
-    }
+    updateDocumentLanguage(language);
   }, [language]);
+
+  useEffect(() => {
+    const handleLanguageChanged = (nextLanguage: string) => {
+      const syncedLanguage =
+        getCurrentI18nLanguage() ??
+        (isLanguage(nextLanguage) ? nextLanguage : null);
+
+      if (!syncedLanguage) {
+        return;
+      }
+
+      setLanguageState((currentLanguage) =>
+        currentLanguage === syncedLanguage ? currentLanguage : syncedLanguage,
+      );
+      storeLanguage(syncedLanguage);
+      updateDocumentLanguage(syncedLanguage);
+    };
+
+    i18n.on("languageChanged", handleLanguageChanged);
+
+    return () => {
+      i18n.off("languageChanged", handleLanguageChanged);
+    };
+  }, []);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>

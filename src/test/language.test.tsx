@@ -150,6 +150,38 @@ describe("useLanguage Hook", () => {
     expect(document.documentElement.lang).toBe("en");
   });
 
+  it("should stay in sync when i18n language changes externally after mount", async () => {
+    const { result } = renderHook(() => useLanguage(), { wrapper });
+
+    await act(async () => {
+      await i18n.changeLanguage("es");
+    });
+
+    await waitFor(() => {
+      expect(result.current.language).toBe("es");
+    });
+
+    expect(localStorage.getItem("awana-labs-language")).toBe("es");
+    expect(document.documentElement.lang).toBe("es");
+  });
+
+  it("should sync to the resolved supported language for unsupported external changes", async () => {
+    const { result } = renderHook(() => useLanguage(), { wrapper });
+
+    await act(async () => {
+      await i18n.changeLanguage("fr");
+    });
+
+    const resolvedLanguage = i18n.resolvedLanguage ?? DEFAULT_LANGUAGE;
+
+    await waitFor(() => {
+      expect(result.current.language).toBe(resolvedLanguage);
+    });
+
+    expect(localStorage.getItem("awana-labs-language")).toBe(resolvedLanguage);
+    expect(document.documentElement.lang).toBe(resolvedLanguage);
+  });
+
   it("should fall back to the default language for unsupported stored values", () => {
     localStorage.setItem("awana-labs-language", "fr");
 

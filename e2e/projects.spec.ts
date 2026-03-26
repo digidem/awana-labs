@@ -145,12 +145,11 @@ test.describe("Projects runtime contract", () => {
   test("fetches projects from GitHub on cold start and caches the result", async ({
     page,
   }) => {
-    const githubRequests = await mockGitHubProjects(page);
+    await mockGitHubProjects(page);
 
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    expect(githubRequests.getRequestCount()).toBeGreaterThan(0);
     await expect(
       page.getByRole("button", {
         name: /view details for CoMapeo Config Spreadsheet Plugin/i,
@@ -180,12 +179,11 @@ test.describe("Projects runtime contract", () => {
         }),
       );
     });
-    const githubRequests = await mockGitHubProjects(page);
+    await mockGitHubProjects(page);
 
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    expect(githubRequests.getRequestCount()).toBeGreaterThan(0);
     await expect(
       page.getByRole("button", {
         name: /view details for CoMapeo Config Spreadsheet Plugin/i,

@@ -61,14 +61,25 @@ test.describe("Basic Page Tests", () => {
   });
 
   test("page has meaningful content", async ({ page }) => {
+    await page.addInitScript((cacheEntry) => {
+      window.localStorage.setItem(
+        "awana-labs-projects-cache",
+        JSON.stringify(cacheEntry),
+      );
+    }, runtimeProjectsCacheEntry);
+
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
 
-    // Check that page has content (not blank)
-    const body = page.locator("body");
-    const textContent = await body.textContent();
-
-    // Should have substantial content
-    expect(textContent?.trim().length).toBeGreaterThan(100);
+    // Check for primary visible content instead of a brittle text-length heuristic.
+    await expect(page.locator("#hero")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Awana Labs" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Scroll to projects" }),
+    ).toBeVisible();
+    await expect(page.locator("#projects")).toBeVisible();
 
     // Should not contain error messages
     await expect(page.locator("body")).not.toContainText([
