@@ -13,7 +13,7 @@ const Hero = () => {
       opacity: 1,
       transition: {
         staggerChildren: prefersReducedMotion ? 0 : 0.2,
-        delayChildren: 0.3,
+        delayChildren: prefersReducedMotion ? 0 : 0.3,
       },
     },
   };
@@ -79,8 +79,12 @@ const Hero = () => {
         >
           <span className="text-sm font-medium">{t("hero.cta")}</span>
           <motion.div
-            animate={prefersReducedMotion ? {} : { y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            animate={prefersReducedMotion ? undefined : { y: [0, 8, 0] }}
+            transition={
+              prefersReducedMotion
+                ? undefined
+                : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+            }
           >
             <ChevronDown className="w-6 h-6" />
           </motion.div>

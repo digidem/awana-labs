@@ -18,7 +18,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 - `[x]` T4. Fix project card and gallery interaction semantics.
 - `[x]` T5. Harden the project modal state, focus behavior, and media loading.
 - `[x]` T6. Align language support, localization coverage, and date formatting.
-- `[ ]` T7. Reduce scroll-driven rendering work in the header and hero background.
+- `[x]` T7. Reduce scroll-driven rendering work in the header and hero background.
 - `[!]` T8. Audit TypeScript and test/build configuration strictness.
 
 ## T0. Restore A Reliable Local Test Baseline
@@ -215,7 +215,7 @@ Completion Note:
 
 ## T7. Reduce Scroll-Driven Rendering Work In The Header And Hero Background
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P1
 Files: `src/components/Header.tsx`, `src/components/Hero.tsx`, `src/components/TopographicBackground.tsx`
 Problem: `src/components/Header.tsx` reads layout and sets React state on every scroll event to update `isScrolled` and `logoOpacity`. `src/components/TopographicBackground.tsx` subscribes to global scroll motion and runs several animated SVG paths regardless of motion preference. This is acceptable on fast devices, but it is the clearest rendering hotspot in the current frontend.
@@ -234,8 +234,8 @@ Validation:
 - `npm run test:e2e -- e2e/responsive.spec.ts --project=chromium --grep "header|hero"`
 Dependencies:
 - T1 for resilient responsive assertions.
-Blockers:
-- The Playwright validation step has the same preview-server environment limitation noted in T1.
+Completion Note:
+- Changed `src/components/Header.tsx`, `src/components/Hero.tsx`, and `src/components/TopographicBackground.tsx`; verified with `npm run typecheck`, `npx eslint src/components/Header.tsx src/components/Hero.tsx src/components/TopographicBackground.tsx`, and `npm run test:e2e -- e2e/responsive.spec.ts --project=chromium --grep "header|hero"`. `npm run lint` is still blocked by unrelated untracked `.claude/helpers/statusline.cjs`.
 
 ## T8. Audit TypeScript And Test/Build Configuration Strictness
 

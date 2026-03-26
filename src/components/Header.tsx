@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
 import { Github } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -12,22 +17,39 @@ interface HeaderProps {
 // Logo fade animation thresholds (in pixels from viewport top)
 const LOGO_FADE_START = 150;
 const LOGO_FULL_OPACITY = 50;
+const LOGO_INTERACTIVE_THRESHOLD = 0.01;
 
 const Header = ({ className }: HeaderProps) => {
   const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [logoOpacity, setLogoOpacity] = useState(0);
+  const [isLogoInteractive, setIsLogoInteractive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const heroTitleDocumentTopRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const logoOpacity = useMotionValue(0);
+  const logoX = useTransform(logoOpacity, [0, 1], [100, 0]);
+
+  const cacheHeroTitlePosition = useCallback(() => {
+    heroTitleRef.current =
+      document.getElementById("hero")?.querySelector("h1") || null;
+    heroTitleDocumentTopRef.current = heroTitleRef.current
+      ? heroTitleRef.current.getBoundingClientRect().top + window.scrollY
+      : null;
+  }, []);
 
   const calculateLogoOpacity = useCallback(() => {
-    if (!heroTitleRef.current) return 0;
+    if (heroTitleDocumentTopRef.current === null) {
+      return 0;
+    }
 
-    const currentTop = heroTitleRef.current.getBoundingClientRect().top;
+    const currentTop = heroTitleDocumentTopRef.current - window.scrollY;
 
     if (currentTop <= LOGO_FULL_OPACITY) {
       return 1;
-    } else if (currentTop <= LOGO_FADE_START) {
+    }
+
+    if (currentTop <= LOGO_FADE_START) {
       const progress =
         (LOGO_FADE_START - currentTop) / (LOGO_FADE_START - LOGO_FULL_OPACITY);
       return Math.max(0, Math.min(1, progress));
@@ -36,19 +58,48 @@ const Header = ({ className }: HeaderProps) => {
   }, []);
 
   useEffect(() => {
-    // Cache the hero title element reference
-    heroTitleRef.current =
-      document.getElementById("hero")?.querySelector("h1") || null;
+    const updateHeaderState = () => {
+      const nextLogoOpacity = calculateLogoOpacity();
+      const nextIsScrolled = window.scrollY > 10;
+      const nextIsLogoInteractive =
+        nextLogoOpacity > LOGO_INTERACTIVE_THRESHOLD;
 
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-      setLogoOpacity(calculateLogoOpacity());
+      logoOpacity.set(nextLogoOpacity);
+      setIsScrolled((prev) => (prev === nextIsScrolled ? prev : nextIsScrolled));
+      setIsLogoInteractive((prev) =>
+        prev === nextIsLogoInteractive ? prev : nextIsLogoInteractive,
+      );
+      animationFrameRef.current = null;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial call
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [calculateLogoOpacity]);
+    const scheduleHeaderUpdate = () => {
+      if (animationFrameRef.current !== null) {
+        return;
+      }
+
+      animationFrameRef.current = window.requestAnimationFrame(updateHeaderState);
+    };
+
+    const handleResize = () => {
+      cacheHeroTitlePosition();
+      scheduleHeaderUpdate();
+    };
+
+    cacheHeroTitlePosition();
+    scheduleHeaderUpdate();
+
+    window.addEventListener("scroll", scheduleHeaderUpdate, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      window.removeEventListener("scroll", scheduleHeaderUpdate);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [cacheHeroTitlePosition, calculateLogoOpacity, logoOpacity]);
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -72,16 +123,12 @@ const Header = ({ className }: HeaderProps) => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo/Brand - fades in with slide animation on scroll */}
           <motion.div
-            animate={{
-              opacity: logoOpacity,
-              x: logoOpacity === 0 ? 100 : 0,
-            }}
-            transition={{
-              opacity: { duration: 0.3 },
-              x: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] },
-            }}
             className="flex items-center gap-2"
-            style={{ pointerEvents: logoOpacity === 0 ? "none" : "auto" }}
+            style={{
+              opacity: logoOpacity,
+              x: logoX,
+              pointerEvents: isLogoInteractive ? "auto" : "none",
+            }}
           >
             <button
               onClick={scrollToTop}
