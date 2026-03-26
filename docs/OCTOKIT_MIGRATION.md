@@ -77,11 +77,12 @@ for await (const response of iterator) {
 
 ```json
 {
-  "@octokit/core": "^6.x.x"
+  "@octokit/rest": "^22.x.x",
+  "@octokit/core": "^7.x.x"
 }
 ```
 
-The package adds 11 additional dependencies but provides significant improvements in type safety and developer experience.
+The package adds additional dependencies but provides significant improvements in type safety and developer experience.
 
 ## Testing
 

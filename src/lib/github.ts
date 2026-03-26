@@ -129,24 +129,42 @@ export class GitHubClient {
     } = {},
   ): Promise<GitHubIssue[]> {
     try {
-      const response = await this.octokit.rest.issues.listForRepo({
-        owner,
-        repo,
-        labels: options.labels,
-        state: options.state || "open",
-        per_page: options.per_page || 30,
-      });
+      const allIssues: Array<{
+        number: number;
+        title: string;
+        body?: string | null;
+        state?: string;
+        html_url: string;
+        created_at: string;
+        updated_at: string;
+        labels: Array<string | { name?: string }>;
+        user: { login: string; type: string } | null;
+      }> = [];
+      const iterator = this.octokit.paginate.iterator(
+        this.octokit.rest.issues.listForRepo,
+        {
+          owner,
+          repo,
+          labels: options.labels,
+          state: options.state || "open",
+          per_page: options.per_page || 100,
+        }
+      );
 
-      return response.data.map((issue) => ({
+      for await (const response of iterator) {
+        allIssues.push(...(response.data as typeof allIssues));
+      }
+
+      return allIssues.map((issue) => ({
         number: issue.number,
         title: issue.title,
-        body: issue.body,
+        body: issue.body || null,
         state: issue.state || "open",
         html_url: issue.html_url,
         created_at: issue.created_at,
         updated_at: issue.updated_at,
         labels: issue.labels.map((label) =>
-          typeof label === "string" ? label : label.name,
+          typeof label === "string" ? label : (label.name || ""),
         ),
         user: {
           login: issue.user?.login || "",

@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { GitHubClient, GitHubApiError, createGitHubClient } from "./github";
 
 // Use vi.hoisted to properly mock Octokit
-const { mockRest, MockOctokitClass } = vi.hoisted(() => {
+const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
   const mockRest = {
     issues: {
       listForRepo: vi.fn(),
@@ -20,13 +20,18 @@ const { mockRest, MockOctokitClass } = vi.hoisted(() => {
     },
   };
 
+  const mockPaginateIterator = vi.fn();
+
   // Create a constructor function that can be called with new
   const MockOctokitClass = function () {
     this.rest = mockRest;
+    this.paginate = {
+      iterator: mockPaginateIterator
+    };
     this.auth = undefined;
   };
 
-  return { mockRest, MockOctokitClass };
+  return { mockRest, MockOctokitClass, mockPaginateIterator };
 });
 
 vi.mock("@octokit/rest", () => ({
@@ -102,9 +107,11 @@ describe("GitHubClient", () => {
         },
       ];
 
-      mockRest.issues.listForRepo.mockResolvedValue({
-        data: mockIssues,
-      });
+      mockPaginateIterator.mockReturnValue(
+        (async function* () {
+          yield { data: mockIssues };
+        })()
+      );
 
       const issues = await client.getIssues("owner", "repo");
 
@@ -112,23 +119,29 @@ describe("GitHubClient", () => {
       expect(issues[0].number).toBe(1);
       expect(issues[0].title).toBe("Test Issue");
       expect(issues[0].labels).toEqual(["bug", "enhancement"]);
-      expect(mockRest.issues.listForRepo).toHaveBeenCalledWith({
-        owner: "owner",
-        repo: "repo",
-        labels: undefined,
-        state: "open",
-        per_page: 30,
-      });
+      expect(mockPaginateIterator).toHaveBeenCalledWith(
+        mockRest.issues.listForRepo,
+        {
+          owner: "owner",
+          repo: "repo",
+          labels: undefined,
+          state: "open",
+          per_page: 100,
+        }
+      );
     });
 
     it("should pass labels filter", async () => {
-      mockRest.issues.listForRepo.mockResolvedValue({
-        data: [],
-      });
+      mockPaginateIterator.mockReturnValue(
+        (async function* () {
+          yield { data: [] };
+        })()
+      );
 
       await client.getIssues("owner", "repo", { labels: "publish:yes" });
 
-      expect(mockRest.issues.listForRepo).toHaveBeenCalledWith(
+      expect(mockPaginateIterator).toHaveBeenCalledWith(
+        mockRest.issues.listForRepo,
         expect.objectContaining({
           labels: "publish:yes",
         }),
@@ -136,13 +149,16 @@ describe("GitHubClient", () => {
     });
 
     it("should pass state filter", async () => {
-      mockRest.issues.listForRepo.mockResolvedValue({
-        data: [],
-      });
+      mockPaginateIterator.mockReturnValue(
+        (async function* () {
+          yield { data: [] };
+        })()
+      );
 
       await client.getIssues("owner", "repo", { state: "all" });
 
-      expect(mockRest.issues.listForRepo).toHaveBeenCalledWith(
+      expect(mockPaginateIterator).toHaveBeenCalledWith(
+        mockRest.issues.listForRepo,
         expect.objectContaining({
           state: "all",
         }),
@@ -150,9 +166,9 @@ describe("GitHubClient", () => {
     });
 
     it("should handle API errors", async () => {
-      mockRest.issues.listForRepo.mockRejectedValue(
-        new Error("Bad credentials"),
-      );
+      mockPaginateIterator.mockImplementation(() => {
+        throw new Error("Bad credentials");
+      });
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         GitHubApiError,
@@ -271,9 +287,9 @@ describe("GitHubClient", () => {
 
   describe("error handling", () => {
     it("should throw GitHubApiError with correct status for bad credentials", async () => {
-      mockRest.issues.listForRepo.mockRejectedValue(
-        Object.assign(new Error("Bad credentials"), { status: 401 }),
-      );
+      mockPaginateIterator.mockImplementation(() => {
+        throw Object.assign(new Error("Bad credentials"), { status: 401 });
+      });
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         "GitHub API authentication failed",
@@ -281,9 +297,9 @@ describe("GitHubClient", () => {
     });
 
     it("should throw GitHubApiError for not found", async () => {
-      mockRest.issues.listForRepo.mockRejectedValue(
-        Object.assign(new Error("Not Found"), { status: 404 }),
-      );
+      mockPaginateIterator.mockImplementation(() => {
+        throw Object.assign(new Error("Not Found"), { status: 404 });
+      });
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         "Repository or resource not found",
@@ -291,9 +307,9 @@ describe("GitHubClient", () => {
     });
 
     it("should throw GitHubApiError for rate limit", async () => {
-      mockRest.issues.listForRepo.mockRejectedValue(
-        Object.assign(new Error("Rate limit exceeded"), { status: 403 }),
-      );
+      mockPaginateIterator.mockImplementation(() => {
+        throw Object.assign(new Error("Rate limit exceeded"), { status: 403 });
+      });
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         "GitHub API rate limit exceeded",
