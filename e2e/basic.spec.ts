@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 const runtimeProjectsCacheEntry = {
   version: 1,
@@ -41,10 +41,31 @@ const runtimeProjectsCacheEntry = {
   },
 } as const;
 
+const pinAppLanguage = async (page: Page) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("awana-labs-language", "en");
+    window.localStorage.setItem("i18nextLng", "en");
+  });
+};
+
+const seedRuntimeCache = async (page: Page) => {
+  await page.addInitScript((cacheEntry) => {
+    window.localStorage.setItem(
+      "awana-labs-projects-cache",
+      JSON.stringify(cacheEntry),
+    );
+  }, runtimeProjectsCacheEntry);
+};
+
 /**
  * Basic page load and rendering tests
  * These tests ensure the website loads correctly and displays content
  */
+test.beforeEach(async ({ page }) => {
+  await pinAppLanguage(page);
+  await seedRuntimeCache(page);
+});
+
 test.describe("Basic Page Tests", () => {
   test("homepage loads successfully", async ({ page }) => {
     const response = await page.goto("/");
@@ -61,13 +82,6 @@ test.describe("Basic Page Tests", () => {
   });
 
   test("page has meaningful content", async ({ page }) => {
-    await page.addInitScript((cacheEntry) => {
-      window.localStorage.setItem(
-        "awana-labs-projects-cache",
-        JSON.stringify(cacheEntry),
-      );
-    }, runtimeProjectsCacheEntry);
-
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
@@ -213,13 +227,6 @@ test.describe("Asset Loading Tests", () => {
   test("project data loads through the runtime cache contract", async ({
     page,
   }) => {
-    await page.addInitScript((cacheEntry) => {
-      window.localStorage.setItem(
-        "awana-labs-projects-cache",
-        JSON.stringify(cacheEntry),
-      );
-    }, runtimeProjectsCacheEntry);
-
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 

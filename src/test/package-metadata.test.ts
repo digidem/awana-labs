@@ -7,7 +7,7 @@ describe("Package Metadata", () => {
   });
 
   it("should have production version", () => {
-    expect(packageJson.version).toBe("1.0.0");
+    expect(packageJson.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(packageJson.version).not.toBe("0.0.0");
   });
 

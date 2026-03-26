@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 const BREAKPOINTS = {
   mobile: { width: 375, height: 667, name: "Mobile (iPhone SE)" },
@@ -51,17 +51,29 @@ const runtimeProjectsCacheEntry = {
   },
 } as const;
 
+const pinAppLanguage = async (page: Page) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("awana-labs-language", "en");
+    window.localStorage.setItem("i18nextLng", "en");
+  });
+};
+
+const seedRuntimeCache = async (page: Page) => {
+  await page.addInitScript((cacheEntry) => {
+    window.localStorage.setItem(
+      "awana-labs-projects-cache",
+      JSON.stringify(cacheEntry),
+    );
+  }, runtimeProjectsCacheEntry);
+};
+
 test.describe("Responsive Design", () => {
   Object.entries(BREAKPOINTS).forEach(([key, { width, height, name }]) => {
     test.describe(`${name} - ${width}x${height}`, () => {
       test.beforeEach(async ({ page }) => {
         await page.setViewportSize({ width, height });
-        await page.addInitScript((cacheEntry) => {
-          window.localStorage.setItem(
-            "awana-labs-projects-cache",
-            JSON.stringify(cacheEntry),
-          );
-        }, runtimeProjectsCacheEntry);
+        await pinAppLanguage(page);
+        await seedRuntimeCache(page);
         await page.goto("/");
         await page.waitForLoadState("networkidle");
       });

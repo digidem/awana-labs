@@ -1,19 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync, statSync } from "fs";
 import { join } from "path";
+import packageJson from "../../package.json";
 
 describe("Husky Setup", () => {
   const projectRoot = join(__dirname, "../..");
   const huskyDir = join(projectRoot, ".husky");
 
   it("should have husky installed as a dev dependency", () => {
-    const packageJson = require("../../package.json");
     expect(packageJson.devDependencies).toHaveProperty("husky");
     expect(packageJson.devDependencies.husky).toMatch(/^\^?\d+\.\d+\.\d+$/);
   });
 
   it("should have prepare script configured to run husky", () => {
-    const packageJson = require("../../package.json");
     expect(packageJson.scripts).toHaveProperty("prepare");
     expect(packageJson.scripts.prepare).toBe("husky");
   });
@@ -67,7 +66,6 @@ describe("Husky Setup", () => {
   });
 
   it("should use Husky v9+ modern syntax", () => {
-    const packageJson = require("../../package.json");
     const huskyVersion = packageJson.devDependencies.husky;
     // Remove the caret (^) prefix if present
     const cleanVersion = huskyVersion.replace(/^\^/, "");

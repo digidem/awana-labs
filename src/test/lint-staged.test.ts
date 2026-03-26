@@ -58,12 +58,6 @@ describe("lint-staged configuration", () => {
 
     expect(tsPattern).toBeDefined();
     expect(Array.isArray(lintStagedConfig[tsPattern!])).toBe(true);
-
-    // Check for tsc command (optional - typecheck runs on pre-push, not pre-commit)
-    const hasTsc = lintStagedConfig[tsPattern!].some((cmd: string) =>
-      cmd.includes("tsc"),
-    );
-    // This is optional since typecheck runs in pre-push hook instead
   });
 
   it("should have Husky pre-commit hook configured", () => {

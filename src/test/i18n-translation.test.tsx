@@ -26,6 +26,27 @@ describe("i18n Translation Tests", () => {
     });
   });
 
+  const collectTranslationKeys = (
+    value: unknown,
+    prefix = "",
+  ): string[] => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return [];
+    }
+
+    return Object.entries(value as Record<string, unknown>).flatMap(
+      ([key, child]) => {
+        const path = prefix ? `${prefix}.${key}` : key;
+
+        if (child && typeof child === "object" && !Array.isArray(child)) {
+          return collectTranslationKeys(child, path);
+        }
+
+        return [path];
+      },
+    );
+  };
+
   describe("Basic Translation Functionality", () => {
     it("renders translations in English by default", async () => {
       render(
@@ -278,11 +299,11 @@ describe("i18n Translation Tests", () => {
         { translation: Record<string, unknown> }
       >;
 
-      // Get all keys from English (reference language)
-      const englishKeys = Object.keys(resources.en.translation);
+      // Get all leaf keys from English (reference language)
+      const englishKeys = collectTranslationKeys(resources.en.translation).sort();
 
       languages.forEach((lang) => {
-        const langKeys = Object.keys(resources[lang].translation);
+        const langKeys = collectTranslationKeys(resources[lang].translation).sort();
         expect(langKeys).toEqual(englishKeys);
       });
     });

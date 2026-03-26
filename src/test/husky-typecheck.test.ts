@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -20,18 +19,18 @@ describe("Husky TypeCheck Integration", () => {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
       expect(packageJson["lint-staged"]).toBeDefined();
-      
+
       // Find TypeScript pattern dynamically (may be combined with JS)
-      const tsPattern = Object.keys(packageJson["lint-staged"]).find(p => p.includes("ts"));
-      expect(tsPattern).toBeDefined();
-      
-      const tsConfig = packageJson["lint-staged"][tsPattern];
-      
-      // Typecheck may run in pre-push instead of pre-commit
-      const hasTypecheckCommand = tsConfig.some(
-        (cmd: string) => cmd.includes("tsc") && cmd.includes("--noEmit"),
+      const tsPattern = Object.keys(packageJson["lint-staged"]).find((p) =>
+        p.includes("ts"),
       );
-      // This is optional - typecheck runs on pre-push, not pre-commit
+      expect(tsPattern).toBeDefined();
+
+      const tsConfig = packageJson["lint-staged"][tsPattern];
+      expect(Array.isArray(tsConfig)).toBe(true);
+      expect(tsConfig.every((cmd: string) => typeof cmd === "string")).toBe(
+        true,
+      );
     });
   });
 
@@ -121,20 +120,15 @@ describe("Husky TypeCheck Integration", () => {
   });
 
   describe("integration validation", () => {
-    it("should successfully run typecheck script", { timeout: 35000 }, () => {
-      // Note: This will fail if there are actual type errors in the codebase
-      // which is expected behavior - the hook should prevent commits/pushes
-      try {
-        execSync("npm run typecheck", {
-          cwd: projectRoot,
-          stdio: "pipe",
-          timeout: 30000, // 30 second timeout
-        });
-      } catch (error) {
-        // If typecheck fails, that's actually validating that the hook works
-        // The test passes either way - we're just verifying the script runs
-        expect(error).toBeDefined();
-      }
+    it("should keep the typecheck script configured for the pre-push hook", () => {
+      const packageJsonPath = path.join(projectRoot, "package.json");
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      const prePushPath = path.join(projectRoot, ".husky", "pre-push");
+
+      expect(packageJson.scripts.typecheck).toBe("tsc --noEmit");
+
+      const prePushContent = fs.readFileSync(prePushPath, "utf8");
+      expect(prePushContent).toContain("npm run typecheck");
     });
   });
 });
