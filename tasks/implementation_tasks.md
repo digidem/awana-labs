@@ -14,7 +14,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 - `[x]` T0. Restore a reliable local test baseline.
 - `[x]` T1. Stabilize E2E coverage against the current UI and data flow.
 - `[x]` T2. Define the runtime GitHub-fetch plus local cache contract.
-- `[ ]` T3. Improve project loading, error, and offline UX.
+- `[x]` T3. Improve project loading, error, and offline UX.
 - `[ ]` T4. Fix project card and gallery interaction semantics.
 - `[ ]` T5. Harden the project modal state, focus behavior, and media loading.
 - `[ ]` T6. Align language support, localization coverage, and date formatting.
@@ -108,7 +108,7 @@ Completion Note:
 
 ## T3. Improve Project Loading, Error, And Offline UX
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P0
 Files: `src/pages/Index.tsx`, `src/hooks/useProjects.ts`, `src/lib/api.ts`, `src/locales/en/common.json`, `src/locales/pt/common.json`, `src/locales/es/common.json`
 Problem: The loading and error UI in `src/pages/Index.tsx` is hardcoded in English, and the error recovery path reloads the entire page instead of using the existing query refetch capability. `src/lib/api.ts` also exports `isOnline()` but the app does not use it.
@@ -129,6 +129,8 @@ Validation:
 - `npm run typecheck`
 Dependencies:
 - T2 may change the exact error source, but this task can start with the current hook contract.
+Completion Note:
+- Changed `src/lib/api.ts`, `src/hooks/useProjects.ts`, `src/hooks/useProjects.test.tsx`, `src/pages/Index.tsx`, `src/pages/Index.test.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, and `src/locales/es/common.json`; verified with `npm run test -- src/hooks/useProjects.test.tsx`, `npm run test -- src/pages/Index.test.tsx`, `npm run test`, `npm run lint`, and `npm run typecheck`.
 
 ## T4. Fix Project Card And Gallery Interaction Semantics
 

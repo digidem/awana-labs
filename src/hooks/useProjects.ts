@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   fetchProjectsQuery,
   getErrorMessage,
+  getProjectLoadErrorType,
   PROJECTS_CACHE_MAX_AGE_MS,
   queryKeys,
 } from "@/lib/api";
@@ -62,12 +63,15 @@ export function useProjects(options: UseProjectsOptions = {}) {
  */
 export function useProjectsWithError(options?: UseProjectsOptions) {
   const result = useProjects(options);
+  const errorType = result.error ? getProjectLoadErrorType(result.error) : null;
 
   return {
     projects: result.data?.projects ?? [],
     isLoading: result.isLoading,
     isError: result.isError,
     error: result.error,
+    errorType,
+    isOfflineError: errorType === "offline",
     errorMessage: result.error ? getErrorMessage(result.error) : null,
     refetch: result.refetch,
   };

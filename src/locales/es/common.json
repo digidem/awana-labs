@@ -38,6 +38,16 @@
     "madeWith": "Hecho con",
     "by": "por"
   },
+  "index": {
+    "loadingTitle": "Cargando proyectos",
+    "loadingDescription": "Obteniendo los proyectos publicados más recientes desde GitHub.",
+    "errorTitle": "No se pudieron cargar los proyectos",
+    "errorDescription": "No pudimos cargar los proyectos en este momento. Inténtalo de nuevo.",
+    "offlineTitle": "Estás sin conexión",
+    "offlineDescription": "Vuelve a conectarte a internet e inténtalo de nuevo, o regresa cuando haya proyectos en caché disponibles.",
+    "timeoutTitle": "La solicitud de proyectos expiró",
+    "timeoutDescription": "GitHub tardó demasiado en responder. Inténtalo de nuevo."
+  },
   "common": {
     "loading": "Cargando...",
     "error": "Ocurrió un error",

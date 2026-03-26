@@ -38,6 +38,16 @@
     "madeWith": "Made with",
     "by": "by"
   },
+  "index": {
+    "loadingTitle": "Loading projects",
+    "loadingDescription": "Fetching the latest published projects from GitHub.",
+    "errorTitle": "Unable to load projects",
+    "errorDescription": "We couldn't load projects right now. Try again.",
+    "offlineTitle": "You're offline",
+    "offlineDescription": "Reconnect to the internet and try again, or return when cached projects are available.",
+    "timeoutTitle": "Project request timed out",
+    "timeoutDescription": "GitHub took too long to respond. Try again."
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",

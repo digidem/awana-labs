@@ -15,10 +15,12 @@ vi.mock("@/lib/api", () => ({
     projects: ["projects"] as const,
   },
   fetchProjectsQuery: vi.fn(),
+  getProjectLoadErrorType: vi.fn(() => "generic"),
   getErrorMessage: vi.fn((error) => error?.message ?? "Unknown error"),
 }));
 
 const mockFetchProjectsQuery = vi.mocked(api.fetchProjectsQuery);
+const mockGetProjectLoadErrorType = vi.mocked(api.getProjectLoadErrorType);
 
 describe("useProjects", () => {
   let queryClient: QueryClient;
@@ -32,6 +34,7 @@ describe("useProjects", () => {
       },
     });
     mockFetchProjectsQuery.mockClear();
+    mockGetProjectLoadErrorType.mockClear();
   });
 
   function createWrapper(client: QueryClient) {
@@ -133,6 +136,7 @@ describe("useProjectsWithError", () => {
       },
     });
     mockFetchProjectsQuery.mockClear();
+    mockGetProjectLoadErrorType.mockClear();
   });
 
   function createWrapper(client: QueryClient) {
@@ -187,6 +191,7 @@ describe("useProjectsWithError", () => {
 
   it("should return empty array on error", async () => {
     const mockError = new Error("Network error");
+    mockGetProjectLoadErrorType.mockReturnValue("offline");
     mockFetchProjectsQuery.mockRejectedValue(mockError);
 
     const { result } = renderHook(
@@ -202,6 +207,8 @@ describe("useProjectsWithError", () => {
 
     expect(result.current.projects).toEqual([]);
     expect(result.current.error).toEqual(mockError);
+    expect(result.current.errorType).toBe("offline");
+    expect(result.current.isOfflineError).toBe(true);
     expect(result.current.errorMessage).toBe("Network error");
   });
 });

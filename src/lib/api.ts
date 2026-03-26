@@ -44,6 +44,8 @@ export interface FetchOptions extends RequestInit {
   retryDelay?: number;
 }
 
+export type ProjectLoadErrorType = "offline" | "timeout" | "generic";
+
 // =============================================================================
 // API Client Configuration
 // =============================================================================
@@ -408,6 +410,25 @@ export const queryKeys = {
  */
 export function isOnline(): boolean {
   return typeof navigator !== "undefined" ? navigator.onLine : true;
+}
+
+export function getProjectLoadErrorType(error: unknown): ProjectLoadErrorType {
+  if (error instanceof ApiError && error.status === 0) {
+    return "offline";
+  }
+
+  if (!isOnline()) {
+    return "offline";
+  }
+
+  if (
+    error instanceof Error &&
+    (error.name === "AbortError" || /timeout/i.test(error.message))
+  ) {
+    return "timeout";
+  }
+
+  return "generic";
 }
 
 /**
