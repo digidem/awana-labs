@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -21,8 +21,9 @@ function TestComponent() {
 
 describe("i18n Translation Tests", () => {
   beforeEach(async () => {
-    // Reset to English before each test
-    await i18n.changeLanguage("en");
+    await act(async () => {
+      await i18n.changeLanguage("en");
+    });
   });
 
   describe("Basic Translation Functionality", () => {
@@ -216,7 +217,9 @@ describe("i18n Translation Tests", () => {
       });
 
       // Switch to Portuguese
-      await i18n.changeLanguage("pt");
+      await act(async () => {
+        await i18n.changeLanguage("pt");
+      });
       rerender(
         <I18nextProvider i18n={i18n}>
           <TestComponent />
@@ -232,7 +235,9 @@ describe("i18n Translation Tests", () => {
       });
 
       // Switch to Spanish
-      await i18n.changeLanguage("es");
+      await act(async () => {
+        await i18n.changeLanguage("es");
+      });
       rerender(
         <I18nextProvider i18n={i18n}>
           <TestComponent />
@@ -248,7 +253,9 @@ describe("i18n Translation Tests", () => {
       });
 
       // Switch back to English
-      await i18n.changeLanguage("en");
+      await act(async () => {
+        await i18n.changeLanguage("en");
+      });
       rerender(
         <I18nextProvider i18n={i18n}>
           <TestComponent />

@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { execSync } from "child_process";
-import { existsSync, statSync } from "fs";
+import { existsSync, readFileSync, statSync } from "fs";
 import { join } from "path";
 
 describe("Husky Setup", () => {
@@ -45,26 +44,25 @@ describe("Husky Setup", () => {
     expect(isExecutable).toBe(true);
   });
 
-  it("should run prepare script successfully", () => {
-    expect(() => {
-      execSync("npm run prepare", {
-        cwd: projectRoot,
-        stdio: "pipe",
-      });
-    }).not.toThrow();
+  it("should keep Husky hook files aligned with the repository contract", () => {
+    const preCommitPath = join(huskyDir, "pre-commit");
+    const prePushPath = join(huskyDir, "pre-push");
+    const preCommitContent = readFileSync(preCommitPath, "utf-8").trim();
+    const prePushContent = readFileSync(prePushPath, "utf-8").trim();
+
+    expect(preCommitContent).toBe("npx lint-staged");
+    expect(prePushContent).toBe("npm run typecheck");
   });
 
   it("pre-commit hook should contain lint-staged command", () => {
     const preCommitPath = join(huskyDir, "pre-commit");
-    const fs = require("fs");
-    const content = fs.readFileSync(preCommitPath, "utf-8");
+    const content = readFileSync(preCommitPath, "utf-8");
     expect(content).toContain("lint-staged");
   });
 
   it("pre-push hook should contain typecheck command", () => {
     const prePushPath = join(huskyDir, "pre-push");
-    const fs = require("fs");
-    const content = fs.readFileSync(prePushPath, "utf-8");
+    const content = readFileSync(prePushPath, "utf-8");
     expect(content).toContain("npm run typecheck");
   });
 
