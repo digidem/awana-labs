@@ -16,7 +16,7 @@ Derived from repository investigation on 2026-03-25. This file replaces the gene
 - `[x]` T2. Define the runtime GitHub-fetch plus local cache contract.
 - `[x]` T3. Improve project loading, error, and offline UX.
 - `[x]` T4. Fix project card and gallery interaction semantics.
-- `[ ]` T5. Harden the project modal state, focus behavior, and media loading.
+- `[x]` T5. Harden the project modal state, focus behavior, and media loading.
 - `[ ]` T6. Align language support, localization coverage, and date formatting.
 - `[ ]` T7. Reduce scroll-driven rendering work in the header and hero background.
 - `[!]` T8. Audit TypeScript and test/build configuration strictness.
@@ -160,7 +160,7 @@ Completion Note:
 
 ## T5. Harden The Project Modal State, Focus Behavior, And Media Loading
 
-Status: `[ ]`
+Status: `[x]`
 Priority: P0
 Files: `src/components/ProjectModal.tsx`, `src/components/ProjectsGallery.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, `src/locales/es/common.json`
 Problem: `src/components/ProjectModal.tsx` resets `currentImageIndex` during render, attaches document-level key handling, and does not manage focus on open or close. Remote images also render without loading hints, error fallbacks, or degraded states.
@@ -182,8 +182,8 @@ Validation:
 - `npm run test:e2e -- e2e/responsive.spec.ts --project=chromium --grep "project modal"`
 Dependencies:
 - T1 for the final E2E selector updates.
-Blockers:
-- The Playwright validation step has the same preview-server environment limitation noted in T1.
+Completion Note:
+- Changed `src/components/ProjectModal.tsx`, `src/components/ProjectModal.test.tsx`, `src/components/ProjectsGallery.tsx`, `src/components/ProjectCard.tsx`, `src/components/ProjectCard.test.tsx`, `src/locales/en/common.json`, `src/locales/pt/common.json`, and `src/locales/es/common.json`; verified with `npm run test -- src/components/ProjectModal.test.tsx`, `npm run test`, `npm run lint`, `npm run typecheck`, and `npm run test:e2e -- e2e/responsive.spec.ts --project=chromium --grep "project modal"`.
 
 ## T6. Align Language Support, Localization Coverage, And Date Formatting
 

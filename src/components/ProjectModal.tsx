@@ -1,4 +1,10 @@
-import { useEffect, useCallback, useState, useRef } from "react";
+import {
+  useEffect,
+  useCallback,
+  useState,
+  useRef,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import {
   motion,
   AnimatePresence,
@@ -22,53 +28,92 @@ import { StatusBadge } from "@/components/StatusBadge";
 interface ProjectModalProps {
   project: Project | null;
   isOpen: boolean;
+  triggerElement?: HTMLElement | null;
   onClose: () => void;
 }
 
-const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
+type ImageLoadState = "loading" | "loaded" | "error";
+
+const ProjectModal = ({
+  project,
+  isOpen,
+  triggerElement = null,
+  onClose,
+}: ProjectModalProps) => {
   const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // Reset image index when project changes
-  const prevProjectIdRef = useRef<string | undefined>(undefined);
-  if (project?.id !== prevProjectIdRef.current) {
-    prevProjectIdRef.current = project?.id;
-    setCurrentImageIndex(0);
-  }
-
-  // Handle keyboard navigation
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!isOpen) return;
-
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "ArrowLeft" && project?.media.images.length) {
-        setCurrentImageIndex((prev) =>
-          prev === 0 ? project.media.images.length - 1 : prev - 1,
-        );
-      } else if (e.key === "ArrowRight" && project?.media.images.length) {
-        setCurrentImageIndex((prev) =>
-          prev === project.media.images.length - 1 ? 0 : prev + 1,
-        );
-      }
-    },
-    [isOpen, onClose, project],
-  );
+  const [imageLoadStates, setImageLoadStates] = useState<
+    Record<number, ImageLoadState>
+  >({});
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previousTriggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
+    setCurrentImageIndex(0);
+    setImageLoadStates({});
+  }, [project?.id]);
 
+  useEffect(() => {
     if (isOpen) {
+      previousTriggerRef.current = triggerElement;
       document.body.style.overflow = "hidden";
+      closeButtonRef.current?.focus();
+      return () => {
+        document.body.style.overflow = "";
+      };
     }
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [handleKeyDown, isOpen]);
+    document.body.style.overflow = "";
+    previousTriggerRef.current?.focus();
+  }, [isOpen, triggerElement]);
+
+  useEffect(() => {
+    if (!isOpen || !project?.media.images[currentImageIndex]) {
+      return;
+    }
+
+    setImageLoadStates((prev) => ({
+      ...prev,
+      [currentImageIndex]: prev[currentImageIndex] ?? "loading",
+    }));
+  }, [currentImageIndex, isOpen, project]);
+
+  const goToPreviousImage = useCallback(() => {
+    if (!project?.media.images.length) {
+      return;
+    }
+
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? project.media.images.length - 1 : prev - 1,
+    );
+  }, [project]);
+
+  const goToNextImage = useCallback(() => {
+    if (!project?.media.images.length) {
+      return;
+    }
+
+    setCurrentImageIndex((prev) =>
+      prev === project.media.images.length - 1 ? 0 : prev + 1,
+    );
+  }, [project]);
+
+  const handleModalKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        goToPreviousImage();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        goToNextImage();
+      }
+    },
+    [goToNextImage, goToPreviousImage, onClose],
+  );
 
   const backdropVariants: Variants = {
     hidden: { opacity: 0 },
@@ -98,6 +143,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   if (!project) return null;
 
   const hasImages = project.media.images.length > 0;
+  const currentImageState = imageLoadStates[currentImageIndex] ?? "loading";
 
   return (
     <AnimatePresence>
@@ -122,10 +168,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
+            tabIndex={-1}
+            onKeyDown={handleModalKeyDown}
             className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-lg sm:rounded-xl bg-card border border-border shadow-2xl mx-2 sm:mx-0"
           >
             {/* Close button */}
             <button
+              ref={closeButtonRef}
               onClick={onClose}
               className="absolute top-4 right-4 z-20 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
               aria-label={t("projectModal.closeModal")}
@@ -137,43 +186,59 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               {/* Image Carousel */}
               {hasImages && (
                 <div className="relative aspect-video bg-muted">
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={currentImageIndex}
-                      src={project.media.images[currentImageIndex]}
-                      alt={`${project.title} screenshot ${currentImageIndex + 1}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="w-full h-full object-cover"
-                    />
-                  </AnimatePresence>
+                  {currentImageState !== "error" && (
+                    <AnimatePresence mode={prefersReducedMotion ? "sync" : "wait"}>
+                      <motion.img
+                        key={`${project.id}-${currentImageIndex}`}
+                        src={project.media.images[currentImageIndex]}
+                        alt={`${project.title} screenshot ${currentImageIndex + 1}`}
+                        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+                        animate={{ opacity: currentImageState === "loading" ? 0 : 1 }}
+                        exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
+                        loading="eager"
+                        decoding="async"
+                        onLoad={() =>
+                          setImageLoadStates((prev) => ({
+                            ...prev,
+                            [currentImageIndex]: "loaded",
+                          }))
+                        }
+                        onError={() =>
+                          setImageLoadStates((prev) => ({
+                            ...prev,
+                            [currentImageIndex]: "error",
+                          }))
+                        }
+                        className="w-full h-full object-cover"
+                      />
+                    </AnimatePresence>
+                  )}
+
+                  {currentImageState === "loading" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted text-sm text-muted-foreground">
+                      {t("projectModal.imageLoading")}
+                    </div>
+                  )}
+
+                  {currentImageState === "error" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted px-6 text-center text-sm text-muted-foreground">
+                      {t("projectModal.imageUnavailable")}
+                    </div>
+                  )}
 
                   {project.media.images.length > 1 && (
                     <>
                       {/* Navigation arrows */}
                       <button
-                        onClick={() =>
-                          setCurrentImageIndex((prev) =>
-                            prev === 0
-                              ? project.media.images.length - 1
-                              : prev - 1,
-                          )
-                        }
+                        onClick={goToPreviousImage}
                         className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
                         aria-label={t("projectModal.previousImage")}
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={() =>
-                          setCurrentImageIndex((prev) =>
-                            prev === project.media.images.length - 1
-                              ? 0
-                              : prev + 1,
-                          )
-                        }
+                        onClick={goToNextImage}
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
                         aria-label={t("projectModal.nextImage")}
                       >

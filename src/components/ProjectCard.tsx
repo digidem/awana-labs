@@ -9,7 +9,7 @@ import { getUsageLabel } from "@/lib/status-utils";
 interface ProjectCardProps {
   project: Project;
   index: number;
-  onClick: () => void;
+  onClick: (trigger: HTMLButtonElement) => void;
 }
 
 const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
@@ -37,7 +37,7 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
   return (
     <motion.button
       type="button"
-      onClick={onClick}
+      onClick={(event) => onClick(event.currentTarget)}
       variants={cardVariants}
       initial="hidden"
       whileInView="visible"

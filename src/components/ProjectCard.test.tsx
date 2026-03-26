@@ -62,5 +62,6 @@ describe("ProjectCard", () => {
 
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClick.mock.calls[0][0]).toBe(button);
   });
 });

@@ -26,6 +26,9 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeTrigger, setActiveTrigger] = useState<HTMLButtonElement | null>(
+    null,
+  );
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
@@ -140,7 +143,10 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
                 key={project.id}
                 project={project}
                 index={index}
-                onClick={() => setSelectedProject(project)}
+                onClick={(trigger) => {
+                  setActiveTrigger(trigger);
+                  setSelectedProject(project);
+                }}
               />
             ))}
           </motion.div>
@@ -170,6 +176,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
       <ProjectModal
         project={selectedProject}
         isOpen={!!selectedProject}
+        triggerElement={activeTrigger}
         onClose={() => setSelectedProject(null)}
       />
     </section>

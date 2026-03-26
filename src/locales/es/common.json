@@ -34,7 +34,9 @@
     "closeModal": "Cerrar modal",
     "previousImage": "Imagen anterior",
     "nextImage": "Siguiente imagen",
-    "goToImage": "Ir a imagen {{index}}"
+    "goToImage": "Ir a imagen {{index}}",
+    "imageLoading": "Cargando imagen...",
+    "imageUnavailable": "No se pudo cargar esta imagen."
   },
   "footer": {
     "madeWith": "Hecho con",
