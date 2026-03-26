@@ -85,8 +85,7 @@ describe("projects cache contract", () => {
     const result = await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
-    expect(result.headers.get("x-awana-projects-source")).toBe("github");
-    expect(result.data).toEqual(mockData);
+    expect(result).toEqual(mockData);
   });
 
   it("writes validated GitHub payloads to localStorage", async () => {
@@ -115,9 +114,7 @@ describe("projects cache contract", () => {
     const result = await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).not.toHaveBeenCalled();
-    expect(result.headers.get("x-awana-projects-source")).toBe("cache");
-    expect(result.headers.get("x-awana-projects-cache-stale")).toBe("false");
-    expect(result.data).toEqual(mockData);
+    expect(result).toEqual(mockData);
   });
 
   it("rejects invalid cached payloads and replaces them with fresh data", async () => {
@@ -132,7 +129,6 @@ describe("projects cache contract", () => {
     const result = await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
-    expect(result.headers.get("x-awana-projects-source")).toBe("github");
     expect(readProjectsCache()?.entry.data).toEqual(mockData);
   });
 
@@ -151,9 +147,7 @@ describe("projects cache contract", () => {
     const result = await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).not.toHaveBeenCalled();
-    expect(result.headers.get("x-awana-projects-source")).toBe("cache");
-    expect(result.headers.get("x-awana-projects-cache-stale")).toBe("true");
-    expect(result.data).toEqual(mockData);
+    expect(result).toEqual(mockData);
   });
 
   it("falls back to stale cached projects when a refresh fails", async () => {
@@ -169,8 +163,6 @@ describe("projects cache contract", () => {
     const result = await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
-    expect(result.headers.get("x-awana-projects-source")).toBe("cache");
-    expect(result.headers.get("x-awana-projects-cache-stale")).toBe("true");
-    expect(result.data).toEqual(mockData);
+    expect(result).toEqual(mockData);
   });
 });

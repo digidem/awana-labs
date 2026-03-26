@@ -5,7 +5,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as githubProjects from "./github-projects";
 import {
-  fetchJson,
   fetchProjects,
   ApiError,
   getErrorMessage,
@@ -50,69 +49,13 @@ function createProjectsData() {
   };
 }
 
-// Mock fetch globally
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
-
 describe("API Client", () => {
   beforeEach(() => {
-    mockFetch.mockClear();
     localStorage.clear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe("fetchJson", () => {
-    it("should fetch and parse JSON data", async () => {
-      const mockData = { projects: [{ id: "1", title: "Test Project" }] };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        headers: new Headers({
-          "content-type": "application/json",
-        }),
-        json: async () => mockData,
-      } as Response);
-
-      const result = await fetchJson("/test.json");
-
-      expect(result.data).toEqual(mockData);
-      expect(result.status).toBe(200);
-      expect(mockFetch).toHaveBeenCalledTimes(1);
-    });
-
-    it("should throw ApiError on non-OK response", async () => {
-      const errorResponse = {
-        ok: false,
-        status: 404,
-        statusText: "Not Found",
-        headers: new Headers(),
-        json: async () => ({}),
-      } as Response;
-
-      mockFetch.mockResolvedValueOnce(errorResponse);
-
-      // Use retries: 0 to avoid retry loop in tests
-      await expect(fetchJson("/missing.json", { retries: 0 })).rejects.toThrow(
-        ApiError,
-      );
-    });
-
-    it("should throw error for non-JSON content type", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        headers: new Headers({
-          "content-type": "text/plain",
-        }),
-      } as Response);
-
-      await expect(fetchJson("/test.txt")).rejects.toThrow("Expected JSON");
-    });
   });
 
   describe("ApiError", () => {
@@ -160,16 +103,11 @@ describe("API Client", () => {
 
       const result = await fetchProjects();
 
-      expect(result.status).toBe(200);
-      expect(result.headers.get("x-awana-projects-source")).toBe("github");
-      expect(result.data.projects).toEqual(mockData.projects);
+      expect(result.projects).toEqual(mockData.projects);
       expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
 
       const cached = localStorage.getItem(PROJECTS_CACHE_KEY);
       expect(cached).not.toBeNull();
     });
   });
-
-  // Note: timeout tests are skipped due to vitest fake timers complexity
-  // In production, timeouts work via AbortController
 });

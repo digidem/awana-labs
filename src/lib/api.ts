@@ -5,24 +5,13 @@
  * and TanStack Query integration for caching.
  */
 
-import type {
-  QueryFunction,
-  QueryFunctionContext,
-} from "@tanstack/react-query";
+import type { QueryFunction } from "@tanstack/react-query";
 import { parseProjectsData, type ProjectsData } from "@/types/project.schema";
 import { fetchValidatedProjectsFromGitHub } from "./github-projects";
 
 // =============================================================================
 // Type Definitions
 // =============================================================================
-
-/** API response wrapper for consistent error handling */
-export interface ApiResponse<T> {
-  data: T;
-  status: number;
-  statusText: string;
-  headers: Headers;
-}
 
 /** Custom API error class with additional context */
 export class ApiError extends Error {
@@ -37,156 +26,7 @@ export class ApiError extends Error {
   }
 }
 
-/** Generic fetch options */
-export interface FetchOptions extends RequestInit {
-  timeout?: number;
-  retries?: number;
-  retryDelay?: number;
-}
-
 export type ProjectLoadErrorType = "offline" | "timeout" | "generic";
-
-// =============================================================================
-// API Client Configuration
-// =============================================================================
-
-const DEFAULT_TIMEOUT = 10000; // 10 seconds
-const DEFAULT_RETRIES = 2;
-const DEFAULT_RETRY_DELAY = 1000; // 1 second
-
-// =============================================================================
-// Core Fetch Function
-// =============================================================================
-
-/**
- * Core fetch wrapper with timeout, retry logic, and error handling
- */
-async function fetchWithTimeout(
-  url: string,
-  options: FetchOptions = {},
-): Promise<Response> {
-  const {
-    timeout = DEFAULT_TIMEOUT,
-    retries = DEFAULT_RETRIES,
-    retryDelay = DEFAULT_RETRY_DELAY,
-    ...fetchOptions
-  } = options;
-
-  let lastError: Error | null = null;
-
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-      const response = await fetch(url, {
-        ...fetchOptions,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new ApiError(
-          `API request failed: ${response.statusText}`,
-          response.status,
-          response.statusText,
-        );
-      }
-
-      return response;
-    } catch (error) {
-      lastError = error as Error;
-
-      // Don't retry on abort (timeout) or 4xx errors
-      if (
-        error instanceof Error &&
-        (error.name === "AbortError" ||
-          (error instanceof ApiError &&
-            error.status >= 400 &&
-            error.status < 500))
-      ) {
-        throw error;
-      }
-
-      // Wait before retrying (except on last attempt)
-      if (attempt < retries) {
-        await new Promise((resolve) => setTimeout(resolve, retryDelay));
-      }
-    }
-  }
-
-  throw lastError || new Error("Unknown error occurred");
-}
-
-// =============================================================================
-// Typed API Response Handlers
-// =============================================================================
-
-/**
- * Fetch JSON with full type safety and error handling
- */
-export async function fetchJson<T>(
-  url: string,
-  options: FetchOptions = {},
-): Promise<ApiResponse<T>> {
-  const response = await fetchWithTimeout(url, options);
-
-  // Validate content type
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    throw new ApiError(
-      `Expected JSON response, got: ${contentType}`,
-      response.status,
-      response.statusText,
-    );
-  }
-
-  const data = await response.json();
-
-  return {
-    data,
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  };
-}
-
-/**
- * Fetch text with error handling
- */
-export async function fetchText(
-  url: string,
-  options: FetchOptions = {},
-): Promise<ApiResponse<string>> {
-  const response = await fetchWithTimeout(url, options);
-
-  const data = await response.text();
-
-  return {
-    data,
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  };
-}
-
-// =============================================================================
-// TanStack Query Integration
-// =============================================================================
-
-/**
- * Create a typed QueryFunction for TanStack Query
- */
-export function createQueryFunction<T>(
-  fetcher: (url: string, options?: FetchOptions) => Promise<ApiResponse<T>>,
-): QueryFunction<T, [string]> {
-  return async (context: QueryFunctionContext<[string]>) => {
-    const [url] = context.queryKey;
-    const result = await fetcher(url);
-    return result.data;
-  };
-}
 
 // =============================================================================
 // Project Runtime Data Contract
@@ -303,27 +143,6 @@ export function clearProjectsCache(): void {
   storage?.removeItem(PROJECTS_CACHE_KEY);
 }
 
-function createProjectsResponse(
-  data: ProjectsData,
-  source: "github" | "cache",
-  stale = false,
-): ApiResponse<ProjectsData> {
-  return {
-    data,
-    status: 200,
-    statusText:
-      source === "cache"
-        ? stale
-          ? "OK (stale cache)"
-          : "OK (cache)"
-        : "OK",
-    headers: new Headers({
-      "x-awana-projects-source": source,
-      "x-awana-projects-cache-stale": String(stale),
-    }),
-  };
-}
-
 /**
  * Fetch projects from GitHub API
  * Uses the GitHub client to fetch issues with 'publish:yes' label
@@ -331,7 +150,7 @@ function createProjectsResponse(
  */
 export async function fetchProjectsFromGitHub(
   token?: string,
-): Promise<ApiResponse<ProjectsData>> {
+): Promise<ProjectsData> {
   const data = await fetchValidatedProjectsFromGitHub(
     import.meta.env.VITE_GITHUB_OWNER || "luandro",
     import.meta.env.VITE_GITHUB_REPO || "awana-labs-showcase",
@@ -340,7 +159,7 @@ export async function fetchProjectsFromGitHub(
   );
 
   writeProjectsCache(data);
-  return createProjectsResponse(data, "github");
+  return data;
 }
 
 /**
@@ -352,16 +171,12 @@ export async function fetchProjectsFromGitHub(
  * - Reuse localStorage when the cached payload is still fresh.
  * - Fall back to cached data when offline or when a refresh fails.
  */
-export async function fetchProjects(): Promise<ApiResponse<ProjectsData>> {
+export async function fetchProjects(): Promise<ProjectsData> {
   const cachedProjects = readProjectsCache();
   const online = isOnline();
 
   if (cachedProjects && (!cachedProjects.isStale || !online)) {
-    return createProjectsResponse(
-      cachedProjects.entry.data,
-      "cache",
-      cachedProjects.isStale,
-    );
+    return cachedProjects.entry.data;
   }
 
   if (!online) {
@@ -377,7 +192,7 @@ export async function fetchProjects(): Promise<ApiResponse<ProjectsData>> {
   } catch (error) {
     if (cachedProjects) {
       console.warn("Using cached projects after GitHub refresh failed:", error);
-      return createProjectsResponse(cachedProjects.entry.data, "cache", true);
+      return cachedProjects.entry.data;
     }
 
     console.error("GitHub API error:", error);
@@ -392,8 +207,7 @@ export const fetchProjectsQuery: QueryFunction<
   ProjectsData,
   ["projects"]
 > = async () => {
-  const result = await fetchProjects();
-  return result.data;
+  return await fetchProjects();
 };
 
 // Query keys for TanStack Query
