@@ -23,7 +23,6 @@ const Header = ({ className }: HeaderProps) => {
   const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLogoInteractive, setIsLogoInteractive] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
   const heroTitleDocumentTopRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -103,7 +102,6 @@ const Header = ({ className }: HeaderProps) => {
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setIsMobileMenuOpen(false);
   }, []);
 
   return (
@@ -184,32 +182,6 @@ const Header = ({ className }: HeaderProps) => {
             </motion.button>
             */}</div>
         </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.nav
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden pb-4 overflow-hidden"
-            >
-              <div className="flex flex-col gap-1 pt-2 border-t border-border/50">
-                <a
-                  href="https://github.com/awanadigital"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-3 rounded-lg text-left text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-accent transition-all flex items-center gap-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <GithubIcon className="h-4 w-4" />
-                  GitHub
-                </a>
-              </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
       </div>
     </motion.header>
   );
