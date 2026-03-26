@@ -57,6 +57,12 @@ function renderModal(
 }
 
 describe("ProjectModal", () => {
+  const imageAlt = (index: number) =>
+    i18n.t("projectModal.imageAlt", {
+      title: project.title,
+      index,
+    });
+
   beforeEach(async () => {
     await act(async () => {
       await i18n.changeLanguage("en");
@@ -97,9 +103,7 @@ describe("ProjectModal", () => {
     fireEvent.keyDown(dialog, { key: "ArrowRight" });
 
     await waitFor(() => {
-      expect(
-        screen.getByAltText("Test Project screenshot 2"),
-      ).toBeInTheDocument();
+      expect(screen.getByAltText(imageAlt(2))).toBeInTheDocument();
     });
 
     fireEvent.keyDown(dialog, { key: "Escape" });
@@ -109,11 +113,9 @@ describe("ProjectModal", () => {
   it("shows a fallback state when an image fails to load", () => {
     renderModal(true);
 
-    const image = screen.getByAltText("Test Project screenshot 1");
+    const image = screen.getByAltText(imageAlt(1));
     fireEvent.error(image);
 
-    expect(
-      screen.getByText("This image could not be loaded."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(i18n.t("projectModal.imageUnavailable"))).toBeInTheDocument();
   });
 });

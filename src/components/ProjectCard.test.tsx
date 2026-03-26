@@ -82,7 +82,8 @@ describe("ProjectCard", () => {
 
     expect(
       screen.getByText((_, node) => {
-        return node?.textContent === `Atualizado ${formattedDate}`;
+        return node?.textContent ===
+          `${i18n.t("projects.updated")} ${formattedDate}`;
       }),
     ).toBeInTheDocument();
   });

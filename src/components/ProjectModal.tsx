@@ -60,16 +60,24 @@ const ProjectModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      previousTriggerRef.current = triggerElement;
+      previousTriggerRef.current =
+        triggerElement ?? (document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null);
       document.body.style.overflow = "hidden";
       closeButtonRef.current?.focus();
       return () => {
         document.body.style.overflow = "";
+        if (previousTriggerRef.current?.isConnected) {
+          previousTriggerRef.current.focus({ preventScroll: true });
+        }
       };
     }
 
     document.body.style.overflow = "";
-    previousTriggerRef.current?.focus();
+    if (previousTriggerRef.current?.isConnected) {
+      previousTriggerRef.current.focus({ preventScroll: true });
+    }
   }, [isOpen, triggerElement]);
 
   useEffect(() => {

@@ -63,7 +63,9 @@ const LanguageSwitcher = ({
         aria-label={t("aria.selectLanguage")}
       >
         {getTriggerContent()}
-        <Languages className="h-4 w-4 opacity-50" />
+        {variant !== "icon-only" && (
+          <Languages className="h-4 w-4 opacity-50" />
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
