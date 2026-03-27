@@ -192,20 +192,6 @@ function parseProjectFromIssue(issue: GitHubIssue): ProjectData | null {
 }
 
 /**
- * Convert a title to a URL-safe slug
- */
-function slugify(text: string): string {
-  if (!text || typeof text !== "string") {
-    return "unknown";
-  }
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-/**
  * Main execution function
  */
 async function main(): Promise<void> {
@@ -278,4 +264,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 // Export for testing
-export { fetchPublishableIssues, parseProjectFromIssue, slugify };
+export { fetchPublishableIssues, parseProjectFromIssue };
