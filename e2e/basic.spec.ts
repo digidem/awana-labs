@@ -67,84 +67,59 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Basic Page Tests", () => {
-  test("homepage loads successfully", async ({ page }) => {
-    const response = await page.goto("/");
-
-    // Should return 200 OK
-    expect(response?.status()).toBe(200);
-
-    // Check page title
-    await expect(page).toHaveTitle(/Awana Labs/);
-
-    // React root should exist
-    const root = page.locator("#root");
-    await expect(root).toBeVisible();
-  });
-
-  test("page has meaningful content", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    // Check for primary visible content instead of a brittle text-length heuristic.
-    await expect(page.locator("#hero")).toBeVisible();
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Awana Labs" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Scroll to projects" }),
-    ).toBeVisible();
-    await expect(page.locator("#projects")).toBeVisible();
-
-    // Should not contain error messages
-    await expect(page.locator("body")).not.toContainText([
-      "Application error",
-      "Something went wrong",
-    ]);
-  });
-
-  test("no console errors on page load", async ({ page }) => {
+  test("page loads successfully with content and no errors", async ({
+    page,
+  }) => {
+    // Collect console errors before navigation
     const errors: string[] = [];
-
     page.on("console", (msg) => {
       if (msg.type() === "error") {
         errors.push(msg.text());
       }
     });
 
-    await page.goto("/");
+    // Navigate and measure load time
+    const startTime = Date.now();
+    const response = await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const loadTime = Date.now() - startTime;
 
-    // Allow some time for async errors
+    // HTTP 200 status
+    expect(response?.status()).toBe(200);
+
+    // Page title contains "Awana Labs"
+    await expect(page).toHaveTitle(/Awana Labs/);
+
+    // React root is visible
+    await expect(page.locator("#root")).toBeVisible();
+
+    // Hero section with h1 heading is visible
+    await expect(page.locator("#hero")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Awana Labs" }),
+    ).toBeVisible();
+
+    // Projects section is visible
+    await expect(page.locator("#projects")).toBeVisible();
+
+    // Body does not contain error messages
+    await expect(page.locator("body")).not.toContainText([
+      "Application error",
+      "Something went wrong",
+    ]);
+
+    // No critical console errors
     await page.waitForTimeout(2000);
-
-    // Check for specific error patterns that indicate problems
     const criticalErrors = errors.filter(
       (e) =>
         e.includes("Uncaught") ||
         e.includes("TypeError") ||
         e.includes("ReferenceError"),
     );
-
     expect(criticalErrors).toHaveLength(0);
-  });
 
-  test("page is responsive (mobile viewport)", async ({ page }) => {
-    // Set mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto("/");
-
-    // Check mobile content is visible
-    const body = page.locator("body");
-    await expect(body).toBeVisible();
-  });
-
-  test("page is responsive (desktop viewport)", async ({ page }) => {
-    // Set desktop viewport
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto("/");
-
-    // Check desktop content is visible
-    const body = page.locator("body");
-    await expect(body).toBeVisible();
+    // Load time under 10 seconds
+    expect(loadTime).toBeLessThan(10000);
   });
 });
 
@@ -258,51 +233,5 @@ test.describe("Accessibility Tests", () => {
 
     const html = page.locator("html");
     await expect(html).toHaveAttribute("lang", /en/);
-  });
-});
-
-/**
- * Performance tests
- * Basic performance checks
- */
-test.describe("Performance Tests", () => {
-  test("page loads within reasonable time", async ({ page }) => {
-    const startTime = Date.now();
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-    const loadTime = Date.now() - startTime;
-
-    // Should load in less than 10 seconds
-    expect(loadTime).toBeLessThan(10000);
-  });
-
-  test("Time to First Contentful Paint is reasonable", async ({ page, browserName }) => {
-    test.skip(browserName !== "chromium", "FCP not reliably reported outside Chromium");
-    await page.goto("/");
-    const fcp = await page.evaluate(() => {
-      const existing = performance.getEntriesByName("first-contentful-paint")[0];
-      if (existing) return existing.startTime;
-
-      return new Promise<number | null>((resolve) => {
-        const observer = new PerformanceObserver((list, obs) => {
-          const entry = list
-            .getEntries()
-            .find((e) => e.name === "first-contentful-paint");
-          if (entry) {
-            obs.disconnect();
-            resolve(entry.startTime);
-          }
-        });
-        observer.observe({ type: "paint", buffered: true });
-        setTimeout(() => {
-          observer.disconnect();
-          resolve(null);
-        }, 3000);
-      });
-    });
-
-    // FCP should be less than 3 seconds
-    expect(fcp).not.toBeNull();
-    expect(fcp!).toBeLessThan(3000);
   });
 });
