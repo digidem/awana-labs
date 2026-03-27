@@ -276,7 +276,8 @@ test.describe("Performance Tests", () => {
     expect(loadTime).toBeLessThan(10000);
   });
 
-  test("Time to First Contentful Paint is reasonable", async ({ page }) => {
+  test("Time to First Contentful Paint is reasonable", async ({ page, browserName }) => {
+    test.skip(browserName !== "chromium", "FCP not reliably reported outside Chromium");
     const metrics = await page.goto("/").then(async () => {
       return await page.evaluate(() => {
         return new Promise((resolve) => {
