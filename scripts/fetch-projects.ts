@@ -259,7 +259,7 @@ async function main(): Promise<void> {
 }
 
 // Execute main function if run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${process.argv[1].replace(/\\/g, "/")}`) {
   main();
 }
 

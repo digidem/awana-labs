@@ -278,23 +278,31 @@ test.describe("Performance Tests", () => {
 
   test("Time to First Contentful Paint is reasonable", async ({ page, browserName }) => {
     test.skip(browserName !== "chromium", "FCP not reliably reported outside Chromium");
-    const metrics = await page.goto("/").then(async () => {
-      return await page.evaluate(() => {
-        return new Promise((resolve) => {
-          new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            const fcp = entries.find(
-              (entry) => entry.name === "first-contentful-paint",
-            );
-            if (fcp) {
-              resolve(fcp.startTime);
-            }
-          }).observe({ entryTypes: ["paint"] });
+    await page.goto("/");
+    const fcp = await page.evaluate(() => {
+      const existing = performance.getEntriesByName("first-contentful-paint")[0];
+      if (existing) return existing.startTime;
+
+      return new Promise<number | null>((resolve) => {
+        const observer = new PerformanceObserver((list, obs) => {
+          const entry = list
+            .getEntries()
+            .find((e) => e.name === "first-contentful-paint");
+          if (entry) {
+            obs.disconnect();
+            resolve(entry.startTime);
+          }
         });
+        observer.observe({ type: "paint", buffered: true });
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(null);
+        }, 3000);
       });
     });
 
-    // FCP should be less than 3 seconds (soft check)
-    // Note: This test may not work in all environments
+    // FCP should be less than 3 seconds
+    expect(fcp).not.toBeNull();
+    expect(fcp!).toBeLessThan(3000);
   });
 });
