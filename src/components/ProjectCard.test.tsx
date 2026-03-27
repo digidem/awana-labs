@@ -48,7 +48,7 @@ describe("ProjectCard", () => {
 
     render(
       <I18nextProvider i18n={i18n}>
-        <ProjectCard project={project} index={0} onClick={onClick} />
+        <ProjectCard project={project} onClick={onClick} />
       </I18nextProvider>,
     );
 
@@ -72,7 +72,7 @@ describe("ProjectCard", () => {
 
     render(
       <I18nextProvider i18n={i18n}>
-        <ProjectCard project={project} index={0} onClick={vi.fn()} />
+        <ProjectCard project={project} onClick={vi.fn()} />
       </I18nextProvider>,
     );
 

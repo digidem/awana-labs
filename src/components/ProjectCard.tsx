@@ -8,11 +8,10 @@ import { getUsageLabel } from "@/lib/status-utils";
 
 interface ProjectCardProps {
   project: Project;
-  index: number;
   onClick: (trigger: HTMLButtonElement) => void;
 }
 
-const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
+const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
   const { t, i18n } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -32,7 +31,6 @@ const ProjectCard = ({ project, index, onClick }: ProjectCardProps) => {
       scale: 1,
       transition: {
         duration: 0.5,
-        delay: prefersReducedMotion ? 0 : index * 0.1,
         ease: [0.25, 0.1, 0.25, 1],
       },
     },

@@ -138,11 +138,10 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             id="projects-grid"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredProjects.map((project, index) => (
+            {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
-                index={index}
                 onClick={(trigger) => {
                   setActiveTrigger(trigger);
                   setSelectedProject(project);
