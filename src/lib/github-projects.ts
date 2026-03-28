@@ -20,6 +20,53 @@ const GITHUB_REPO = "awana-labs-showcase";
 const PUBLISH_LABEL = "publish:yes";
 
 // =============================================================================
+// Image URL Validation
+// =============================================================================
+
+const ALLOWED_IMAGE_EXTENSIONS = new Set([
+  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif", ".ico",
+]);
+
+const ALLOWED_IMAGE_HOSTS = new Set([
+  "user-images.githubusercontent.com",
+  "avatars.githubusercontent.com",
+  "raw.githubusercontent.com",
+  "github.com",
+  "img.shields.io",
+  "camo.githubusercontent.com",
+  "cloudinary.com",
+  "imgur.com",
+  "i.imgur.com",
+]);
+
+function isValidImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+
+    // Must be HTTPS
+    if (parsed.protocol !== "https:") return false;
+
+    // Check if host is a known image host
+    const hostname = parsed.hostname.toLowerCase();
+    const isKnownHost = [...ALLOWED_IMAGE_HOSTS].some(
+      (allowed) => hostname === allowed || hostname.endsWith(`.${allowed}`),
+    );
+
+    // Check extension
+    const pathname = parsed.pathname.toLowerCase();
+    const lastSegment = pathname.split("/").pop() || "";
+    const hasExtension = lastSegment.includes(".");
+    const ext = hasExtension ? lastSegment.substring(lastSegment.lastIndexOf(".")) : "";
+    const hasImageExtension = ALLOWED_IMAGE_EXTENSIONS.has(ext);
+
+    // Accept if: known image host OR has recognized image extension
+    return isKnownHost || hasImageExtension;
+  } catch {
+    return false;
+  }
+}
+
+// =============================================================================
 // Parsing Functions
 // =============================================================================
 
@@ -119,11 +166,17 @@ function extractLogo(section: SectionContent | null): string {
   if (logoIndex !== -1) {
     const logoLine = section.lines[logoIndex];
     const urlMatch = logoLine.match(/https?:\/\/[^\s]+/i);
-    if (urlMatch) return urlMatch[0].trim();
+    if (urlMatch) {
+      const url = urlMatch[0].trim();
+      if (isValidImageUrl(url)) return url;
+    }
 
     if (logoIndex + 1 < section.lines.length) {
       const nextUrlMatch = section.lines[logoIndex + 1].match(/https?:\/\/[^\s]+/i);
-      if (nextUrlMatch) return nextUrlMatch[0].trim();
+      if (nextUrlMatch) {
+        const url = nextUrlMatch[0].trim();
+        if (isValidImageUrl(url)) return url;
+      }
     }
   }
 
@@ -150,7 +203,7 @@ function parseImages(section: SectionContent | null): string[] {
   const matches = searchText.matchAll(urlPattern);
   for (const match of matches) {
     const url = match[0].trim();
-    if (url && url !== logoUrl) {
+    if (url && url !== logoUrl && isValidImageUrl(url)) {
       urls.push(url);
     }
   }
