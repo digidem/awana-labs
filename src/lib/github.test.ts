@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { GitHubClient, GitHubApiError, createGitHubClient } from "./github";
+import { GitHubClient, GitHubApiError, createGitHubClient, isRateLimitError } from "./github";
 
 // Use vi.hoisted to properly mock Octokit
 const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
@@ -331,5 +331,58 @@ describe("GitHubApiError", () => {
     const error = new GitHubApiError("Test error", 404, "https://docs.github.com");
 
     expect(error.documentation_url).toBe("https://docs.github.com");
+  });
+});
+
+describe("isRateLimitError", () => {
+  it("returns true for GitHubApiError with status 403 and 'rate limit' in message", () => {
+    const error = new GitHubApiError("API rate limit exceeded", 403);
+    expect(isRateLimitError(error)).toBe(true);
+  });
+
+  it("returns true for GitHubApiError with status 403 and 'Rate Limit' (case-insensitive)", () => {
+    const error = new GitHubApiError("Rate Limit Exceeded", 403);
+    expect(isRateLimitError(error)).toBe(true);
+  });
+
+  it("returns false for GitHubApiError with status 403 but no 'rate limit' in message", () => {
+    const error = new GitHubApiError("Forbidden access", 403);
+    expect(isRateLimitError(error)).toBe(false);
+  });
+
+  it("returns false for GitHubApiError with status 404", () => {
+    const error = new GitHubApiError("Not Found", 404);
+    expect(isRateLimitError(error)).toBe(false);
+  });
+
+  it("returns true for duck-typed object with status 429 and 'rate limit' in message", () => {
+    const error = { status: 429, message: "rate limit exceeded" };
+    expect(isRateLimitError(error)).toBe(true);
+  });
+
+  it("returns false for duck-typed object with status 404 and no 'rate limit' in message", () => {
+    const error = { status: 404, message: "not found" };
+    expect(isRateLimitError(error)).toBe(false);
+  });
+
+  it("returns false for duck-typed object with status 403 but non-string message", () => {
+    const error = { status: 403, message: 12345 };
+    expect(isRateLimitError(error)).toBe(false);
+  });
+
+  it("returns false for null", () => {
+    expect(isRateLimitError(null)).toBe(false);
+  });
+
+  it("returns false for a string", () => {
+    expect(isRateLimitError("rate limit error")).toBe(false);
+  });
+
+  it("returns false for undefined", () => {
+    expect(isRateLimitError(undefined)).toBe(false);
+  });
+
+  it("returns false for a number", () => {
+    expect(isRateLimitError(42)).toBe(false);
   });
 });
