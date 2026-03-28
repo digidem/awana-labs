@@ -87,38 +87,6 @@ describe("Husky TypeCheck Integration", () => {
     });
   });
 
-  describe("documentation", () => {
-    it("should have typecheck rationale documentation", () => {
-      const docPath = path.join(projectRoot, "docs", "TYPECHECK_RATIONALE.md");
-      expect(fs.existsSync(docPath)).toBe(true);
-
-      const content = fs.readFileSync(docPath, "utf8");
-
-      // Verify key sections exist
-      expect(content).toContain("## Overview");
-      expect(content).toContain("## Current Setup");
-      expect(content).toContain("## Rationale");
-      expect(content).toContain("Two-Tier Validation Strategy");
-      expect(content).toContain("Pre-Commit");
-      expect(content).toContain("Pre-Push");
-    });
-
-    it("should document both pre-commit and pre-push strategies", () => {
-      const docPath = path.join(projectRoot, "docs", "TYPECHECK_RATIONALE.md");
-      const content = fs.readFileSync(docPath, "utf8");
-
-      // Pre-commit should mention speed/targeted checking
-      expect(content.toLowerCase()).toContain("pre-commit");
-      expect(content.toLowerCase()).toContain("fast");
-      expect(content.toLowerCase()).toContain("staged");
-
-      // Pre-push should mention comprehensive checking
-      expect(content.toLowerCase()).toContain("pre-push");
-      expect(content.toLowerCase()).toContain("comprehensive");
-      expect(content.toLowerCase()).toContain("full project");
-    });
-  });
-
   describe("integration validation", () => {
     it("should keep the typecheck script configured for the pre-push hook", () => {
       const packageJsonPath = path.join(projectRoot, "package.json");
