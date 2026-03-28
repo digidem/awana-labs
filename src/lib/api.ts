@@ -143,12 +143,19 @@ export function writeProjectsCache(data: ProjectsData): ProjectsCacheEntry | nul
   // Truncate to most recent projects if count exceeds the safeguard
   if (validatedData.projects.length > MAX_CACHE_PROJECT_COUNT) {
     const sorted = [...validatedData.projects].sort((a, b) => {
-      const aTime = Date.parse(a.timestamps.last_updated_at);
-      const bTime = Date.parse(b.timestamps.last_updated_at);
+      const aTime = Date.parse(a.timestamps.last_updated_at) || 0;
+      const bTime = Date.parse(b.timestamps.last_updated_at) || 0;
       return bTime - aTime;
     });
     validatedData = { ...validatedData, projects: sorted.slice(0, MAX_CACHE_PROJECT_COUNT) };
   }
+
+  // Sort once by oldest-first so we can efficiently trim from the front
+  const projectsByAge = [...validatedData.projects].sort((a, b) => {
+    const aTime = Date.parse(a.timestamps.last_updated_at) || 0;
+    const bTime = Date.parse(b.timestamps.last_updated_at) || 0;
+    return aTime - bTime;
+  });
 
   const entry: ProjectsCacheEntry = {
     version: PROJECTS_CACHE_VERSION,
@@ -156,22 +163,19 @@ export function writeProjectsCache(data: ProjectsData): ProjectsCacheEntry | nul
     data: validatedData,
   };
 
-  // Progressively remove oldest projects until the serialized entry fits
-  while (estimateEntrySizeBytes(entry) > MAX_CACHE_SIZE_BYTES) {
-    if (entry.data.projects.length === 0) {
+  // Progressively remove oldest projects until the serialized entry fits.
+  // Sort once above, then shrink from the front each iteration.
+  let serialized = JSON.stringify(entry);
+  while (new Blob([serialized]).size > MAX_CACHE_SIZE_BYTES) {
+    if (projectsByAge.length === 0) {
       console.warn(
         "Projects cache still exceeds size limit after removing all projects; skipping write",
       );
       return null;
     }
-    const trimmed = [...entry.data.projects];
-    trimmed.sort((a, b) => {
-      const aTime = Date.parse(a.timestamps.last_updated_at);
-      const bTime = Date.parse(b.timestamps.last_updated_at);
-      return aTime - bTime;
-    });
-    trimmed.shift();
-    entry.data = { ...entry.data, projects: trimmed };
+    projectsByAge.shift();
+    entry.data = { ...validatedData, projects: [...projectsByAge] };
+    serialized = JSON.stringify(entry);
   }
 
   try {
