@@ -54,6 +54,7 @@ describe("Index page states", () => {
       error: null,
       errorType: null,
       isOfflineError: false,
+      isRateLimitError: false,
       errorMessage: null,
       refetch: vi.fn(),
     });
@@ -74,6 +75,7 @@ describe("Index page states", () => {
       error: new Error("Offline"),
       errorType: "offline",
       isOfflineError: true,
+      isRateLimitError: false,
       errorMessage: "Offline",
       refetch: vi.fn(),
     });
@@ -97,6 +99,7 @@ describe("Index page states", () => {
       error: new Error("Request timeout"),
       errorType: "timeout",
       isOfflineError: false,
+      isRateLimitError: false,
       errorMessage: "Request timeout",
       refetch,
     });
@@ -110,5 +113,28 @@ describe("Index page states", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders a localized rate-limit message", () => {
+    mockUseProjectsWithError.mockReturnValue({
+      projects: [],
+      isLoading: false,
+      isError: true,
+      error: new Error("rate limit exceeded"),
+      errorType: "rate-limit",
+      isOfflineError: false,
+      isRateLimitError: true,
+      errorMessage: "rate limit exceeded",
+      refetch: vi.fn(),
+    });
+
+    renderIndex();
+
+    expect(screen.getByText("GitHub rate limit reached")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Too many requests to GitHub. Please wait a moment and try again.",
+      ),
+    ).toBeInTheDocument();
   });
 });

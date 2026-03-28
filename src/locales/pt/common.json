@@ -51,7 +51,9 @@
     "offlineTitle": "Você está offline",
     "offlineDescription": "Reconecte-se à internet e tente novamente, ou volte quando houver projetos em cache disponíveis.",
     "timeoutTitle": "A solicitação dos projetos expirou",
-    "timeoutDescription": "O GitHub demorou demais para responder. Tente novamente."
+    "timeoutDescription": "O GitHub demorou demais para responder. Tente novamente.",
+    "rateLimitTitle": "Limite de requisições do GitHub atingido",
+    "rateLimitDescription": "Muitas requisições ao GitHub. Aguarde um momento e tente novamente."
   },
   "common": {
     "loading": "Carregando...",

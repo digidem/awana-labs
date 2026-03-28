@@ -8,6 +8,7 @@
 import type { QueryFunction } from "@tanstack/react-query";
 import { parseProjectsData, type ProjectsData } from "@/types/project.schema";
 import { fetchValidatedProjectsFromGitHub } from "./github-projects";
+import { isRateLimitError as isGitHubRateLimitError } from "./github";
 
 // =============================================================================
 // Type Definitions
@@ -26,7 +27,7 @@ export class ApiError extends Error {
   }
 }
 
-export type ProjectLoadErrorType = "offline" | "timeout" | "generic";
+export type ProjectLoadErrorType = "offline" | "timeout" | "rate-limit" | "generic";
 
 // =============================================================================
 // Project Runtime Data Contract
@@ -35,6 +36,10 @@ export type ProjectLoadErrorType = "offline" | "timeout" | "generic";
 export const PROJECTS_CACHE_KEY = "awana-labs-projects-cache";
 export const PROJECTS_CACHE_VERSION = 1;
 export const PROJECTS_CACHE_MAX_AGE_MS = 1000 * 60 * 60;
+/** Stale-while-revalidate upper bound: serve stale cache up to 24 hours old. */
+export const PROJECTS_STALE_WINDOW_MS = 1000 * 60 * 60 * 24;
+export const MAX_CACHE_SIZE_BYTES = 4 * 1024 * 1024; // 4MB safety margin under 5MB limit
+export const MAX_CACHE_PROJECT_COUNT = 200;
 
 export interface ProjectsCacheEntry {
   version: number;
@@ -58,6 +63,10 @@ function getProjectsStorage(): Storage | null {
     console.warn("Projects cache is unavailable:", error);
     return null;
   }
+}
+
+function estimateEntrySizeBytes(entry: ProjectsCacheEntry): number {
+  return new Blob([JSON.stringify(entry)]).size;
 }
 
 function parseProjectsCacheEntry(value: unknown): ProjectsCacheEntry {
@@ -102,6 +111,12 @@ export function readProjectsCache(): CachedProjectsResult | null {
     return null;
   }
 
+  if (new Blob([rawValue]).size > MAX_CACHE_SIZE_BYTES) {
+    console.warn("Discarding projects cache entry that exceeds size limit");
+    storage.removeItem(PROJECTS_CACHE_KEY);
+    return null;
+  }
+
   try {
     const parsed = JSON.parse(rawValue);
     const entry = parseProjectsCacheEntry(parsed);
@@ -123,11 +138,41 @@ export function writeProjectsCache(data: ProjectsData): ProjectsCacheEntry | nul
     return null;
   }
 
+  let validatedData = parseProjectsData(data);
+
+  // Truncate to most recent projects if count exceeds the safeguard
+  if (validatedData.projects.length > MAX_CACHE_PROJECT_COUNT) {
+    const sorted = [...validatedData.projects].sort((a, b) => {
+      const aTime = Date.parse(a.timestamps.last_updated_at);
+      const bTime = Date.parse(b.timestamps.last_updated_at);
+      return bTime - aTime;
+    });
+    validatedData = { ...validatedData, projects: sorted.slice(0, MAX_CACHE_PROJECT_COUNT) };
+  }
+
   const entry: ProjectsCacheEntry = {
     version: PROJECTS_CACHE_VERSION,
     cachedAt: new Date().toISOString(),
-    data: parseProjectsData(data),
+    data: validatedData,
   };
+
+  // Progressively remove oldest projects until the serialized entry fits
+  while (estimateEntrySizeBytes(entry) > MAX_CACHE_SIZE_BYTES) {
+    if (entry.data.projects.length === 0) {
+      console.warn(
+        "Projects cache still exceeds size limit after removing all projects; skipping write",
+      );
+      return null;
+    }
+    const trimmed = [...entry.data.projects];
+    trimmed.sort((a, b) => {
+      const aTime = Date.parse(a.timestamps.last_updated_at);
+      const bTime = Date.parse(b.timestamps.last_updated_at);
+      return aTime - bTime;
+    });
+    trimmed.shift();
+    entry.data = { ...entry.data, projects: trimmed };
+  }
 
   try {
     storage.setItem(PROJECTS_CACHE_KEY, JSON.stringify(entry));
@@ -163,12 +208,27 @@ export async function fetchProjectsFromGitHub(
 }
 
 /**
+ * Check whether a cached entry falls within the stale-while-revalidate window
+ * (older than the fresh threshold but newer than the 24-hour upper bound).
+ */
+function isWithinStaleWindow(cachedAt: string): boolean {
+  const ageMs = getProjectsCacheAgeMs(cachedAt);
+  return ageMs > PROJECTS_CACHE_MAX_AGE_MS && ageMs <= PROJECTS_STALE_WINDOW_MS;
+}
+
+/** Resolved GitHub token from the Vite environment, or undefined. */
+function getGitHubToken(): string | undefined {
+  return import.meta.env.VITE_GITHUB_TOKEN || undefined;
+}
+
+/**
  * Main fetch function for project data.
  *
  * Runtime contract:
  * - Fetch from GitHub on cold start when no valid cache exists.
  * - Validate payloads before they reach React Query or localStorage.
  * - Reuse localStorage when the cached payload is still fresh.
+ * - Stale-while-revalidate: serve cache between 1h-24h and refresh in background.
  * - Fall back to cached data when offline or when a refresh fails.
  */
 export async function fetchProjects(): Promise<ProjectsData> {
@@ -176,6 +236,16 @@ export async function fetchProjects(): Promise<ProjectsData> {
   const online = isOnline();
 
   if (cachedProjects && (!cachedProjects.isStale || !online)) {
+    return cachedProjects.entry.data;
+  }
+
+  // Stale-while-revalidate: if cache is between 1h and 24h old, serve it
+  // immediately and kick off a background refresh.
+  if (cachedProjects && online && isWithinStaleWindow(cachedProjects.entry.cachedAt)) {
+    // Fire-and-forget background refresh
+    fetchProjectsFromGitHub(getGitHubToken()).catch((error: unknown) => {
+      console.warn("Background refresh failed:", error);
+    });
     return cachedProjects.entry.data;
   }
 
@@ -188,7 +258,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
   }
 
   try {
-    return await fetchProjectsFromGitHub();
+    return await fetchProjectsFromGitHub(getGitHubToken());
   } catch (error) {
     if (cachedProjects) {
       console.warn("Using cached projects after GitHub refresh failed:", error);
@@ -233,6 +303,10 @@ export function getProjectLoadErrorType(error: unknown): ProjectLoadErrorType {
 
   if (!isOnline()) {
     return "offline";
+  }
+
+  if (isGitHubRateLimitError(error)) {
+    return "rate-limit";
   }
 
   if (

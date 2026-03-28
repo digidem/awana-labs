@@ -51,7 +51,9 @@
     "offlineTitle": "Estás sin conexión",
     "offlineDescription": "Vuelve a conectarte a internet e inténtalo de nuevo, o regresa cuando haya proyectos en caché disponibles.",
     "timeoutTitle": "La solicitud de proyectos expiró",
-    "timeoutDescription": "GitHub tardó demasiado en responder. Inténtalo de nuevo."
+    "timeoutDescription": "GitHub tardó demasiado en responder. Inténtalo de nuevo.",
+    "rateLimitTitle": "Límite de solicitudes de GitHub alcanzado",
+    "rateLimitDescription": "Demasiadas solicitudes a GitHub. Espera un momento e inténtalo de nuevo."
   },
   "common": {
     "loading": "Cargando...",

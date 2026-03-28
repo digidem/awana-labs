@@ -78,6 +78,32 @@ export class GitHubApiError extends Error {
   }
 }
 
+/**
+ * Check whether a thrown error is a GitHub rate-limit error.
+ * Handles both wrapped {@link GitHubApiError} instances and raw Octokit errors.
+ */
+export function isRateLimitError(error: unknown): boolean {
+  if (error instanceof GitHubApiError) {
+    return (
+      (error.status === 403 || error.status === 429) &&
+      error.message.toLowerCase().includes("rate limit")
+    );
+  }
+  // Fallback: duck-type check for raw Octokit / RequestError objects
+  if (error && typeof error === "object") {
+    const err = error as Record<string, unknown>;
+    const status = err["status"];
+    const message =
+      typeof err["message"] === "string"
+        ? (err["message"] as string).toLowerCase()
+        : "";
+    return (
+      (status === 403 || status === 429) && message.includes("rate limit")
+    );
+  }
+  return false;
+}
+
 // =============================================================================
 // GitHub Client Class
 // =============================================================================

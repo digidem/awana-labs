@@ -72,6 +72,7 @@ export function useProjectsWithError(options?: UseProjectsOptions) {
     error: result.error,
     errorType,
     isOfflineError: errorType === "offline",
+    isRateLimitError: errorType === "rate-limit",
     errorMessage: result.error ? getErrorMessage(result.error) : null,
     refetch: result.refetch,
   };

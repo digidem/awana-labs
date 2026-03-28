@@ -51,7 +51,9 @@
     "offlineTitle": "You're offline",
     "offlineDescription": "Reconnect to the internet and try again, or return when cached projects are available.",
     "timeoutTitle": "Project request timed out",
-    "timeoutDescription": "GitHub took too long to respond. Try again."
+    "timeoutDescription": "GitHub took too long to respond. Try again.",
+    "rateLimitTitle": "GitHub rate limit reached",
+    "rateLimitDescription": "Too many requests to GitHub. Please wait a moment and try again."
   },
   "common": {
     "loading": "Loading...",

@@ -21,10 +21,15 @@ const Index = () => {
             title: t("index.timeoutTitle"),
             description: t("index.timeoutDescription"),
           }
-        : {
-            title: t("index.errorTitle"),
-            description: t("index.errorDescription"),
-          };
+        : errorType === "rate-limit"
+          ? {
+              title: t("index.rateLimitTitle"),
+              description: t("index.rateLimitDescription"),
+            }
+          : {
+              title: t("index.errorTitle"),
+              description: t("index.errorDescription"),
+            };
 
   if (isLoading) {
     return (
