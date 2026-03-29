@@ -23,44 +23,12 @@ const PUBLISH_LABEL = "publish:yes";
 // Image URL Validation
 // =============================================================================
 
-const ALLOWED_IMAGE_EXTENSIONS = new Set([
-  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif", ".ico",
-]);
-
-const ALLOWED_IMAGE_HOSTS = new Set([
-  "user-images.githubusercontent.com",
-  "avatars.githubusercontent.com",
-  "raw.githubusercontent.com",
-  "github.com",
-  "img.shields.io",
-  "camo.githubusercontent.com",
-  "cloudinary.com",
-  "imgur.com",
-  "i.imgur.com",
-]);
-
 function isValidImageUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-
-    // Must be HTTPS
-    if (parsed.protocol !== "https:") return false;
-
-    // Check if host is a known image host
-    const hostname = parsed.hostname.toLowerCase();
-    const isKnownHost = [...ALLOWED_IMAGE_HOSTS].some(
-      (allowed) => hostname === allowed || hostname.endsWith(`.${allowed}`),
-    );
-
-    // Check extension
-    const pathname = parsed.pathname.toLowerCase();
-    const lastSegment = pathname.split("/").pop() || "";
-    const hasExtension = lastSegment.includes(".");
-    const ext = hasExtension ? lastSegment.substring(lastSegment.lastIndexOf(".")) : "";
-    const hasImageExtension = ALLOWED_IMAGE_EXTENSIONS.has(ext);
-
-    // Accept if: known image host OR has recognized image extension
-    return isKnownHost || hasImageExtension;
+    // Must be HTTPS — no host allowlist needed since images render in
+    // sandboxed <img> tags and can't execute code.
+    return parsed.protocol === "https:";
   } catch {
     return false;
   }

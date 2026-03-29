@@ -69,6 +69,22 @@ export const statusSchema = z.object({
 export type Status = z.infer<typeof statusSchema>;
 
 // ============================================================================
+// Shared URL Helpers
+// ============================================================================
+
+/**
+ * Helper: accepts a valid URL or an empty string.
+ * Used for optional URL fields that default to "" when absent.
+ */
+const optionalUrl = (label: string) =>
+  z
+    .string()
+    .refine((val) => val === "" || z.string().url().safeParse(val).success, {
+      message: `${label} must be a valid URL`,
+    })
+    .default("");
+
+// ============================================================================
 // Media Schema
 // ============================================================================
 
@@ -76,7 +92,7 @@ export type Status = z.infer<typeof statusSchema>;
  * Project media assets schema
  */
 export const mediaSchema = z.object({
-  logo: z.string().url("Logo must be a valid URL").optional().default(""),
+  logo: optionalUrl("Logo"),
   images: z.array(z.string().url("Image URLs must be valid")).default([]),
 });
 
@@ -92,16 +108,8 @@ export type Media = z.infer<typeof mediaSchema>;
  */
 export const linksSchema = z.object({
   homepage: z.string().url("Homepage must be a valid URL"),
-  repository: z
-    .string()
-    .url("Repository must be a valid URL")
-    .optional()
-    .default(""),
-  documentation: z
-    .string()
-    .url("Documentation must be a valid URL")
-    .optional()
-    .default(""),
+  repository: optionalUrl("Repository"),
+  documentation: optionalUrl("Documentation"),
 });
 
 export type Links = z.infer<typeof linksSchema>;
