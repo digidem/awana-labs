@@ -93,7 +93,7 @@ test.describe("Responsive Design", () => {
         await expect(hero).toBeVisible();
         await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
         await expect(
-          hero.getByRole("button", { name: "Scroll to projects" }),
+          hero.getByRole("button", { name: "Explore Projects" }),
         ).toBeVisible();
 
         const heroTitle = hero.getByRole("heading", { level: 1 });
