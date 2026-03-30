@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as githubProjects from "./github-projects";
 import {
   fetchProjects,
+  MAX_CACHE_SIZE_BYTES,
   PROJECTS_CACHE_KEY,
   PROJECTS_CACHE_MAX_AGE_MS,
   PROJECTS_CACHE_VERSION,
@@ -201,6 +202,149 @@ describe("projects cache contract", () => {
     const result = await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockData);
+  });
+});
+
+describe("corrupted cache edge cases", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    setOnlineStatus(true);
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("discards non-JSON string in localStorage and refetches", async () => {
+    localStorage.setItem(PROJECTS_CACHE_KEY, "{invalid json");
+    const mockData = createProjectsData();
+    const fetchValidatedProjectsFromGitHub = vi
+      .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+      .mockResolvedValue(mockData);
+
+    const result = await fetchProjects();
+
+    expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockData);
+  });
+
+  it("discards cache entry with wrong version and refetches", async () => {
+    localStorage.setItem(
+      PROJECTS_CACHE_KEY,
+      JSON.stringify({
+        version: 999,
+        cachedAt: new Date().toISOString(),
+        data: createProjectsData(),
+      }),
+    );
+    const mockData = createProjectsData();
+    const fetchValidatedProjectsFromGitHub = vi
+      .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+      .mockResolvedValue(mockData);
+
+    const result = await fetchProjects();
+
+    expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockData);
+  });
+
+  it("discards cache entry missing cachedAt field and refetches", async () => {
+    localStorage.setItem(
+      PROJECTS_CACHE_KEY,
+      JSON.stringify({
+        version: PROJECTS_CACHE_VERSION,
+        data: createProjectsData(),
+      }),
+    );
+    const mockData = createProjectsData();
+    const fetchValidatedProjectsFromGitHub = vi
+      .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+      .mockResolvedValue(mockData);
+
+    const result = await fetchProjects();
+
+    expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockData);
+  });
+
+  it("discards cache entry with invalid cachedAt timestamp and refetches", async () => {
+    localStorage.setItem(
+      PROJECTS_CACHE_KEY,
+      JSON.stringify({
+        version: PROJECTS_CACHE_VERSION,
+        cachedAt: "not-a-date",
+        data: createProjectsData(),
+      }),
+    );
+    const mockData = createProjectsData();
+    const fetchValidatedProjectsFromGitHub = vi
+      .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+      .mockResolvedValue(mockData);
+
+    const result = await fetchProjects();
+
+    expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockData);
+  });
+
+  it("discards cache entry exceeding MAX_CACHE_SIZE_BYTES and refetches", async () => {
+    const oversizedData = {
+      version: PROJECTS_CACHE_VERSION,
+      cachedAt: new Date().toISOString(),
+      data: createProjectsData(),
+    };
+    // Force the serialized size past the limit by adding padding inside the JSON
+    const raw = JSON.stringify(oversizedData).slice(0, -1) +
+      "," + "\"_padding\":\"" + "x".repeat(MAX_CACHE_SIZE_BYTES) + "\"}";
+    localStorage.setItem(PROJECTS_CACHE_KEY, raw);
+
+    const mockData = createProjectsData();
+    const fetchValidatedProjectsFromGitHub = vi
+      .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+      .mockResolvedValue(mockData);
+
+    const result = await fetchProjects();
+
+    expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockData);
+  });
+
+  it("returns data even when localStorage.setItem throws", async () => {
+    const mockData = createProjectsData();
+    vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockResolvedValue(
+      mockData,
+    );
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+
+    const result = await fetchProjects();
+
+    expect(result).toEqual(mockData);
+  });
+
+  it("accepts cache entry with extra top-level fields", async () => {
+    const mockData = createProjectsData();
+    localStorage.setItem(
+      PROJECTS_CACHE_KEY,
+      JSON.stringify({
+        version: PROJECTS_CACHE_VERSION,
+        cachedAt: new Date().toISOString(),
+        data: mockData,
+        extraField: "should be ignored",
+        anotherExtra: 42,
+      }),
+    );
+    const fetchValidatedProjectsFromGitHub = vi.spyOn(
+      githubProjects,
+      "fetchValidatedProjectsFromGitHub",
+    );
+
+    const result = await fetchProjects();
+
+    expect(fetchValidatedProjectsFromGitHub).not.toHaveBeenCalled();
     expect(result).toEqual(mockData);
   });
 });
