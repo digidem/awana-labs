@@ -85,8 +85,6 @@
     "returnHome": "Return to Home"
   },
   "aria": {
-    "scrollToTop": "Scroll to top",
-    "scrollToProjects": "Scroll to projects",
     "viewDetails": "View details for {{title}}",
     "selectLanguage": "Select language",
     "switchLanguage": "Switch to {{language}}",

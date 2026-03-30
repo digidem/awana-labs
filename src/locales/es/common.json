@@ -85,8 +85,6 @@
     "returnHome": "Volver al Inicio"
   },
   "aria": {
-    "scrollToTop": "Desplazarse hacia arriba",
-    "scrollToProjects": "Desplazarse a proyectos",
     "viewDetails": "Ver detalles de {{title}}",
     "selectLanguage": "Seleccionar idioma",
     "switchLanguage": "Cambiar a {{language}}",

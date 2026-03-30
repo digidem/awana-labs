@@ -79,7 +79,6 @@ const Hero = () => {
           variants={itemVariants}
           onClick={scrollToProjects}
           className="group inline-flex flex-col items-center gap-2 text-primary/70 hover:text-primary transition-colors cursor-pointer"
-          aria-label={t("aria.scrollToProjects")}
         >
           <span className="text-sm font-medium">{t("hero.cta")}</span>
           <motion.div
