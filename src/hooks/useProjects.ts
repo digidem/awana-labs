@@ -5,12 +5,14 @@
  * caching, refetching, and error handling.
  */
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchProjectsQuery,
   getErrorMessage,
   getProjectLoadErrorType,
   PROJECTS_CACHE_MAX_AGE_MS,
+  PROJECTS_DATA_UPDATED_EVENT,
   queryKeys,
 } from "@/lib/api";
 import type { ProjectsData } from "@/types/project";
@@ -45,6 +47,34 @@ export function useProjects(options: UseProjectsOptions = {}) {
 
   // Always uses GitHub API now
   const queryFn = fetchProjectsQuery;
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleProjectsDataUpdated = (event: Event) => {
+      const { detail } = event as CustomEvent<ProjectsData>;
+      if (!detail) {
+        return;
+      }
+
+      queryClient.setQueryData(queryKeys.projects, detail);
+    };
+
+    window.addEventListener(
+      PROJECTS_DATA_UPDATED_EVENT,
+      handleProjectsDataUpdated as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        PROJECTS_DATA_UPDATED_EVENT,
+        handleProjectsDataUpdated as EventListener,
+      );
+    };
+  }, [queryClient]);
 
   return useQuery<ProjectsData, Error>({
     queryKey: queryKeys.projects,

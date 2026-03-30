@@ -5,6 +5,7 @@ import {
   PROJECTS_CACHE_KEY,
   PROJECTS_CACHE_MAX_AGE_MS,
   PROJECTS_CACHE_VERSION,
+  PROJECTS_DATA_UPDATED_EVENT,
   readProjectsCache,
   writeProjectsCache,
 } from "./api";
@@ -148,6 +149,43 @@ describe("projects cache contract", () => {
 
     expect(fetchValidatedProjectsFromGitHub).not.toHaveBeenCalled();
     expect(result).toEqual(mockData);
+  });
+
+  it("dispatches an update event after refreshing stale cached projects", async () => {
+    const mockData = createProjectsData();
+    writeRawCache(
+      mockData,
+      new Date(Date.now() - PROJECTS_CACHE_MAX_AGE_MS - 1000).toISOString(),
+    );
+    const refreshedData = {
+      projects: [
+        {
+          ...mockData.projects[0],
+          title: "Refreshed Project",
+          slug: "refreshed-project",
+          id: "refreshed-project",
+        },
+      ],
+    };
+    vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockResolvedValue(
+      refreshedData,
+    );
+    const updatedListener = vi.fn();
+    window.addEventListener(PROJECTS_DATA_UPDATED_EVENT, updatedListener);
+
+    const result = await fetchProjects();
+
+    expect(result).toEqual(mockData);
+
+    await vi.waitFor(() => {
+      expect(updatedListener).toHaveBeenCalledTimes(1);
+    });
+
+    const event = updatedListener.mock.calls[0][0] as CustomEvent;
+    expect(event.detail).toEqual(refreshedData);
+    expect(readProjectsCache()?.entry.data).toEqual(refreshedData);
+
+    window.removeEventListener(PROJECTS_DATA_UPDATED_EVENT, updatedListener);
   });
 
   it("falls back to stale cached projects when a refresh fails", async () => {

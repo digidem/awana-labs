@@ -11,6 +11,7 @@ import * as api from "@/lib/api";
 // Mock the API module
 vi.mock("@/lib/api", () => ({
   PROJECTS_CACHE_MAX_AGE_MS: 60 * 60 * 1000,
+  PROJECTS_DATA_UPDATED_EVENT: "awana-labs-projects-updated",
   queryKeys: {
     projects: ["projects"] as const,
   },
@@ -111,6 +112,75 @@ describe("useProjects", () => {
 
     expect(result.current.error).toEqual(mockError);
     expect(result.current.data).toBeUndefined();
+  });
+
+  it("updates cached query data when the runtime refresh event fires", async () => {
+    const initialData = {
+      projects: [
+        {
+          id: "1",
+          issue_number: 1,
+          title: "Initial Project",
+          slug: "initial-project",
+          description: "Initial project data",
+          organization: {
+            name: "Test Org",
+            short_name: "Test",
+            url: "https://example.com",
+          },
+          status: {
+            state: "active" as const,
+            usage: "experimental" as const,
+            notes: "",
+          },
+          tags: ["test"],
+          media: {
+            logo: "",
+            images: [],
+          },
+          links: {
+            homepage: "",
+            repository: "",
+            documentation: "",
+          },
+          timestamps: {
+            created_at: "2024-01-01",
+            last_updated_at: "2024-01-01",
+          },
+        },
+      ],
+    };
+    const refreshedData = {
+      projects: [
+        {
+          ...initialData.projects[0],
+          id: "2",
+          issue_number: 2,
+          title: "Refreshed Project",
+          slug: "refreshed-project",
+          description: "Refreshed project data",
+        },
+      ],
+    };
+
+    mockFetchProjectsQuery.mockResolvedValue(initialData);
+
+    const { result } = renderHook(() => useProjects(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.data).toEqual(initialData);
+
+    window.dispatchEvent(
+      new CustomEvent(api.PROJECTS_DATA_UPDATED_EVENT, {
+        detail: refreshedData,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(refreshedData);
+    });
   });
 
   it("should respect enabled option", () => {

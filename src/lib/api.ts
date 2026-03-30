@@ -34,6 +34,7 @@ export type ProjectLoadErrorType = "offline" | "timeout" | "rate-limit" | "gener
 // =============================================================================
 
 export const PROJECTS_CACHE_KEY = "awana-labs-projects-cache";
+export const PROJECTS_DATA_UPDATED_EVENT = "awana-labs-projects-updated";
 export const PROJECTS_CACHE_VERSION = 1;
 export const PROJECTS_CACHE_MAX_AGE_MS = 1000 * 60 * 60;
 /** Stale-while-revalidate upper bound: serve stale cache up to 24 hours old. */
@@ -192,6 +193,18 @@ export function clearProjectsCache(): void {
   storage?.removeItem(PROJECTS_CACHE_KEY);
 }
 
+function dispatchProjectsDataUpdated(data: ProjectsData): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent<ProjectsData>(PROJECTS_DATA_UPDATED_EVENT, {
+      detail: data,
+    }),
+  );
+}
+
 /**
  * Fetch projects from GitHub API
  * Uses the GitHub client to fetch issues with 'publish:yes' label
@@ -208,6 +221,7 @@ export async function fetchProjectsFromGitHub(
   );
 
   writeProjectsCache(data);
+  dispatchProjectsDataUpdated(data);
   return data;
 }
 
