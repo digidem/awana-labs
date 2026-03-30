@@ -27,4 +27,20 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("framer-motion")) return "framer-motion";
+            if (id.includes("lucide-react")) return "lucide";
+            if (id.includes("@tanstack")) return "tanstack";
+            if (id.includes("i18next")) return "i18n";
+            if (id.includes("react-dom") || id.includes("react-router"))
+              return "react-vendor";
+          }
+        },
+      },
+    },
+  },
 }));

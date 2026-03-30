@@ -1,7 +1,9 @@
+import { lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
-import ProjectsGallery from "@/components/ProjectsGallery";
-import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+
+const ProjectsGallery = lazy(() => import("@/components/ProjectsGallery"));
+const Footer = lazy(() => import("@/components/Footer"));
 import { useProjectsWithError } from "@/hooks/useProjects";
 import { useTranslation } from "react-i18next";
 
@@ -71,8 +73,12 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <ProjectsGallery projects={projects} />
-      <Footer />
+      <Suspense fallback={<div className="py-20 min-h-[400px]" />}>
+        <ProjectsGallery projects={projects} />
+      </Suspense>
+      <Suspense fallback={<div className="py-8" />}>
+        <Footer />
+      </Suspense>
     </main>
   );
 };

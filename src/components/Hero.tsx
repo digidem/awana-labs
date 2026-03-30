@@ -1,7 +1,9 @@
+import { lazy, Suspense } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import TopographicBackground from "./TopographicBackground";
 import { ChevronDown } from "lucide-react";
+
+const TopographicBackground = lazy(() => import("./TopographicBackground"));
 
 const Hero = () => {
   const { t } = useTranslation();
@@ -36,7 +38,9 @@ const Hero = () => {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      <TopographicBackground />
+      <Suspense fallback={<div className="absolute inset-0 pointer-events-none" />}>
+        <TopographicBackground />
+      </Suspense>
 
       <motion.div
         variants={containerVariants}
