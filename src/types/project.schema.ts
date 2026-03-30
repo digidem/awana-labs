@@ -193,52 +193,8 @@ export const projectsDataSchema = z.object({
 export type ProjectsData = z.infer<typeof projectsDataSchema>;
 
 // ============================================================================
-// Partial Schemas for Updates/Patches
-// ============================================================================
-
-/**
- * Partial project schema for updates
- * All fields optional
- */
-export const projectUpdateSchema = projectSchema.partial();
-
-export type ProjectUpdate = z.infer<typeof projectUpdateSchema>;
-
-/**
- * Project creation schema (without id, issue_number, timestamps)
- * For creating new projects before they have IDs
- */
-export const projectCreateSchema = projectSchema
-  .omit({
-    id: true,
-    issue_number: true,
-    timestamps: true,
-  })
-  .extend({
-    timestamps: timestampsSchema.partial().optional(),
-  });
-
-export type ProjectCreate = z.infer<typeof projectCreateSchema>;
-
-// ============================================================================
 // Validation Helper Functions
 // ============================================================================
-
-/**
- * Safely validate project data
- * Returns result object with success status and data or error
- */
-export function validateProject(data: unknown) {
-  return projectSchema.safeParse(data);
-}
-
-/**
- * Safely validate projects data array
- * Returns result object with success status and data or error
- */
-export function validateProjectsData(data: unknown) {
-  return projectsDataSchema.safeParse(data);
-}
 
 /**
  * Validate and return project data, throwing on error
@@ -254,39 +210,9 @@ export function parseProjectsData(data: unknown): ProjectsData {
   return projectsDataSchema.parse(data);
 }
 
-/**
- * Validate and return project data from a GitHub issue body
- * This is a helper that can be used with the parseIssueBody function
- */
-export function validateParsedProject(data: unknown): Project | null {
-  const result = projectSchema.safeParse(data);
-  if (result.success) {
-    return result.data;
-  }
-  // Log validation errors for debugging
-  if (result.error) {
-    console.error("Project validation failed:", result.error.format());
-  }
-  return null;
-}
-
 // ============================================================================
 // Type Guards
 // ============================================================================
-
-/**
- * Type guard to check if data is a valid Project
- */
-export function isProject(data: unknown): data is Project {
-  return projectSchema.safeParse(data).success;
-}
-
-/**
- * Type guard to check if data is a valid ProjectsData
- */
-export function isProjectsData(data: unknown): data is ProjectsData {
-  return projectsDataSchema.safeParse(data).success;
-}
 
 /**
  * Type guard to check if string is a valid ProjectState
