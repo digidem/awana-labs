@@ -279,11 +279,18 @@ export async function fetchProjects(): Promise<ProjectsData> {
     return await fetchProjectsFromGitHub(getGitHubToken());
   } catch (error) {
     if (cachedProjects) {
-      console.warn("Using cached projects after GitHub refresh failed:", error);
+      if (isGitHubRateLimitError(error)) {
+        console.warn(
+          "GitHub rate limit exceeded — serving cached projects (age: %d ms)",
+          getProjectsCacheAgeMs(cachedProjects.entry.cachedAt),
+        );
+      } else {
+        console.warn("Using cached projects after GitHub refresh failed:", error);
+      }
       return cachedProjects.entry.data;
     }
 
-    console.error("GitHub API error:", error);
+    console.error("GitHub API error (no cache available):", error);
     throw error;
   }
 }

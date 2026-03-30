@@ -109,5 +109,28 @@ describe("API Client", () => {
       const cached = localStorage.getItem(PROJECTS_CACHE_KEY);
       expect(cached).not.toBeNull();
     });
+
+    it("serves stale cache on rate-limit error", async () => {
+      const mockData = createProjectsData();
+
+      // Prime the cache with valid data
+      localStorage.setItem(
+        PROJECTS_CACHE_KEY,
+        JSON.stringify({
+          version: 1,
+          cachedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h old
+          data: mockData,
+        }),
+      );
+
+      vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockRejectedValue(
+        Object.assign(new Error("API rate limit exceeded"), { status: 403 }),
+      );
+
+      const result = await fetchProjects();
+
+      // Should return cached data, not throw
+      expect(result.projects).toEqual(mockData.projects);
+    });
   });
 });

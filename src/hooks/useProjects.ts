@@ -15,6 +15,7 @@ import {
   PROJECTS_DATA_UPDATED_EVENT,
   queryKeys,
 } from "@/lib/api";
+import { isRateLimitError as isGitHubRateLimitError } from "@/lib/github";
 import type { ProjectsData } from "@/types/project";
 
 interface UseProjectsOptions {
@@ -84,7 +85,11 @@ export function useProjects(options: UseProjectsOptions = {}) {
     gcTime,
     refetchOnWindowFocus,
     refetchOnReconnect,
-    retry,
+    retry: (failureCount, error) => {
+      // Never retry rate-limit errors — they won't resolve until the reset window passes
+      if (isGitHubRateLimitError(error)) return false;
+      return failureCount < retry;
+    },
   });
 }
 

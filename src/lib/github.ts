@@ -72,6 +72,7 @@ export class GitHubApiError extends Error {
     message: string,
     public status: number,
     public documentation_url?: string,
+    public headers?: Record<string, string>,
   ) {
     super(message);
     this.name = "GitHubApiError";
@@ -81,26 +82,45 @@ export class GitHubApiError extends Error {
 /**
  * Check whether a thrown error is a GitHub rate-limit error.
  * Handles both wrapped {@link GitHubApiError} instances and raw Octokit errors.
+ *
+ * Detection paths:
+ * 1. Status 403/429 + "rate limit" in message (original path)
+ * 2. Status 403/429 + x-ratelimit-remaining: "0" header (reliable even when
+ *    GitHub changes error message wording)
  */
 export function isRateLimitError(error: unknown): boolean {
+  const isRateLimitStatus = (s: unknown) => s === 403 || s === 429;
+
+  const hasRateLimitMessage = (msg: unknown): boolean =>
+    typeof msg === "string" && msg.toLowerCase().includes("rate limit");
+
+  const hasRateLimitHeader = (err: Record<string, unknown>): boolean => {
+    const headers =
+      (err["headers"] as Record<string, string> | undefined) ??
+      ((err["response"] as Record<string, unknown> | undefined)?.headers as
+        | Record<string, string>
+        | undefined);
+    return headers?.["x-ratelimit-remaining"] === "0";
+  };
+
   if (error instanceof GitHubApiError) {
+    if (!isRateLimitStatus(error.status)) return false;
     return (
-      (error.status === 403 || error.status === 429) &&
-      error.message.toLowerCase().includes("rate limit")
+      hasRateLimitMessage(error.message) ||
+      (!!error.headers && hasRateLimitHeader(error as unknown as Record<string, unknown>))
     );
   }
+
   // Fallback: duck-type check for raw Octokit / RequestError objects
   if (error && typeof error === "object") {
     const err = error as Record<string, unknown>;
     const status = err["status"];
-    const message =
-      typeof err["message"] === "string"
-        ? (err["message"] as string).toLowerCase()
-        : "";
+    if (!isRateLimitStatus(status)) return false;
     return (
-      (status === 403 || status === 429) && message.includes("rate limit")
+      hasRateLimitMessage(err["message"]) || hasRateLimitHeader(err)
     );
   }
+
   return false;
 }
 
@@ -165,53 +185,62 @@ export class GitHubClient {
       per_page?: number;
     } = {},
   ): Promise<GitHubIssue[]> {
-    try {
-      const allIssues: Array<{
-        number: number;
-        title: string;
-        body?: string | null;
-        state?: string;
-        html_url: string;
-        created_at: string;
-        updated_at: string;
-        labels: Array<string | { name?: string }>;
-        user: { login: string; type: string } | null;
-        pull_request?: Record<string, unknown>;
-      }> = [];
-      const iterator = this.octokit.paginate.iterator(
-        this.octokit.rest.issues.listForRepo,
-        {
-          owner,
-          repo,
-          labels: options.labels,
-          state: options.state || "open",
-          per_page: options.per_page || 100,
-        }
-      );
+    const allIssues: Array<{
+      number: number;
+      title: string;
+      body?: string | null;
+      state?: string;
+      html_url: string;
+      created_at: string;
+      updated_at: string;
+      labels: Array<string | { name?: string }>;
+      user: { login: string; type: string } | null;
+      pull_request?: Record<string, unknown>;
+    }> = [];
+    const iterator = this.octokit.paginate.iterator(
+      this.octokit.rest.issues.listForRepo,
+      {
+        owner,
+        repo,
+        labels: options.labels,
+        state: options.state || "open",
+        per_page: options.per_page || 100,
+      }
+    );
 
+    try {
       for await (const response of iterator) {
         allIssues.push(...(response.data as typeof allIssues));
       }
-
-      const issuesOnly = allIssues.filter((issue) => !issue.pull_request);
-
-      return issuesOnly.map((issue) => ({
-        number: issue.number,
-        title: issue.title,
-        body: issue.body || null,
-        state: issue.state || "open",
-        html_url: issue.html_url,
-        created_at: issue.created_at,
-        updated_at: issue.updated_at,
-        labels: normalizeLabels(issue.labels),
-        user: {
-          login: issue.user?.login || "",
-          type: issue.user?.type || "User",
-        },
-      }));
     } catch (error) {
-      throw this.handleError(error);
+      // If rate-limited mid-pagination and we already collected issues,
+      // return partial data rather than failing entirely.
+      if (isRateLimitError(error) && allIssues.length > 0) {
+        console.warn(
+          "GitHub rate limit during pagination (%d issues collected); returning partial results",
+          allIssues.length,
+        );
+      } else {
+        throw this.handleError(error);
+      }
     }
+
+    const issuesOnly = allIssues.filter((issue) => !issue.pull_request);
+
+    return issuesOnly.map((issue) => ({
+      number: issue.number,
+      title: issue.title,
+      body: issue.body || null,
+      state: issue.state || "open",
+      html_url: issue.html_url,
+      created_at: issue.created_at,
+      updated_at: issue.updated_at,
+      labels: normalizeLabels(issue.labels),
+      user: {
+        login: issue.user?.login || "",
+        type: issue.user?.type || "User",
+      },
+    }));
   }
 
   /**
@@ -304,12 +333,15 @@ export class GitHubClient {
       const status = (error as { status?: number }).status || 500;
       const documentation_url = (error as { documentation_url?: string })
         .documentation_url;
+      const headers = (error as { response?: { headers?: Record<string, string> } })
+        .response?.headers;
 
       if (error.message.includes("Bad credentials")) {
         return new GitHubApiError(
           "GitHub API authentication failed. Please check your token.",
           status,
           documentation_url,
+          headers,
         );
       }
 
@@ -318,6 +350,7 @@ export class GitHubClient {
           "Repository or resource not found.",
           status,
           documentation_url,
+          headers,
         );
       }
 
@@ -326,10 +359,11 @@ export class GitHubClient {
           "GitHub API rate limit exceeded. Please try again later.",
           status,
           documentation_url,
+          headers,
         );
       }
 
-      return new GitHubApiError(error.message, status, documentation_url);
+      return new GitHubApiError(error.message, status, documentation_url, headers);
     }
 
     return new GitHubApiError("Unknown GitHub API error", 500);
