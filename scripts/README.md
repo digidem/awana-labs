@@ -12,10 +12,10 @@ Fetches all issues from `luandro/awana-labs-showcase` with the `publish:yes` lab
 
 ```bash
 # Using the npm script
-bun run fetch:projects
+npm run fetch:projects
 
 # Direct execution
-bun scripts/fetch-projects.ts
+npx tsx scripts/fetch-projects.ts
 ```
 
 **Environment Variables:**

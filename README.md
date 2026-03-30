@@ -23,7 +23,7 @@ A modern, responsive web application for showcasing projects with multi-language
 - **Internationalization**: i18next, react-i18next
 - **Forms**: React Hook Form with Zod validation
 - **Testing**: Vitest, Playwright, React Testing Library
-- **Package Manager**: npm (with Bun for scripts)
+- **Package Manager**: npm
 
 ## Installation
 
@@ -106,7 +106,7 @@ npm run test:e2e:debug
 - `npm run test:e2e` - Run Playwright end-to-end tests
 - `npm run test:e2e:ui` - Run Playwright tests with UI
 - `npm run test:e2e:debug` - Run Playwright tests in debug mode
-- `npm run fetch:projects` - Fetch projects data (requires Bun)
+- `npm run fetch:projects` - Fetch projects data
 
 ## Internationalization (i18n)
 

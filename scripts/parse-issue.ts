@@ -466,7 +466,7 @@ export function parseIssueBody(
 }
 
 // ============================================================================
-// CLI Usage (for running directly with ts-node/bun)
+// CLI Usage (for running directly with tsx/vite-node)
 // ============================================================================
 
 // Only run CLI when this is the main module (not when imported)
@@ -479,7 +479,7 @@ if (isMainModule) {
 
   if (args.includes("--help") || args.includes("-h")) {
     console.log(`
-Usage: bun run parse-issue.ts <issue-body-file> [options]
+Usage: npx tsx parse-issue.ts <issue-body-file> [options]
 
 Arguments:
   issue-body-file    Path to file containing the issue body markdown
@@ -492,7 +492,7 @@ Options:
   --help, -h         Show this help message
 
 Example:
-  bun run scripts/parse-issue.ts issue.md --number 2 \\
+  npx tsx scripts/parse-issue.ts issue.md --number 2 \\
     --created 2026-02-03T18:34:20Z \\
     --updated 2026-02-03T18:34:20Z
     `);

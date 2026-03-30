@@ -1,3 +1,8 @@
+# bun files
+bun.lock
+bun.lockb
+bunfig.toml
+
 # Logs
 logs
 *.log

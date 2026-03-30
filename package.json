@@ -15,7 +15,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:install": "playwright install --with-deps",
-    "fetch:projects": "bun scripts/fetch-projects.ts",
+    "fetch:projects": "npx tsx scripts/fetch-projects.ts",
     "prepare": "husky"
   },
   "dependencies": {
