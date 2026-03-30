@@ -1,12 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Inter font - self-hosted (v20, Latin subset) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 400 500 600 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin.woff2') format('woff2');
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Awana Labs Design System
-   Primary: Deep Plum #4C1130 → HSL(338, 61%, 18%)
-   Accent: Warm Cream #F7F3EB → HSL(40, 43%, 95%)
+   Primary: Deep Plum #4C1130 -> HSL(338, 61%, 18%)
+   Accent: Warm Cream #F7F3EB -> HSL(40, 43%, 95%)
 */
 
 @layer base {
