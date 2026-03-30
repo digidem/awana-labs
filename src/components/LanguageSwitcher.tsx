@@ -60,7 +60,15 @@ const LanguageSwitcher = ({
           "bg-background/50 backdrop-blur-sm",
           className,
         )}
-        aria-label={t("aria.selectLanguage")}
+        aria-label={
+          variant === "icon-only"
+            ? t("aria.selectLanguage")
+            : `${t("aria.selectLanguage")} (${
+                variant === "compact"
+                  ? currentLang.code.toUpperCase()
+                  : currentLang.nativeName
+              })`
+        }
       >
         {getTriggerContent()}
         {variant !== "icon-only" && (
