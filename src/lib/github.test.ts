@@ -206,13 +206,49 @@ describe("GitHubClient", () => {
     });
 
     it("should handle API errors", async () => {
-      mockPaginateIterator.mockImplementation(() => {
-        throw new Error("Bad credentials");
-      });
+      mockPaginateIterator.mockReturnValue(
+        // eslint-disable-next-line require-yield
+        (async function* () {
+          throw new Error("Bad credentials");
+        })(),
+      );
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         GitHubApiError,
       );
+    });
+
+    it("returns partial issues when rate-limited mid-pagination", async () => {
+      const firstPage = [
+        {
+          number: 1, title: "Issue 1", body: null, state: "open",
+          html_url: "https://github.com/o/r/issues/1",
+          created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-02T00:00:00Z",
+          labels: [], user: { login: "u", type: "User" },
+        },
+      ];
+
+      mockPaginateIterator.mockReturnValue(
+        (async function* () {
+          yield { data: firstPage };
+          throw Object.assign(new Error("rate limit exceeded"), { status: 403 });
+        })(),
+      );
+
+      const issues = await client.getIssues("owner", "repo");
+      expect(issues).toHaveLength(1);
+      expect(issues[0].number).toBe(1);
+    });
+
+    it("still throws for non-rate-limit errors during pagination with no data", async () => {
+      mockPaginateIterator.mockReturnValue(
+        // eslint-disable-next-line require-yield
+        (async function* () {
+          throw new Error("Network failure");
+        })(),
+      );
+
+      await expect(client.getIssues("owner", "repo")).rejects.toThrow(GitHubApiError);
     });
   });
 
@@ -327,9 +363,12 @@ describe("GitHubClient", () => {
 
   describe("error handling", () => {
     it("should throw GitHubApiError with correct status for bad credentials", async () => {
-      mockPaginateIterator.mockImplementation(() => {
-        throw Object.assign(new Error("Bad credentials"), { status: 401 });
-      });
+      mockPaginateIterator.mockReturnValue(
+        // eslint-disable-next-line require-yield
+        (async function* () {
+          throw Object.assign(new Error("Bad credentials"), { status: 401 });
+        })(),
+      );
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         "GitHub API authentication failed",
@@ -337,9 +376,12 @@ describe("GitHubClient", () => {
     });
 
     it("should throw GitHubApiError for not found", async () => {
-      mockPaginateIterator.mockImplementation(() => {
-        throw Object.assign(new Error("Not Found"), { status: 404 });
-      });
+      mockPaginateIterator.mockReturnValue(
+        // eslint-disable-next-line require-yield
+        (async function* () {
+          throw Object.assign(new Error("Not Found"), { status: 404 });
+        })(),
+      );
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         "Repository or resource not found",
@@ -347,9 +389,12 @@ describe("GitHubClient", () => {
     });
 
     it("should throw GitHubApiError for rate limit", async () => {
-      mockPaginateIterator.mockImplementation(() => {
-        throw Object.assign(new Error("Rate limit exceeded"), { status: 403 });
-      });
+      mockPaginateIterator.mockReturnValue(
+        // eslint-disable-next-line require-yield
+        (async function* () {
+          throw Object.assign(new Error("Rate limit exceeded"), { status: 403 });
+        })(),
+      );
 
       await expect(client.getIssues("owner", "repo")).rejects.toThrow(
         "GitHub API rate limit exceeded",
@@ -424,5 +469,30 @@ describe("isRateLimitError", () => {
 
   it("returns false for a number", () => {
     expect(isRateLimitError(42)).toBe(false);
+  });
+
+  it("returns true for GitHubApiError with status 403 and x-ratelimit-remaining: 0 header", () => {
+    const error = new GitHubApiError("Forbidden", 403, undefined, { "x-ratelimit-remaining": "0" });
+    expect(isRateLimitError(error)).toBe(true);
+  });
+
+  it("returns false for GitHubApiError with status 403 and x-ratelimit-remaining: 5 header", () => {
+    const error = new GitHubApiError("Forbidden", 403, undefined, { "x-ratelimit-remaining": "5" });
+    expect(isRateLimitError(error)).toBe(false);
+  });
+
+  it("returns true for duck-typed error with status 403 and x-ratelimit-remaining: 0 header", () => {
+    const error = { status: 403, message: "forbidden", headers: { "x-ratelimit-remaining": "0" } };
+    expect(isRateLimitError(error)).toBe(true);
+  });
+
+  it("returns true for duck-typed error with status 403 and nested response header", () => {
+    const error = { status: 403, message: "forbidden", response: { headers: { "x-ratelimit-remaining": "0" } } };
+    expect(isRateLimitError(error)).toBe(true);
+  });
+
+  it("returns false for duck-typed error with status 403 and non-zero remaining header", () => {
+    const error = { status: 403, message: "forbidden", headers: { "x-ratelimit-remaining": "10" } };
+    expect(isRateLimitError(error)).toBe(false);
   });
 });
