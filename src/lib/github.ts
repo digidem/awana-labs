@@ -176,6 +176,7 @@ export class GitHubClient {
         updated_at: string;
         labels: Array<string | { name?: string }>;
         user: { login: string; type: string } | null;
+        pull_request?: Record<string, unknown>;
       }> = [];
       const iterator = this.octokit.paginate.iterator(
         this.octokit.rest.issues.listForRepo,
@@ -192,7 +193,9 @@ export class GitHubClient {
         allIssues.push(...(response.data as typeof allIssues));
       }
 
-      return allIssues.map((issue) => ({
+      const issuesOnly = allIssues.filter((issue) => !issue.pull_request);
+
+      return issuesOnly.map((issue) => ({
         number: issue.number,
         title: issue.title,
         body: issue.body || null,

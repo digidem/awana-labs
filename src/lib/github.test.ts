@@ -165,6 +165,46 @@ describe("GitHubClient", () => {
       );
     });
 
+    it("filters pull requests out of the issues response", async () => {
+      const mockIssues = [
+        {
+          number: 1,
+          title: "Test Issue",
+          body: "Issue body",
+          state: "open",
+          html_url: "https://github.com/owner/repo/issues/1",
+          created_at: "2024-01-01T00:00:00Z",
+          updated_at: "2024-01-02T00:00:00Z",
+          labels: [{ name: "bug" }],
+          user: { login: "testuser", type: "User" },
+        },
+        {
+          number: 2,
+          title: "Test Pull Request",
+          body: "PR body",
+          state: "open",
+          html_url: "https://github.com/owner/repo/pull/2",
+          created_at: "2024-01-03T00:00:00Z",
+          updated_at: "2024-01-04T00:00:00Z",
+          labels: [{ name: "enhancement" }],
+          user: { login: "testuser", type: "User" },
+          pull_request: { url: "https://api.github.com/repos/owner/repo/pulls/2" },
+        },
+      ];
+
+      mockPaginateIterator.mockReturnValue(
+        (async function* () {
+          yield { data: mockIssues };
+        })()
+      );
+
+      const issues = await client.getIssues("owner", "repo");
+
+      expect(issues).toHaveLength(1);
+      expect(issues[0].number).toBe(1);
+      expect(issues[0].title).toBe("Test Issue");
+    });
+
     it("should handle API errors", async () => {
       mockPaginateIterator.mockImplementation(() => {
         throw new Error("Bad credentials");
