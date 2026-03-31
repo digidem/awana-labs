@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install dependencies
         run: npm ci
@@ -34,7 +34,7 @@ jobs:
         run: npm run build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
 
@@ -44,7 +44,55 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+
+  test-live:
+    needs: deploy
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for deployment to propagate
+        run: |
+          echo "Waiting 30s for GitHub Pages to propagate..."
+          sleep 30
+
+      - name: Test live site
+        run: npx playwright test --project=chromium
+        env:
+          BASE_URL: https://digidem.github.io/awana-labs/
+        working-directory: ./e2e-live
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-site-test-results
+          path: e2e-live/test-results/
+          retention-days: 30
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: live-site-html-report
+          path: e2e-live/playwright-report/
+          retention-days: 30

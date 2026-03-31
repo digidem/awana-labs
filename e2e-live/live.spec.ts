@@ -18,12 +18,11 @@ test.describe("Live Site Tests", () => {
   test("site loads and responds", async ({ page }) => {
     const response = await page.goto("/");
 
-    // Should return 200 OK or 3xx redirect
-    const status = response?.status();
-    expect(status).toBeGreaterThanOrEqual(200);
-    expect(status).toBeLessThan(400);
+    expect(response, "Page should return a response").toBeDefined();
+    const status = response!.status();
+    expect(status, `Expected 2xx/3xx status, got ${status}`).toBeGreaterThanOrEqual(200);
+    expect(status, `Expected < 400 status, got ${status}`).toBeLessThan(400);
 
-    // Page should have loaded
     expect(page.url()).toBeTruthy();
     expect(page.url().length).toBeGreaterThan(0);
   });
@@ -32,7 +31,6 @@ test.describe("Live Site Tests", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check for basic HTML elements
     const html = page.locator("html");
     await expect(html).toBeAttached();
 
@@ -45,12 +43,9 @@ test.describe("Live Site Tests", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Should have substantial content
     const bodyText = await page.locator("body").textContent();
-    expect(bodyText?.trim().length).toBeGreaterThan(100);
-
-    // Should not be blank or just whitespace
-    expect(bodyText?.trim()).not.toBe("");
+    expect(bodyText?.trim().length, "Page should have substantial content").toBeGreaterThan(100);
+    expect(bodyText?.trim(), "Page should not be blank").not.toBe("");
   });
 
   test("site loads within reasonable time", async ({ page }) => {
@@ -59,8 +54,7 @@ test.describe("Live Site Tests", () => {
     await page.waitForLoadState("domcontentloaded");
     const loadTime = Date.now() - startTime;
 
-    // Should load in less than 10 seconds
-    expect(loadTime).toBeLessThan(10000);
+    expect(loadTime, `Site took ${loadTime}ms to load, expected < 10000ms`).toBeLessThan(10000);
   });
 
   test("critical assets load successfully", async ({ page }) => {
@@ -68,7 +62,6 @@ test.describe("Live Site Tests", () => {
 
     page.on("response", (response) => {
       const url = response.url();
-      // Track critical asset failures
       if (
         (url.includes(".js") || url.includes(".css")) &&
         response.status() >= 400
@@ -80,99 +73,77 @@ test.describe("Live Site Tests", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Log any failures for debugging
-    if (failedRequests.length > 0) {
-      console.warn("Some assets failed to load:", failedRequests);
-    }
-
-    // The test should pass as long as the page itself loads
-    // Individual asset failures are warnings, not failures
-    expect(failedRequests.length).toBeLessThan(10);
+    expect(
+      failedRequests,
+      `Failed asset requests: ${JSON.stringify(failedRequests, null, 2)}`,
+    ).toHaveLength(0);
   });
 
   test("no critical JavaScript errors", async ({ page }) => {
     const errors: string[] = [];
 
     page.on("pageerror", (error) => {
-      // Only track critical errors, not third-party script issues
+      // Ignore third-party script errors that we cannot control
       const errorStr = error.toString();
       if (
-        errorStr.includes("TypeError") ||
-        errorStr.includes("SyntaxError") ||
-        errorStr.includes("ReferenceError")
+        errorStr.includes("Script error") ||
+        errorStr.includes("cdn") ||
+        errorStr.includes("analytics")
       ) {
-        errors.push(errorStr);
+        return;
       }
+      errors.push(errorStr);
     });
 
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Wait a bit for async errors
+    // Wait for async errors to surface
     await page.waitForTimeout(2000);
 
-    // Log errors for debugging
-    if (errors.length > 0) {
-      console.warn("JavaScript errors detected:", errors);
-    }
-
-    // Allow minor third-party errors but not critical app errors
-    const criticalErrors = errors.filter(
-      (e) =>
-        !e.includes("Script error") &&
-        !e.includes("cdn") &&
-        !e.includes("analytics"),
-    );
-
-    // The site should work even with minor errors
-    expect(criticalErrors.length).toBeLessThan(5);
+    expect(
+      errors,
+      `JavaScript errors detected: ${errors.join("\n")}`,
+    ).toHaveLength(0);
   });
 
   test("site is responsive on mobile viewport", async ({ page }) => {
-    // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check mobile content is visible
     const body = page.locator("body");
     await expect(body).toBeVisible();
 
     const bodyText = await body.textContent();
-    expect(bodyText?.trim().length).toBeGreaterThan(50);
+    expect(bodyText?.trim().length, "Mobile page should have content").toBeGreaterThan(50);
   });
 
   test("site is responsive on desktop viewport", async ({ page }) => {
-    // Set desktop viewport
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check desktop content is visible
     const body = page.locator("body");
     await expect(body).toBeVisible();
 
     const bodyText = await body.textContent();
-    expect(bodyText?.trim().length).toBeGreaterThan(50);
+    expect(bodyText?.trim().length, "Desktop page should have content").toBeGreaterThan(50);
   });
 
   test("site navigation works", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    // Find any links on the page
-    const links = page.locator("a[href]").first();
+    const links = page.locator("a[href]");
+    const linkCount = await links.count();
 
-    if ((await links.count()) > 0) {
-      // Click the first link
-      await links.first().click();
+    expect(linkCount, "Page should have at least one navigable link").toBeGreaterThan(0);
 
-      // Wait for navigation
-      await page.waitForTimeout(1000);
+    // Click the first link and verify navigation occurs
+    await links.first().click();
+    await page.waitForTimeout(1000);
 
-      // Page should still be loaded
-      expect(page.url()).toBeTruthy();
-    }
-    // If no links, that's also fine - test passes
+    expect(page.url(), "Page should have navigated to a valid URL").toBeTruthy();
   });
 });

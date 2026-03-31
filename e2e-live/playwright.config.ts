@@ -8,9 +8,10 @@ export default defineConfig({
   testDir: "./",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 0 : 0,
   workers: 1,
-  reporter: [["html"], ["list"]],
+  reporter: [["html", { open: "never" }], ["list"]],
+  outputDir: "./test-results",
   use: {
     trace: "on-first-retry",
     screenshot: "only-on-failure",
