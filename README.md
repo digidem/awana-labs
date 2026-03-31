@@ -1,9 +1,16 @@
 # Awana Labs
 
-Multilingual project showcase for `digidem/awana-labs`. The app fetches published project data from GitHub, validates it at runtime, caches it locally, and renders it as a searchable gallery.
+[![Deploy to GitHub Pages](https://github.com/digidem/awana-labs/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/digidem/awana-labs/actions/workflows/deploy.yml)
+[![E2E Tests](https://github.com/digidem/awana-labs/actions/workflows/test-e2e.yml/badge.svg?branch=main)](https://github.com/digidem/awana-labs/actions/workflows/test-e2e.yml)
+[![Test Deployed Site](https://github.com/digidem/awana-labs/actions/workflows/test-deployed.yml/badge.svg?branch=main)](https://github.com/digidem/awana-labs/actions/workflows/test-deployed.yml)
+
+Showcase for Awana Labs. Its goal is to build tech tools that resolve users' workflow problems using our apps, APIs, and support materials.
+
+This site fetches published project data from GitHub, validates it at runtime, caches it locally, and renders it as a multilingual, searchable gallery.
 
 ## What It Does
 
+- Presents the Awana Labs mission and project portfolio in one public place
 - Publishes project entries from GitHub issues labeled `publish:yes`
 - Validates project data before it reaches the UI
 - Caches validated data in `localStorage` for fast reloads and offline fallback
@@ -49,12 +56,6 @@ VITE_GITHUB_REPO=awana-labs
 VITE_GITHUB_LABEL=publish:yes
 ```
 
-For the GitHub fetch script, use:
-
-```bash
-GITHUB_TOKEN=your_token_here
-GITHUB_REPOSITORY=owner/repo
-```
 
 ## Scripts
 
@@ -67,7 +68,6 @@ npm run lint
 npm run typecheck
 npm run test
 npm run test:e2e
-npm run fetch:projects
 ```
 
 ## Runtime Behavior

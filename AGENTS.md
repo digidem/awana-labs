@@ -25,7 +25,6 @@
 - `npm run test` - Run Vitest in CI mode.
 - `npm run test:e2e` - Run Playwright tests headlessly.
 - `npm run test:e2e:ui` - Open Playwright UI runner.
-- `npm run fetch:projects` - Run `scripts/fetch-projects.ts` via tsx.
 - `npm run test:e2e -- verify-projects.spec.ts` - Run targeted E2E verification.
 - `node scripts/verify-site.mjs` - Run site verification script.
 - `node scripts/verify-detailed.mjs` - Run detailed verification script.

@@ -5,7 +5,6 @@ on:
     workflows: ["Deploy to GitHub Pages"]
     types:
       - completed
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -38,7 +37,7 @@ jobs:
       - name: Test live site
         run: npx playwright test --project=chromium
         env:
-          BASE_URL: https://luandro.github.io/awana-labs-showcase/
+          BASE_URL: https://digidem.github.io/awana-labs/
         working-directory: ./e2e-live
 
       - name: Upload test results
