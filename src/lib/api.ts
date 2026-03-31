@@ -210,14 +210,11 @@ function dispatchProjectsDataUpdated(data: ProjectsData): void {
  * Uses the GitHub client to fetch issues with 'publish:yes' label
  * and validates the response before it can reach the UI or cache.
  */
-export async function fetchProjectsFromGitHub(
-  token?: string,
-): Promise<ProjectsData> {
+export async function fetchProjectsFromGitHub(): Promise<ProjectsData> {
   const data = await fetchValidatedProjectsFromGitHub(
     import.meta.env.VITE_GITHUB_OWNER || "luandro",
     import.meta.env.VITE_GITHUB_REPO || "awana-labs-showcase",
     import.meta.env.VITE_GITHUB_LABEL || "publish:yes",
-    token,
   );
 
   writeProjectsCache(data);
@@ -232,11 +229,6 @@ export async function fetchProjectsFromGitHub(
 function isWithinStaleWindow(cachedAt: string): boolean {
   const ageMs = getProjectsCacheAgeMs(cachedAt);
   return ageMs > PROJECTS_CACHE_MAX_AGE_MS && ageMs <= PROJECTS_STALE_WINDOW_MS;
-}
-
-/** Resolved GitHub token from the Vite environment, or undefined. */
-function getGitHubToken(): string | undefined {
-  return import.meta.env.VITE_GITHUB_TOKEN || undefined;
 }
 
 /**
@@ -261,7 +253,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
   // immediately and kick off a background refresh.
   if (cachedProjects && online && isWithinStaleWindow(cachedProjects.entry.cachedAt)) {
     // Fire-and-forget background refresh
-    fetchProjectsFromGitHub(getGitHubToken()).catch((error: unknown) => {
+    fetchProjectsFromGitHub().catch((error: unknown) => {
       console.warn("Background refresh failed:", error);
     });
     return cachedProjects.entry.data;
@@ -276,7 +268,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
   }
 
   try {
-    return await fetchProjectsFromGitHub(getGitHubToken());
+    return await fetchProjectsFromGitHub();
   } catch (error) {
     if (cachedProjects) {
       if (isGitHubRateLimitError(error)) {
