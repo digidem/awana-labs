@@ -1,12 +1,12 @@
 # Build Scripts
 
-This directory contains TypeScript build scripts for the Awana Labs Showcase project.
+This directory contains TypeScript build scripts for the Awana Labs project.
 
 ## Available Scripts
 
 ### fetch-projects.ts
 
-Fetches all issues from `luandro/awana-labs-showcase` with the `publish:yes` label using the GitHub API via @octokit/rest.
+Fetches all issues from the configured Awana Labs repository with the `publish:yes` label using the GitHub API via `@octokit/rest`.
 
 **Usage:**
 
