@@ -142,7 +142,7 @@ const Header = ({ className }: HeaderProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              href="https://github.com/awanadigital"
+              href="https://github.com/digidem/awana-labs"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-accent transition-colors"
