@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Input } from "@/components/ui/input";
 import ProjectCard from "./ProjectCard";
@@ -12,18 +13,22 @@ interface ProjectsGalleryProps {
 
 type StatusFilter = "all" | "active" | "paused" | "archived";
 
-const filterOptions: { value: StatusFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "paused", label: "Paused" },
-  { value: "archived", label: "Archived" },
-];
-
 const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
+
+  const filterOptions: { value: StatusFilter; label: string }[] = [
+    { value: "all", label: t("common.all") },
+    { value: "active", label: t("status.active") },
+    { value: "paused", label: t("status.paused") },
+    { value: "archived", label: t("status.archived") },
+  ];
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeTrigger, setActiveTrigger] = useState<HTMLButtonElement | null>(
+    null,
+  );
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
@@ -65,14 +70,13 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12 px-4"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Our Projects
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
+            {t("projects.title")}
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Practical tools forged from real partner needs and platform
-            challenges
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+            {t("projects.subtitle")}
           </p>
         </motion.div>
 
@@ -82,14 +86,18 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8"
+          className="flex flex-col gap-4 mb-8"
         >
           {/* Search */}
-          <div className="relative w-full sm:w-80">
+          <div className="relative w-full sm:max-w-md mx-auto sm:mx-0">
+            <label htmlFor="project-search" className="sr-only">
+              {t("projects.searchLabel")}
+            </label>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
+              id="project-search"
               type="text"
-              placeholder="Search projects..."
+              placeholder={t("projects.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-card/50"
@@ -97,12 +105,18 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
           </div>
 
           {/* Status Filter Pills */}
-          <div className="flex gap-2 flex-wrap justify-center">
+          <div
+            role="group"
+            aria-label={t("projects.statusFilterLabel")}
+            className="flex gap-2 flex-wrap justify-center sm:justify-start"
+          >
             {filterOptions.map((option) => (
               <button
                 key={option.value}
+                type="button"
                 onClick={() => setStatusFilter(option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                aria-pressed={statusFilter === option.value}
+                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   statusFilter === option.value
                     ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-card hover:bg-secondary text-foreground border border-border"
@@ -121,14 +135,17 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
+            id="projects-grid"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredProjects.map((project, index) => (
+            {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
-                index={index}
-                onClick={() => setSelectedProject(project)}
+                onClick={(trigger) => {
+                  setActiveTrigger(trigger);
+                  setSelectedProject(project);
+                }}
               />
             ))}
           </motion.div>
@@ -139,7 +156,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             className="text-center py-16"
           >
             <p className="text-muted-foreground text-lg">
-              No projects found matching your criteria.
+              {t("projects.noResults")}
             </p>
             <button
               onClick={() => {
@@ -148,7 +165,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
               }}
               className="mt-4 text-primary hover:underline"
             >
-              Clear filters
+              {t("projects.clearFilters")}
             </button>
           </motion.div>
         )}
@@ -158,6 +175,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
       <ProjectModal
         project={selectedProject}
         isOpen={!!selectedProject}
+        triggerElement={activeTrigger}
         onClose={() => setSelectedProject(null)}
       />
     </section>

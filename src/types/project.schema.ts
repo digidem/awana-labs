@@ -3,7 +3,7 @@
  *
  * Runtime type validation for project data structures.
  * Provides Zod schemas for validating project data from external sources
- * (GitHub API, projects.json, user input).
+ * (GitHub issue fetches, browser localStorage cache, user input).
  *
  * Usage:
  *   import { projectSchema, projectsDataSchema } from '@/types/project.schema';
@@ -23,11 +23,7 @@ import { z } from "zod";
  * - paused: Temporarily suspended, may resume
  * - archived: No longer maintained, kept for reference
  */
-export const ProjectStateEnum = z.enum(["active", "paused", "archived"], {
-  errorMap: () => ({
-    message: "State must be one of: active, paused, archived",
-  }),
-});
+export const ProjectStateEnum = z.enum(["active", "paused", "archived"]);
 export type ProjectState = z.infer<typeof ProjectStateEnum>;
 
 /**
@@ -36,14 +32,7 @@ export type ProjectState = z.infer<typeof ProjectStateEnum>;
  * - used: Used in specific contexts/deployments
  * - widely-used: Used across multiple deployments/projects
  */
-export const ProjectUsageEnum = z.enum(
-  ["experimental", "used", "widely-used"],
-  {
-    errorMap: () => ({
-      message: "Usage must be one of: experimental, used, widely-used",
-    }),
-  },
-);
+export const ProjectUsageEnum = z.enum(["experimental", "used", "widely-used"]);
 export type ProjectUsage = z.infer<typeof ProjectUsageEnum>;
 
 // ============================================================================
@@ -80,6 +69,22 @@ export const statusSchema = z.object({
 export type Status = z.infer<typeof statusSchema>;
 
 // ============================================================================
+// Shared URL Helpers
+// ============================================================================
+
+/**
+ * Helper: accepts a valid URL or an empty string.
+ * Used for optional URL fields that default to "" when absent.
+ */
+const optionalUrl = (label: string) =>
+  z
+    .string()
+    .refine((val) => val === "" || z.string().url().safeParse(val).success, {
+      message: `${label} must be a valid URL`,
+    })
+    .default("");
+
+// ============================================================================
 // Media Schema
 // ============================================================================
 
@@ -87,7 +92,7 @@ export type Status = z.infer<typeof statusSchema>;
  * Project media assets schema
  */
 export const mediaSchema = z.object({
-  logo: z.string().url("Logo must be a valid URL").optional().default(""),
+  logo: optionalUrl("Logo"),
   images: z.array(z.string().url("Image URLs must be valid")).default([]),
 });
 
@@ -103,16 +108,8 @@ export type Media = z.infer<typeof mediaSchema>;
  */
 export const linksSchema = z.object({
   homepage: z.string().url("Homepage must be a valid URL"),
-  repository: z
-    .string()
-    .url("Repository must be a valid URL")
-    .optional()
-    .default(""),
-  documentation: z
-    .string()
-    .url("Documentation must be a valid URL")
-    .optional()
-    .default(""),
+  repository: optionalUrl("Repository"),
+  documentation: optionalUrl("Documentation"),
 });
 
 export type Links = z.infer<typeof linksSchema>;
@@ -186,7 +183,8 @@ export type Project = z.infer<typeof projectSchema>;
 
 /**
  * Container schema for projects array
- * Matches the structure of public/projects.json
+ * Matches the runtime projects payload returned from GitHub-backed fetches
+ * and persisted in browser localStorage.
  */
 export const projectsDataSchema = z.object({
   projects: z.array(projectSchema),
@@ -195,52 +193,8 @@ export const projectsDataSchema = z.object({
 export type ProjectsData = z.infer<typeof projectsDataSchema>;
 
 // ============================================================================
-// Partial Schemas for Updates/Patches
-// ============================================================================
-
-/**
- * Partial project schema for updates
- * All fields optional
- */
-export const projectUpdateSchema = projectSchema.partial();
-
-export type ProjectUpdate = z.infer<typeof projectUpdateSchema>;
-
-/**
- * Project creation schema (without id, issue_number, timestamps)
- * For creating new projects before they have IDs
- */
-export const projectCreateSchema = projectSchema
-  .omit({
-    id: true,
-    issue_number: true,
-    timestamps: true,
-  })
-  .extend({
-    timestamps: timestampsSchema.partial().optional(),
-  });
-
-export type ProjectCreate = z.infer<typeof projectCreateSchema>;
-
-// ============================================================================
 // Validation Helper Functions
 // ============================================================================
-
-/**
- * Safely validate project data
- * Returns result object with success status and data or error
- */
-export function validateProject(data: unknown) {
-  return projectSchema.safeParse(data);
-}
-
-/**
- * Safely validate projects data array
- * Returns result object with success status and data or error
- */
-export function validateProjectsData(data: unknown) {
-  return projectsDataSchema.safeParse(data);
-}
 
 /**
  * Validate and return project data, throwing on error
@@ -256,39 +210,9 @@ export function parseProjectsData(data: unknown): ProjectsData {
   return projectsDataSchema.parse(data);
 }
 
-/**
- * Validate and return project data from a GitHub issue body
- * This is a helper that can be used with the parseIssueBody function
- */
-export function validateParsedProject(data: unknown): Project | null {
-  const result = projectSchema.safeParse(data);
-  if (result.success) {
-    return result.data;
-  }
-  // Log validation errors for debugging
-  if (result.error) {
-    console.error("Project validation failed:", result.error.format());
-  }
-  return null;
-}
-
 // ============================================================================
 // Type Guards
 // ============================================================================
-
-/**
- * Type guard to check if data is a valid Project
- */
-export function isProject(data: unknown): data is Project {
-  return projectSchema.safeParse(data).success;
-}
-
-/**
- * Type guard to check if data is a valid ProjectsData
- */
-export function isProjectsData(data: unknown): data is ProjectsData {
-  return projectsDataSchema.safeParse(data).success;
-}
 
 /**
  * Type guard to check if string is a valid ProjectState

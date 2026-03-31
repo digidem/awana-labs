@@ -3,70 +3,59 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchJson, fetchProjects, ApiError, getErrorMessage } from "./api";
+import * as githubProjects from "./github-projects";
+import {
+  fetchProjects,
+  ApiError,
+  getErrorMessage,
+  PROJECTS_CACHE_KEY,
+} from "./api";
 
-// Mock fetch globally
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+function createProjectsData() {
+  return {
+    projects: [
+      {
+        id: "test-project",
+        issue_number: 1,
+        title: "Test Project",
+        slug: "test-project",
+        description: "A test project",
+        organization: {
+          name: "Test Org",
+          short_name: "Test",
+          url: "https://example.com",
+        },
+        status: {
+          state: "active" as const,
+          usage: "experimental" as const,
+          notes: "",
+        },
+        tags: ["test"],
+        media: {
+          logo: "https://example.com/logo.png",
+          images: ["https://example.com/image.png"],
+        },
+        links: {
+          homepage: "https://example.com",
+          repository: "https://github.com/test/repo",
+          documentation: "https://docs.example.com",
+        },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-01-02T00:00:00.000Z",
+        },
+      },
+    ],
+  };
+}
 
 describe("API Client", () => {
   beforeEach(() => {
-    mockFetch.mockClear();
+    localStorage.clear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe("fetchJson", () => {
-    it("should fetch and parse JSON data", async () => {
-      const mockData = { projects: [{ id: "1", title: "Test Project" }] };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        headers: new Headers({
-          "content-type": "application/json",
-        }),
-        json: async () => mockData,
-      } as Response);
-
-      const result = await fetchJson("/test.json");
-
-      expect(result.data).toEqual(mockData);
-      expect(result.status).toBe(200);
-      expect(mockFetch).toHaveBeenCalledTimes(1);
-    });
-
-    it("should throw ApiError on non-OK response", async () => {
-      const errorResponse = {
-        ok: false,
-        status: 404,
-        statusText: "Not Found",
-        headers: new Headers(),
-        json: async () => ({}),
-      } as Response;
-
-      mockFetch.mockResolvedValueOnce(errorResponse);
-
-      // Use retries: 0 to avoid retry loop in tests
-      await expect(fetchJson("/missing.json", { retries: 0 })).rejects.toThrow(
-        ApiError,
-      );
-    });
-
-    it("should throw error for non-JSON content type", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        headers: new Headers({
-          "content-type": "text/plain",
-        }),
-      } as Response);
-
-      await expect(fetchJson("/test.txt")).rejects.toThrow("Expected JSON");
-    });
   });
 
   describe("ApiError", () => {
@@ -106,60 +95,42 @@ describe("API Client", () => {
   });
 
   describe("fetchProjects", () => {
-    it("should fetch projects data", async () => {
-      const mockProjects = {
-        projects: [
-          {
-            id: "1",
-            issue_number: 1,
-            title: "Test Project",
-            slug: "test-project",
-            description: "A test project",
-            organization: {
-              name: "Test Org",
-              short_name: "Test",
-              url: "https://example.com",
-            },
-            status: {
-              state: "active",
-              usage: "experimental",
-              notes: "",
-            },
-            tags: ["test"],
-            media: {
-              logo: "https://example.com/logo.png",
-              images: [],
-            },
-            links: {
-              homepage: "https://example.com",
-              repository: "https://github.com/test/repo",
-              documentation: "https://docs.example.com",
-            },
-            timestamps: {
-              created_at: "2024-01-01T00:00:00Z",
-              last_updated_at: "2024-01-01T00:00:00Z",
-            },
-          },
-        ],
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        statusText: "OK",
-        headers: new Headers({
-          "content-type": "application/json",
-        }),
-        json: async () => mockProjects,
-      } as Response);
+    it("fetches validated project data from GitHub on cold start", async () => {
+      const mockData = createProjectsData();
+      const fetchValidatedProjectsFromGitHub = vi
+        .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
+        .mockResolvedValue(mockData);
 
       const result = await fetchProjects();
 
-      expect(result.data).toEqual(mockProjects);
-      expect(result.status).toBe(200);
+      expect(result.projects).toEqual(mockData.projects);
+      expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
+
+      const cached = localStorage.getItem(PROJECTS_CACHE_KEY);
+      expect(cached).not.toBeNull();
+    });
+
+    it("serves stale cache on rate-limit error", async () => {
+      const mockData = createProjectsData();
+
+      // Prime the cache with valid data
+      localStorage.setItem(
+        PROJECTS_CACHE_KEY,
+        JSON.stringify({
+          version: 1,
+          cachedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h old
+          data: mockData,
+        }),
+      );
+
+      vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockRejectedValue(
+        Object.assign(new Error("API rate limit exceeded"), { status: 403 }),
+      );
+
+      const result = await fetchProjects();
+
+      // Should return cached data, not throw
+      expect(result.projects).toEqual(mockData.projects);
     });
   });
-
-  // Note: timeout tests are skipped due to vitest fake timers complexity
-  // In production, timeouts work via AbortController
 });

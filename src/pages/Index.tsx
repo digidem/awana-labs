@@ -1,15 +1,49 @@
+import { lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
-import ProjectsGallery from "@/components/ProjectsGallery";
-import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+
+const ProjectsGallery = lazy(() => import("@/components/ProjectsGallery"));
+const Footer = lazy(() => import("@/components/Footer"));
 import { useProjectsWithError } from "@/hooks/useProjects";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
-  const { projects, isLoading, isError } = useProjectsWithError();
+  const { t } = useTranslation();
+  const { projects, isLoading, isError, errorType, refetch } =
+    useProjectsWithError();
+
+  const errorCopy =
+    errorType === "offline"
+      ? {
+          title: t("index.offlineTitle"),
+          description: t("index.offlineDescription"),
+        }
+      : errorType === "timeout"
+        ? {
+            title: t("index.timeoutTitle"),
+            description: t("index.timeoutDescription"),
+          }
+        : errorType === "rate-limit"
+          ? {
+              title: t("index.rateLimitTitle"),
+              description: t("index.rateLimitDescription"),
+            }
+          : {
+              title: t("index.errorTitle"),
+              description: t("index.errorDescription"),
+            };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary">Loading...</div>
+        <div className="max-w-md px-6 text-center">
+          <h1 className="animate-pulse text-2xl font-semibold text-primary">
+            {t("index.loadingTitle")}
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("index.loadingDescription")}
+          </p>
+        </div>
       </div>
     );
   }
@@ -19,16 +53,16 @@ const Index = () => {
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-bold text-destructive mb-4">
-            Failed to load projects
+            {errorCopy.title}
           </h1>
           <p className="text-muted-foreground mb-6">
-            Failed to load projects. Please refresh the page.
+            {errorCopy.description}
           </p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => void refetch()}
             className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            Retry
+            {t("common.retry")}
           </button>
         </div>
       </div>
@@ -37,9 +71,14 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
+      <Header />
       <Hero />
-      <ProjectsGallery projects={projects} />
-      <Footer />
+      <Suspense fallback={<div className="py-20 min-h-[400px]" />}>
+        <ProjectsGallery projects={projects} />
+      </Suspense>
+      <Suspense fallback={<div className="py-8" />}>
+        <Footer />
+      </Suspense>
     </main>
   );
 };

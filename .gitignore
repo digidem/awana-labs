@@ -1,3 +1,8 @@
+# bun files
+bun.lock
+bun.lockb
+bunfig.toml
+
 # Logs
 logs
 *.log
@@ -23,6 +28,9 @@ test-results/
 
 # Verification reports
 VERIFICATION_REPORT.md
+
+# Bundle analysis
+stats.html
 
 # Editor directories and files
 .vscode/*

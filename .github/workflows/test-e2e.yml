@@ -25,19 +25,14 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: npm ci
 
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps
+        run: npx playwright install --with-deps
 
       - name: Run E2E tests
-        run: bun run test:e2e
+        run: npm run test:e2e
 
       - name: Upload test report
         if: always()

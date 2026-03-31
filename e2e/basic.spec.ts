@@ -1,84 +1,125 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+const runtimeProjectsCacheEntry = {
+  version: 1,
+  cachedAt: new Date().toISOString(),
+  data: {
+    projects: [
+      {
+        id: "comapeo-config-spreadsheet-plugin",
+        issue_number: 2,
+        title: "CoMapeo Config Spreadsheet Plugin",
+        slug: "comapeo-config-spreadsheet-plugin",
+        description: "Google Sheets plugin for CoMapeo configurations.",
+        organization: {
+          name: "Digital Democracy",
+          short_name: "Awana Digital",
+          url: "https://www.digital-democracy.org",
+        },
+        status: {
+          state: "active",
+          usage: "widely-used",
+          notes: "Used in multiple deployments.",
+        },
+        tags: ["CoMapeo", "Mapping", "Spreadsheet"],
+        media: {
+          logo: "https://images.unsplash.com/photo-1",
+          images: ["https://images.unsplash.com/photo-2"],
+        },
+        links: {
+          homepage: "https://www.digital-democracy.org/comapeo",
+          repository:
+            "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
+          documentation: "https://docs.example.com/comapeo",
+        },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-01-02T00:00:00.000Z",
+        },
+      },
+    ],
+  },
+} as const;
+
+const pinAppLanguage = async (page: Page) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("awana-labs-language", "en");
+    window.localStorage.setItem("i18nextLng", "en");
+  });
+};
+
+const seedRuntimeCache = async (page: Page) => {
+  await page.addInitScript((cacheEntry) => {
+    window.localStorage.setItem(
+      "awana-labs-projects-cache",
+      JSON.stringify(cacheEntry),
+    );
+  }, runtimeProjectsCacheEntry);
+};
 
 /**
  * Basic page load and rendering tests
  * These tests ensure the website loads correctly and displays content
  */
+test.beforeEach(async ({ page }) => {
+  await pinAppLanguage(page);
+  await seedRuntimeCache(page);
+});
+
 test.describe("Basic Page Tests", () => {
-  test("homepage loads successfully", async ({ page }) => {
-    const response = await page.goto("/");
-
-    // Should return 200 OK
-    expect(response?.status()).toBe(200);
-
-    // Check page title
-    await expect(page).toHaveTitle(/Awana Labs|Lovable App/);
-
-    // React root should exist
-    const root = page.locator("#root");
-    await expect(root).toBeVisible();
-  });
-
-  test("page has meaningful content", async ({ page }) => {
-    await page.goto("/");
-
-    // Check that page has content (not blank)
-    const body = page.locator("body");
-    const textContent = await body.textContent();
-
-    // Should have substantial content
-    expect(textContent?.trim().length).toBeGreaterThan(100);
-
-    // Should not contain error messages
-    await expect(page.locator("body")).not.toContainText([
-      "Application error",
-      "Something went wrong",
-    ]);
-  });
-
-  test("no console errors on page load", async ({ page }) => {
+  test("page loads successfully with content and no errors", async ({
+    page,
+  }) => {
+    // Collect console errors before navigation
     const errors: string[] = [];
-
     page.on("console", (msg) => {
       if (msg.type() === "error") {
         errors.push(msg.text());
       }
     });
 
-    await page.goto("/");
+    // Navigate and measure load time
+    const startTime = Date.now();
+    const response = await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    const loadTime = Date.now() - startTime;
 
-    // Allow some time for async errors
+    // HTTP 200 status
+    expect(response?.status()).toBe(200);
+
+    // Page title contains "Awana Labs"
+    await expect(page).toHaveTitle(/Awana Labs/);
+
+    // React root is visible
+    await expect(page.locator("#root")).toBeVisible();
+
+    // Hero section with h1 heading is visible
+    await expect(page.locator("#hero")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Awana Labs" }),
+    ).toBeVisible();
+
+    // Projects section is visible
+    await expect(page.locator("#projects")).toBeVisible();
+
+    // Body does not contain error messages
+    await expect(page.locator("body")).not.toContainText([
+      "Application error",
+      "Something went wrong",
+    ]);
+
+    // No critical console errors
     await page.waitForTimeout(2000);
-
-    // Check for specific error patterns that indicate problems
     const criticalErrors = errors.filter(
       (e) =>
         e.includes("Uncaught") ||
         e.includes("TypeError") ||
         e.includes("ReferenceError"),
     );
-
     expect(criticalErrors).toHaveLength(0);
-  });
 
-  test("page is responsive (mobile viewport)", async ({ page }) => {
-    // Set mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto("/");
-
-    // Check mobile content is visible
-    const body = page.locator("body");
-    await expect(body).toBeVisible();
-  });
-
-  test("page is responsive (desktop viewport)", async ({ page }) => {
-    // Set desktop viewport
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto("/");
-
-    // Check desktop content is visible
-    const body = page.locator("body");
-    await expect(body).toBeVisible();
+    // Load time under 10 seconds
+    expect(loadTime).toBeLessThan(10000);
   });
 });
 
@@ -158,22 +199,15 @@ test.describe("Asset Loading Tests", () => {
     expect(cssRequests.length).toBeGreaterThan(0);
   });
 
-  test("projects.json data loads", async ({ page }) => {
-    const dataRequests: string[] = [];
-
-    page.on("request", (request) => {
-      if (request.url().includes("projects.json")) {
-        dataRequests.push(request.url());
-      }
-    });
-
+  test("project data loads through the runtime cache contract", async ({
+    page,
+  }) => {
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
 
-    // Wait for data fetch
-    await page.waitForTimeout(2000);
-
-    // projects.json should be requested (unless already cached)
-    // This is a soft check - if it doesn't load, the page should still work
+    await expect(page.locator("#projects")).toContainText(
+      "CoMapeo Config Spreadsheet Plugin",
+    );
   });
 });
 
@@ -199,42 +233,5 @@ test.describe("Accessibility Tests", () => {
 
     const html = page.locator("html");
     await expect(html).toHaveAttribute("lang", /en/);
-  });
-});
-
-/**
- * Performance tests
- * Basic performance checks
- */
-test.describe("Performance Tests", () => {
-  test("page loads within reasonable time", async ({ page }) => {
-    const startTime = Date.now();
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-    const loadTime = Date.now() - startTime;
-
-    // Should load in less than 10 seconds
-    expect(loadTime).toBeLessThan(10000);
-  });
-
-  test("Time to First Contentful Paint is reasonable", async ({ page }) => {
-    const metrics = await page.goto("/").then(async () => {
-      return await page.evaluate(() => {
-        return new Promise((resolve) => {
-          new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            const fcp = entries.find(
-              (entry) => entry.name === "first-contentful-paint",
-            );
-            if (fcp) {
-              resolve(fcp.startTime);
-            }
-          }).observe({ entryTypes: ["paint"] });
-        });
-      });
-    });
-
-    // FCP should be less than 3 seconds (soft check)
-    // Note: This test may not work in all environments
   });
 });

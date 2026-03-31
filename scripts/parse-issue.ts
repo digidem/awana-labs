@@ -1,8 +1,8 @@
 /**
  * parse-issue.ts - GitHub Issue to Project JSON Parser
  *
- * Parses GitHub issue Markdown body into the project JSON schema
- * following the format defined in public/projects.json
+ * Parses GitHub issue Markdown body into the shared project schema used by
+ * the runtime GitHub fetch path and the browser localStorage cache.
  *
  * This module uses Zod schemas defined in ../src/types/project.schema.ts
  * for runtime validation of parsed project data.
@@ -466,7 +466,7 @@ export function parseIssueBody(
 }
 
 // ============================================================================
-// CLI Usage (for running directly with ts-node/bun)
+// CLI Usage (for running directly with tsx/vite-node)
 // ============================================================================
 
 // Only run CLI when this is the main module (not when imported)
@@ -479,7 +479,7 @@ if (isMainModule) {
 
   if (args.includes("--help") || args.includes("-h")) {
     console.log(`
-Usage: bun run parse-issue.ts <issue-body-file> [options]
+Usage: npx tsx parse-issue.ts <issue-body-file> [options]
 
 Arguments:
   issue-body-file    Path to file containing the issue body markdown
@@ -492,7 +492,7 @@ Options:
   --help, -h         Show this help message
 
 Example:
-  bun run scripts/parse-issue.ts issue.md --number 2 \\
+  npx tsx scripts/parse-issue.ts issue.md --number 2 \\
     --created 2026-02-03T18:34:20Z \\
     --updated 2026-02-03T18:34:20Z
     `);

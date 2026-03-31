@@ -6,21 +6,54 @@
     "contact": "Contacto"
   },
   "hero": {
-    "title": "Construyendo Experiencias Digitales",
-    "subtitle": "Creando soluciones web innovadoras con tecnologías modernas",
-    "cta": "Ver Proyectos"
+    "badge": "Experimental",
+    "title": "Awana Labs",
+    "tagline": "Donde los experimentos se convierten en herramientas esenciales",
+    "subtitle": "Prototipamos, probamos y refinamos herramientas para abordar necesidades genuinas de los socios—creando utilidades, APIs y recursos que amplifican nuestras plataformas principales.",
+    "cta": "Explorar Proyectos"
   },
   "projects": {
-    "title": "Proyectos Destacados",
-    "subtitle": "Explora nuestros trabajos e innovaciones más recientes",
+    "title": "Nuestros Proyectos",
+    "subtitle": "Herramientas prácticas forjadas a partir de necesidades reales de socios y desafíos de plataforma",
     "viewProject": "Ver Proyecto",
     "technologies": "Tecnologías",
-    "status": "Estado"
+    "searchLabel": "Buscar proyectos",
+    "searchPlaceholder": "Buscar proyectos...",
+    "statusFilterLabel": "Filtrar proyectos por estado",
+    "updated": "Actualizado",
+    "created": "Creado",
+    "tags": "Etiquetas",
+    "statusLabel": "Estado",
+    "noResults": "No se encontraron proyectos que coincidan con sus criterios.",
+    "clearFilters": "Limpiar filtros"
+  },
+  "projectModal": {
+    "homepage": "Página Principal",
+    "repository": "Repositorio",
+    "docs": "Documentación",
+    "closeModal": "Cerrar modal",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Siguiente imagen",
+    "goToImage": "Ir a imagen {{index}}",
+    "imageAlt": "Captura de {{title}} {{index}}",
+    "imageLoading": "Cargando imagen...",
+    "imageUnavailable": "No se pudo cargar esta imagen."
   },
   "footer": {
-    "copyright": "© {{year}} Awana Labs. Todos los derechos reservados.",
     "madeWith": "Hecho con",
-    "love": "amor"
+    "by": "por"
+  },
+  "index": {
+    "loadingTitle": "Cargando proyectos",
+    "loadingDescription": "Obteniendo los proyectos publicados más recientes desde GitHub.",
+    "errorTitle": "No se pudieron cargar los proyectos",
+    "errorDescription": "No pudimos cargar los proyectos en este momento. Inténtalo de nuevo.",
+    "offlineTitle": "Estás sin conexión",
+    "offlineDescription": "Vuelve a conectarte a internet e inténtalo de nuevo, o regresa cuando haya proyectos en caché disponibles.",
+    "timeoutTitle": "La solicitud de proyectos expiró",
+    "timeoutDescription": "GitHub tardó demasiado en responder. Inténtalo de nuevo.",
+    "rateLimitTitle": "Límite de solicitudes de GitHub alcanzado",
+    "rateLimitDescription": "Demasiadas solicitudes a GitHub. Espera un momento e inténtalo de nuevo."
   },
   "common": {
     "loading": "Cargando...",
@@ -35,12 +68,28 @@
     "filter": "Filtrar",
     "sort": "Ordenar",
     "noResults": "No se encontraron resultados",
-    "viewMore": "Ver Más"
+    "viewMore": "Ver Más",
+    "all": "Todos"
   },
   "status": {
     "active": "Activo",
-    "completed": "Completado",
-    "inProgress": "En Progreso",
-    "planned": "Planeado"
+    "paused": "Pausado",
+    "archived": "Archivado",
+    "experimental": "Experimental",
+    "used": "En Uso",
+    "widelyUsed": "Ampliamente Usado"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "¡Ups! Página no encontrada",
+    "returnHome": "Volver al Inicio"
+  },
+  "aria": {
+    "viewDetails": "Ver detalles de {{title}}",
+    "selectLanguage": "Seleccionar idioma",
+    "switchLanguage": "Cambiar a {{language}}",
+    "visitGithub": "Visitar repositorio de GitHub",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
   }
 }

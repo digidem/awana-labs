@@ -1,267 +1,218 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-/**
- * Projects Display Tests
- * These tests verify that projects from GitHub Issues display correctly on the website
- */
-test.describe("Projects Display Tests", () => {
-  test("projects section is visible on homepage", async ({ page }) => {
-    await page.goto("/");
-
-    // Wait for page to load
-    await page.waitForLoadState("networkidle");
-
-    // Check that projects section exists
-    const projectsSection = page
-      .locator("section")
-      .filter({ hasText: /projects/i });
-    await expect(projectsSection).toBeVisible();
-  });
-
-  test("project cards are displayed", async ({ page }) => {
-    await page.goto("/");
-
-    // Wait for projects to load
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1000);
-
-    // Look for project cards - they should have project titles
-    const projectCards = page
-      .locator("[class*='project'], [class*='Project']")
-      .or(page.locator("a").filter({ hasText: /CoMapeo|Awana/ }));
-
-    // Wait for cards to be visible
-    await projectCards
-      .first()
-      .waitFor({ state: "visible", timeout: 5000 })
-      .catch(() => {
-        // If no specific cards found, check if there's any content
-        console.log("Project cards selector may need adjustment");
-      });
-  });
-
-  test("CoMapeo project from GitHub Issue #2 is displayed", async ({
-    page,
-  }) => {
-    await page.goto("/");
-
-    // Wait for content to load
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1500);
-
-    // Check for CoMapeo project content
-    const pageContent = page.locator("body");
-    const textContent = await pageContent.textContent();
-
-    // Should contain CoMapeo reference
-    expect(textContent?.toLowerCase()).toContain("comapeo");
-
-    // Should contain Digital Democracy (organization)
-    expect(textContent?.toLowerCase()).toContain("digital democracy");
-  });
-
-  test("project tags are visible", async ({ page }) => {
-    await page.goto("/");
-
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1000);
-
-    // Look for tags - common tag selectors
-    const tags = page
-      .locator("[class*='tag'], span[class*='badge']")
-      .or(
-        page
-          .locator("span")
-          .filter({ hasText: /Mapping|Spreadsheet|Configuration/ }),
-      );
-
-    // At least check if the page contains tag-related content
-    const pageContent = page.locator("body");
-    await expect(pageContent).toContainText(
-      /Mapping|Spreadsheet|Configuration/i,
-    );
-  });
-
-  test("project status badges are displayed", async ({ page }) => {
-    await page.goto("/");
-
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1000);
-
-    // Check for active/widely-used status indicators
-    const pageContent = page.locator("body");
-    const textContent = await pageContent.textContent();
-
-    // Should show status information
-    expect(textContent?.toLowerCase()).toMatch(/active|widely.?used/);
-  });
-
-  test("projects.json is fetched and contains correct data", async ({
-    page,
-  }) => {
-    const jsonResponse = await page.goto("/projects.json");
-
-    expect(jsonResponse?.ok()).toBeTruthy();
-
-    const data = await jsonResponse?.json();
-    expect(data).toHaveProperty("projects");
-    expect(Array.isArray(data.projects)).toBeTruthy();
-
-    // Should have at least the CoMapeo project
-    const comapeoProject = data.projects.find(
-      (p: { title?: string; id?: string }) =>
-        p.title?.includes("CoMapeo") || p.id?.includes("comapeo"),
-    );
-
-    expect(comapeoProject).toBeDefined();
-    expect(comapeoProject?.organization?.name).toBe("Digital Democracy");
-    expect(comapeoProject?.status?.state).toBe("active");
-    expect(comapeoProject?.tags).toContain("Mapping");
-  });
-
-  test("project cards have correct structure", async ({ page }) => {
-    await page.goto("/");
-
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1500);
-
-    // Verify the page has project-related content
-    const body = page.locator("body");
-
-    // Check for key elements from the project data
-    await expect(body).toContainText("CoMapeo", { timeout: 5000 });
-    await expect(body).toContainText("Digital Democracy");
-    await expect(body).toContainText("Google Sheets plugin");
-  });
-
-  test("clicking project shows details (if modal exists)", async ({ page }) => {
-    await page.goto("/");
-
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(1000);
-
-    // Try to find and click a project card
-    const projectLink = page
-      .locator("a, div, button")
-      .filter({ hasText: /CoMapeo/i })
-      .first();
-
-    const isVisible = await projectLink.isVisible().catch(() => false);
-    if (isVisible) {
-      await projectLink.click();
-      await page.waitForTimeout(500);
-
-      // If modal opens, check for detail content
-      const modal = page.locator(
-        "[role='dialog'], .modal, [class*='Modal'], [class*='dialog']",
-      );
-      const modalExists = await modal.count();
-
-      if (modalExists > 0) {
-        await expect(modal.first()).toBeVisible();
-      }
-    }
-  });
-});
-
-/**
- * Projects Data Integrity Tests
- * Verify the data pipeline from GitHub Issues -> projects.json -> UI
- */
-test.describe("Projects Data Pipeline Tests", () => {
-  test("projects.json has valid structure", async ({ page }) => {
-    const response = await page.goto("/projects.json");
-    const data = await response?.json();
-
-    // Validate structure
-    expect(data).toMatchObject({
-      projects: expect.any(Array),
-    });
-
-    // Each project should have required fields
-    data.projects.forEach((project: Record<string, unknown>) => {
-      expect(project).toHaveProperty("id");
-      expect(project).toHaveProperty("title");
-      expect(project).toHaveProperty("slug");
-      expect(project).toHaveProperty("description");
-      expect(project).toHaveProperty("organization");
-      expect(project).toHaveProperty("status");
-      expect(project).toHaveProperty("tags");
-      expect(project).toHaveProperty("links");
-    });
-  });
-
-  test("GitHub Issue #2 data is correctly parsed", async ({ page }) => {
-    const response = await page.goto("/projects.json");
-    const data = await response?.json();
-
-    const project = data.projects.find(
-      (p: { issue_number?: number }) => p.issue_number === 2,
-    );
-
-    expect(project).toBeDefined();
-    expect(project?.title).toBe("CoMapeo Config Spreadsheet Plugin");
-    expect(project?.slug).toBe("comapeo-config-spreadsheet-plugin");
-    expect(project?.organization?.name).toBe("Digital Democracy");
-    expect(project?.organization?.short_name).toBe("digidem");
-    expect(project?.organization?.url).toBe(
-      "https://www.digital-democracy.org",
-    );
-    expect(project?.status?.state).toBe("active");
-    expect(project?.status?.usage).toBe("widely-used");
-    expect(project?.tags).toEqual(
-      expect.arrayContaining(["CoMapeo", "Mapping", "Spreadsheet"]),
-    );
-    expect(project?.media?.logo).toContain("logo.png");
-    expect(project?.media?.images).toHaveLength(2);
-    expect(project?.links?.homepage).toContain("lab.digital-democracy.org");
-    expect(project?.links?.repository).toContain(
-      "github.com/digidem/comapeo-config-spreadsheet-plugin",
-    );
-  });
-
-  test("all projects have required timestamps", async ({ page }) => {
-    const response = await page.goto("/projects.json");
-    const data = await response?.json();
-
-    data.projects.forEach(
-      (project: {
-        timestamps?: { created_at: string; last_updated_at: string };
-      }) => {
-        expect(project.timestamps).toBeDefined();
-        expect(project.timestamps.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
-        expect(project.timestamps.last_updated_at).toMatch(
-          /^\d{4}-\d{2}-\d{2}T/,
-        );
-      },
-    );
-  });
-});
-
-/**
- * Links and Navigation Tests
- */
-test.describe("Project Links Tests", () => {
-  test("repository links are valid", async ({ page }) => {
-    const response = await page.goto("/projects.json");
-    const data = await response?.json();
-
-    const comapeoProject = data.projects.find(
-      (p: { issue_number?: number }) => p.issue_number === 2,
-    );
-    expect(comapeoProject?.links?.repository).toBe(
+const projectFixture = {
+  id: "comapeo-config-spreadsheet-plugin",
+  issue_number: 2,
+  title: "CoMapeo Config Spreadsheet Plugin",
+  slug: "comapeo-config-spreadsheet-plugin",
+  description: "Google Sheets plugin for CoMapeo configurations.",
+  organization: {
+    name: "Digital Democracy",
+    short_name: "Awana Digital",
+    url: "https://www.digital-democracy.org",
+  },
+  status: {
+    state: "active",
+    usage: "widely-used",
+    notes: "Used in multiple deployments.",
+  },
+  tags: ["CoMapeo", "Mapping", "Spreadsheet"],
+  media: {
+    logo: "https://images.unsplash.com/photo-1",
+    images: [
+      "https://images.unsplash.com/photo-2",
+      "https://images.unsplash.com/photo-3",
+    ],
+  },
+  links: {
+    homepage: "https://www.digital-democracy.org/comapeo",
+    repository:
       "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
+    documentation: "https://docs.example.com/comapeo",
+  },
+  timestamps: {
+    created_at: "2024-01-01T00:00:00.000Z",
+    last_updated_at: "2024-01-02T00:00:00.000Z",
+  },
+} as const;
+
+const projectsPayload = {
+  projects: [projectFixture],
+} as const;
+
+function createCacheEntry(stale = false) {
+  return {
+    version: 1,
+    cachedAt: new Date(
+      stale ? Date.now() - 1000 * 60 * 60 * 2 : Date.now(),
+    ).toISOString(),
+    data: projectsPayload,
+  } as const;
+}
+
+const githubIssueFixture = {
+  number: 2,
+  title: projectFixture.title,
+  body: `# ${projectFixture.title}
+
+## Description
+${projectFixture.description}
+
+## Organization
+**Name:** ${projectFixture.organization.name}
+**Short name:** ${projectFixture.organization.short_name}
+**Website:** ${projectFixture.organization.url}
+
+## Project Status
+**State:** ${projectFixture.status.state}
+**Usage:** ${projectFixture.status.usage}
+**Notes:**
+${projectFixture.status.notes}
+
+## Tags
+${projectFixture.tags.join(", ")}
+
+## Media
+**Logo:** ${projectFixture.media.logo}
+**Images:**
+${projectFixture.media.images.join("\n")}
+
+## Links
+**Homepage:** ${projectFixture.links.homepage}
+**Repository:** ${projectFixture.links.repository}
+**Documentation:** ${projectFixture.links.documentation}
+`,
+  state: "open",
+  html_url: "https://github.com/luandro/awana-labs-showcase/issues/2",
+  created_at: projectFixture.timestamps.created_at,
+  updated_at: projectFixture.timestamps.last_updated_at,
+  labels: [{ name: "publish:yes" }],
+  user: {
+    login: "luandro",
+    type: "User",
+  },
+} as const;
+
+async function seedProjectsCache(page: Page, cacheEntry = createCacheEntry()) {
+  await page.addInitScript((entry) => {
+    window.localStorage.setItem("awana-labs-projects-cache", JSON.stringify(entry));
+  }, cacheEntry);
+}
+
+async function setNavigatorOffline(page: Page) {
+  await page.addInitScript(() => {
+    Object.defineProperty(window.navigator, "onLine", {
+      configurable: true,
+      get: () => false,
+    });
+  });
+}
+
+async function mockGitHubProjects(page: Page) {
+  let requestCount = 0;
+
+  await page.route("https://api.github.com/repos/**/issues**", async (route) => {
+    requestCount += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([githubIssueFixture]),
+    });
+  });
+
+  return {
+    getRequestCount: () => requestCount,
+  };
+}
+
+test.describe("Projects runtime contract", () => {
+  test("renders projects from the runtime cache contract", async ({ page }) => {
+    await seedProjectsCache(page);
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await expect(
+      page.getByRole("button", {
+        name: /view details for CoMapeo Config Spreadsheet Plugin/i,
+      }),
+    ).toBeVisible();
+    await expect(page.locator("#projects")).toContainText(
+      "Google Sheets plugin for CoMapeo configurations.",
     );
   });
 
-  test("homepage and documentation links exist", async ({ page }) => {
-    const response = await page.goto("/projects.json");
-    const data = await response?.json();
+  test("fetches projects from GitHub on cold start and caches the result", async ({
+    page,
+  }) => {
+    await mockGitHubProjects(page);
 
-    const comapeoProject = data.projects.find(
-      (p: { issue_number?: number }) => p.issue_number === 2,
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await expect(
+      page.getByRole("button", {
+        name: /view details for CoMapeo Config Spreadsheet Plugin/i,
+      }),
+    ).toBeVisible();
+
+    const cacheEntry = await page.evaluate(() =>
+      JSON.parse(window.localStorage.getItem("awana-labs-projects-cache") ?? "null"),
     );
-    expect(comapeoProject?.links?.homepage).toBeTruthy();
-    expect(comapeoProject?.links?.repository).toBeTruthy();
+
+    expect(cacheEntry?.version).toBe(1);
+    expect(cacheEntry?.data?.projects?.[0]?.title).toBe(
+      "CoMapeo Config Spreadsheet Plugin",
+    );
+  });
+
+  test("rejects invalid cached payloads and refreshes from GitHub", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        "awana-labs-projects-cache",
+        JSON.stringify({
+          version: 1,
+          cachedAt: "2026-03-25T00:00:00.000Z",
+          data: { projects: [{ id: "broken-project" }] },
+        }),
+      );
+    });
+    await mockGitHubProjects(page);
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await expect(
+      page.getByRole("button", {
+        name: /view details for CoMapeo Config Spreadsheet Plugin/i,
+      }),
+    ).toBeVisible();
+
+    const cacheEntry = await page.evaluate(() =>
+      JSON.parse(window.localStorage.getItem("awana-labs-projects-cache") ?? "null"),
+    );
+
+    expect(cacheEntry?.data?.projects?.[0]?.slug).toBe(
+      "comapeo-config-spreadsheet-plugin",
+    );
+  });
+
+  test("falls back to cached projects while offline", async ({ page }) => {
+    await seedProjectsCache(page, createCacheEntry(true));
+    await setNavigatorOffline(page);
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    await expect(
+      page.getByRole("button", {
+        name: /view details for CoMapeo Config Spreadsheet Plugin/i,
+      }),
+    ).toBeVisible();
+    await expect(page.locator("#projects")).toContainText(
+      "Google Sheets plugin for CoMapeo configurations.",
+    );
   });
 });

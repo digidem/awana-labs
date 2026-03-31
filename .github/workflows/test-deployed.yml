@@ -24,16 +24,11 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: npm ci
 
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Wait for deployment to be ready
         run: |
@@ -41,7 +36,7 @@ jobs:
           sleep 30
 
       - name: Test live site
-        run: bunx playwright test --project=chromium
+        run: npx playwright test --project=chromium
         env:
           BASE_URL: https://luandro.github.io/awana-labs-showcase/
         working-directory: ./e2e-live
