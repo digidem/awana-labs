@@ -135,14 +135,14 @@ function extractLogo(section: SectionContent | null): string {
     const logoLine = section.lines[logoIndex];
     const urlMatch = logoLine.match(/https?:\/\/[^\s]+/i);
     if (urlMatch) {
-      const url = urlMatch[0].trim();
+      const url = urlMatch[0].replace(/["')\]]+$/, "").trim();
       if (isValidImageUrl(url)) return url;
     }
 
     if (logoIndex + 1 < section.lines.length) {
       const nextUrlMatch = section.lines[logoIndex + 1].match(/https?:\/\/[^\s]+/i);
       if (nextUrlMatch) {
-        const url = nextUrlMatch[0].trim();
+        const url = nextUrlMatch[0].replace(/["')\]]+$/, "").trim();
         if (isValidImageUrl(url)) return url;
       }
     }
@@ -170,7 +170,9 @@ function parseImages(section: SectionContent | null): string[] {
   const urlPattern = /https?:\/\/[^\s]+/gi;
   const matches = searchText.matchAll(urlPattern);
   for (const match of matches) {
-    const url = match[0].trim();
+    // Strip trailing characters commonly appended by HTML attributes or
+    // markdown syntax: quotes (src="..."), parentheses ([text](url)), etc.
+    const url = match[0].replace(/["')\]]+$/, "").trim();
     if (url && url !== logoUrl && isValidImageUrl(url)) {
       urls.push(url);
     }
