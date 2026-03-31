@@ -4,13 +4,11 @@ import { test, expect } from "@playwright/test";
  * Live site tests - run against the deployed GitHub Pages site
  * These tests verify the actual deployed site is working correctly
  *
- * Note: Due to GitHub Pages configuration, the awana-labs-showcase project
- * may redirect to the main luandro.github.io site. These tests validate
- * that the deployed content is functional regardless.
+ * These tests target the GitHub Pages deployment for this repository.
  */
 
 const BASE_URL =
-  process.env.BASE_URL || "https://luandro.github.io/awana-labs-showcase/";
+  process.env.BASE_URL || "https://digidem.github.io/awana-labs/";
 
 test.use({
   baseURL: BASE_URL,

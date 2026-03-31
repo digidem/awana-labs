@@ -3,7 +3,7 @@ import packageJson from "../../package.json";
 
 describe("Package Metadata", () => {
   it("should have correct package name", () => {
-    expect(packageJson.name).toBe("awana-labs-showcase");
+    expect(packageJson.name).toBe("awana-labs");
   });
 
   it("should have production version", () => {

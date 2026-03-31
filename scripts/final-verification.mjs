@@ -1,7 +1,7 @@
 // @ts-check
 import { chromium } from 'playwright';
 
-const SITE_URL = 'https://luandro.github.io/awana-labs-showcase/';
+const SITE_URL = 'https://digidem.github.io/awana-labs/';
 
 async function finalVerification() {
   console.log(`📋 FINAL VERIFICATION REPORT`);

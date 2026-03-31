@@ -16,7 +16,7 @@ export default defineConfig({
     ["github" as unknown as import("@playwright/test").ReporterDescription],
   ],
   use: {
-    baseURL: "http://localhost:4173/awana-labs-showcase/",
+    baseURL: "http://localhost:4173/awana-labs/",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -46,7 +46,7 @@ export default defineConfig({
 
   webServer: {
     command: "npm run build && npm run preview",
-    url: "http://localhost:4173/awana-labs-showcase/",
+    url: "http://localhost:4173/awana-labs/",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },

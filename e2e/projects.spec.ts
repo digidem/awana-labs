@@ -83,12 +83,12 @@ ${projectFixture.media.images.join("\n")}
 **Documentation:** ${projectFixture.links.documentation}
 `,
   state: "open",
-  html_url: "https://github.com/luandro/awana-labs-showcase/issues/2",
+  html_url: "https://github.com/digidem/awana-labs/issues/2",
   created_at: projectFixture.timestamps.created_at,
   updated_at: projectFixture.timestamps.last_updated_at,
   labels: [{ name: "publish:yes" }],
   user: {
-    login: "luandro",
+    login: "digidem",
     type: "User",
   },
 } as const;
