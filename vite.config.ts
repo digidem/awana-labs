@@ -5,7 +5,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/awana-labs-showcase/" : "/",
+  base: mode === "production" ? "/awana-labs/" : "/",
   server: {
     host: "::",
     port: 8080,

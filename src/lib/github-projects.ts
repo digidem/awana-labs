@@ -15,8 +15,8 @@ import {
 } from "@/types/project.schema";
 
 // Configuration
-const GITHUB_OWNER = "luandro";
-const GITHUB_REPO = "awana-labs-showcase";
+const GITHUB_OWNER = "digidem";
+const GITHUB_REPO = "awana-labs";
 const PUBLISH_LABEL = "publish:yes";
 
 // =============================================================================

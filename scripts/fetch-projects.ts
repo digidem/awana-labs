@@ -83,7 +83,7 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
   // Initialize Octokit with authentication
   const octokit = new Octokit({
     auth: token,
-    userAgent: "awana-labs-showcase-fetch-projects",
+    userAgent: "awana-labs-fetch-projects",
   });
 
   try {
@@ -130,14 +130,12 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
       const normalizedMessage = message.toLowerCase();
 
       if (status === 401 || normalizedMessage.includes("bad credentials")) {
-        // eslint-disable-next-line preserve-caught-error
         throw new Error(
           "GitHub API authentication failed. Please check your GITHUB_TOKEN is valid."
         );
       }
 
       if (status === 404 || normalizedMessage.includes("not found")) {
-        // eslint-disable-next-line preserve-caught-error
         throw new Error(
           `Repository ${owner}/${name} not found or token lacks access.`
         );
@@ -148,14 +146,11 @@ async function fetchPublishableIssues(): Promise<GitHubIssue[]> {
         normalizedMessage.includes("rate limit") ||
         normalizedMessage.includes("secondary rate limit")
       ) {
-        // eslint-disable-next-line preserve-caught-error
         throw new Error(`GitHub API rate limit exceeded. ${message}`);
       }
 
-      // eslint-disable-next-line preserve-caught-error
       throw new Error(`GitHub API error: ${message}`);
     }
-    // eslint-disable-next-line preserve-caught-error
     throw new Error("Unknown error occurred while fetching issues");
   }
 }

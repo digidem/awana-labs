@@ -142,7 +142,7 @@ export class GitHubClient {
    * @param token - GitHub personal access token (optional for public repos)
    * @param userAgent - User agent string for API requests
    */
-  constructor(token?: string, userAgent = "awana-labs-showcase") {
+  constructor(token?: string, userAgent = "awana-labs") {
     this.userAgent = userAgent;
     this.token = token;
     this.octokit = new Octokit({

@@ -212,8 +212,8 @@ function dispatchProjectsDataUpdated(data: ProjectsData): void {
  */
 export async function fetchProjectsFromGitHub(): Promise<ProjectsData> {
   const data = await fetchValidatedProjectsFromGitHub(
-    import.meta.env.VITE_GITHUB_OWNER || "luandro",
-    import.meta.env.VITE_GITHUB_REPO || "awana-labs-showcase",
+    import.meta.env.VITE_GITHUB_OWNER || "digidem",
+    import.meta.env.VITE_GITHUB_REPO || "awana-labs",
     import.meta.env.VITE_GITHUB_LABEL || "publish:yes",
   );
 
