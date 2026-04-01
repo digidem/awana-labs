@@ -86,7 +86,7 @@ const optionalUrl = (label: string) =>
 
 /**
  * Helper: accepts a valid HTTPS URL, a lucide-react icon name, or an empty string.
- * Icon names are lowercase-kebab-case identifiers (e.g. "globe", "map-pin").
+ * Icon names are PascalCase (e.g. "Globe", "MapPin") or kebab-case (e.g. "map-pin").
  */
 const logoValue = () =>
   z
@@ -95,14 +95,13 @@ const logoValue = () =>
       (val) =>
         val === "" ||
         z.string().url().safeParse(val).success ||
-        /^[a-z][a-z0-9-]*$/.test(val),
+        /^[A-Za-z][A-Za-z0-9-]*$/.test(val),
       {
         message:
-          "Logo must be a valid URL or a lucide-react icon name (lowercase-kebab-case)",
+          "Logo must be a valid URL or a lucide-react icon name (PascalCase or kebab-case)",
       },
     )
     .default("");
-
 // ============================================================================
 // Media Schema
 // ============================================================================
