@@ -48,6 +48,8 @@ const ProjectModal = ({
   >({});
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previousTriggerRef = useRef<HTMLElement | null>(null);
+  /** Cache of prefetched Image objects keyed by URL for adjacent carousel images. */
+  const prefetchCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const locale = i18n.resolvedLanguage ?? i18n.language;
 
   const formatDate = (value: string) =>
@@ -90,6 +92,44 @@ const ProjectModal = ({
       [currentImageIndex]: prev[currentImageIndex] ?? "loading",
     }));
   }, [currentImageIndex, isOpen, project]);
+
+  /**
+   * Prefetch and decode adjacent carousel images after the current image loads.
+   * This ensures next/previous images are in the browser cache and decoded
+   * before the user navigates, making carousel swaps visually instant.
+   */
+  useEffect(() => {
+    const images = project?.media.images;
+    if (!isOpen || !images || images.length <= 1) return;
+
+    const currentUrl = images[currentImageIndex];
+    if (!currentUrl) return;
+
+    const prefetchAndDecode = (url: string) => {
+      if (prefetchCacheRef.current.has(url)) return;
+
+      const img = new Image();
+      img.src = url;
+      // .decode() may not be available in all environments (e.g., jsdom)
+      if (typeof img.decode === "function") {
+        img
+          .decode()
+          .catch(() => {
+            // Decode failure is non-critical — browser will still render
+          });
+      }
+      prefetchCacheRef.current.set(url, img);
+    };
+
+    const nextIndex = (currentImageIndex + 1) % images.length;
+    const prevIndex =
+      (currentImageIndex - 1 + images.length) % images.length;
+
+    prefetchAndDecode(images[nextIndex]);
+    if (nextIndex !== prevIndex) {
+      prefetchAndDecode(images[prevIndex]);
+    }
+  }, [currentImageIndex, isOpen, project?.media.images]);
 
   const goToPreviousImage = useCallback(() => {
     if (!project?.media.images.length) {
@@ -212,6 +252,7 @@ const ProjectModal = ({
                         exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
                         transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
                         loading="eager"
+                        fetchPriority="high"
                         decoding="async"
                         onLoad={() =>
                           setImageLoadStates((prev) => ({
@@ -231,8 +272,13 @@ const ProjectModal = ({
                   )}
 
                   {currentImageState === "loading" && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-muted text-sm text-muted-foreground">
-                      {t("projectModal.imageLoading")}
+                    <div
+                      className="absolute inset-0 animate-pulse bg-muted"
+                      role="status"
+                      aria-label={t("projectModal.imageLoading")}
+                    >
+                      {/* Skeleton shimmer overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
                     </div>
                   )}
 

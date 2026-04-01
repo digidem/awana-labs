@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -6,6 +6,33 @@ import { Project } from "@/types/project";
 import { Input } from "@/components/ui/input";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
+
+/** Maximum number of unique hosts to dynamically preconnect to. */
+const MAX_PRECONNECT_HOSTS = 5;
+const preconnectedHosts = new Set<string>();
+
+/**
+ * Dynamically inject a `<link rel="preconnect">` for the given URL's origin.
+ * Covers non-GitHub image hosts that aren't hardcoded in index.html.
+ */
+function preconnectOrigin(url: string): void {
+  try {
+    const { origin } = new URL(url);
+    if (!origin || origin === "null" || preconnectedHosts.has(origin)) return;
+    if (preconnectedHosts.size >= MAX_PRECONNECT_HOSTS) return;
+    if (document.querySelector(`link[rel="preconnect"][href="${origin}"]`)) {
+      preconnectedHosts.add(origin);
+      return;
+    }
+    const link = document.createElement("link");
+    link.rel = "preconnect";
+    link.href = origin;
+    document.head.appendChild(link);
+    preconnectedHosts.add(origin);
+  } catch {
+    // Invalid URL — ignore
+  }
+}
 
 interface ProjectsGalleryProps {
   projects: Project[];
@@ -29,6 +56,20 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
   const [activeTrigger, setActiveTrigger] = useState<HTMLButtonElement | null>(
     null,
   );
+
+  /** Track which project images have been prefetched to avoid duplicate work. */
+  const prefetchedRef = useRef<Set<string>>(new Set());
+
+  /** Prefetch the first modal image for a project on hover/focus/touch. */
+  const handlePrefetch = useCallback((project: Project) => {
+    const firstImage = project.media.images[0];
+    if (!firstImage || prefetchedRef.current.has(firstImage)) return;
+    prefetchedRef.current.add(firstImage);
+
+    preconnectOrigin(firstImage);
+    const img = new Image();
+    img.src = firstImage;
+  }, []);
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
@@ -146,6 +187,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
                   setActiveTrigger(trigger);
                   setSelectedProject(project);
                 }}
+                onPrefetch={() => handlePrefetch(project)}
               />
             ))}
           </motion.div>

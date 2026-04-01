@@ -105,3 +105,19 @@
     text-wrap: balance;
   }
 }
+
+/* Skeleton shimmer animation for image loading placeholders */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}

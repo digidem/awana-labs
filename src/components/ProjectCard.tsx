@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
@@ -9,11 +10,20 @@ import { getUsageLabel } from "@/lib/status-utils";
 interface ProjectCardProps {
   project: Project;
   onClick: (trigger: HTMLButtonElement) => void;
+  /** Called when the user signals intent to open this card (hover/focus/touch). */
+  onPrefetch?: () => void;
 }
 
-const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
+const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   const { t, i18n } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
+  const hasPrefetchedRef = useRef(false);
+
+  const handlePrefetch = useCallback(() => {
+    if (hasPrefetchedRef.current) return;
+    hasPrefetchedRef.current = true;
+    onPrefetch?.();
+  }, [onPrefetch]);
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const lastUpdatedLabel = new Intl.DateTimeFormat(locale).format(
     new Date(project.timestamps.last_updated_at),
@@ -40,6 +50,9 @@ const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
     <motion.button
       type="button"
       onClick={(event) => onClick(event.currentTarget)}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+      onTouchStart={handlePrefetch}
       variants={cardVariants}
       initial="hidden"
       whileInView="visible"
