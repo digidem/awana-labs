@@ -132,10 +132,17 @@ function extractLogo(section: SectionContent | null): string {
       if (url) return url;
     }
 
-    // Extract value after the colon — may be an icon name instead of a URL
+    // Extract value after the colon — may be an icon name instead of a URL.
+    // Strip ** markdown bold markers so `**Logo:**` (value = `**`) falls
+    // through to the next-line check where the actual icon name lives.
     const colonIdx = logoLine.indexOf(":");
     if (colonIdx !== -1) {
-      const rawValue = logoLine.slice(colonIdx + 1).trim().replace(/["')\]]+$/, "").trim();
+      const rawValue = logoLine
+        .slice(colonIdx + 1)
+        .trim()
+        .replace(/^\*\*|\*\*$/g, "")
+        .replace(/["')\]]+$/, "")
+        .trim();
       if (rawValue) return rawValue;
     }
 
