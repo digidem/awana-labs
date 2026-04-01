@@ -24,6 +24,7 @@ import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/StatusBadge";
+import ProjectLogo from "@/components/ProjectLogo";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -332,11 +333,12 @@ const ProjectModal = ({
               <div className="p-4 sm:p-6 md:p-8">
                 {/* Header */}
                 <div className="flex items-start gap-3 sm:gap-4 mb-6">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-xl sm:text-2xl font-bold text-primary">
-                      {project.title.charAt(0)}
-                    </span>
-                  </div>
+                  <ProjectLogo
+                    logo={project.media?.logo ?? ""}
+                    title={project.title}
+                    className="shrink-0"
+                    iconSize={28}
+                  />
                   <div className="flex-1 min-w-0">
                     <h2
                       id="modal-title"

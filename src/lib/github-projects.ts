@@ -106,7 +106,15 @@ function extractKeyValue(
 }
 
 /**
- * Extract logo URL from media section
+ * Check whether a string looks like a URL (starts with http:// or https://).
+ */
+function isUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
+}
+
+/**
+ * Extract logo value from media section.
+ * Returns a URL if one is found, otherwise returns a plain icon name string.
  */
 function extractLogo(section: SectionContent | null): string {
   if (!section) return "";
@@ -124,11 +132,23 @@ function extractLogo(section: SectionContent | null): string {
       if (url) return url;
     }
 
+    // Extract value after the colon — may be an icon name instead of a URL
+    const colonIdx = logoLine.indexOf(":");
+    if (colonIdx !== -1) {
+      const rawValue = logoLine.slice(colonIdx + 1).trim().replace(/["')\]]+$/, "").trim();
+      if (rawValue) return rawValue;
+    }
+
     if (logoIndex + 1 < section.lines.length) {
       const nextUrlMatch = section.lines[logoIndex + 1].match(/https?:\/\/[^\s]+/i);
       if (nextUrlMatch) {
         const url = nextUrlMatch[0].replace(/["')\]]+$/, "").trim();
         if (url) return url;
+      }
+      // Check next line for an icon name (non-URL text)
+      const nextLine = section.lines[logoIndex + 1].trim();
+      if (nextLine && !isUrl(nextLine)) {
+        return nextLine;
       }
     }
   }

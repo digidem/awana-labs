@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import { getUsageLabel } from "@/lib/status-utils";
+import ProjectLogo from "@/components/ProjectLogo";
 
 interface ProjectCardProps {
   project: Project;
@@ -64,12 +65,12 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
       aria-label={t("aria.viewDetails", { title: project.title })}
     >
       <CardHeader className="pb-3">
-        {/* Logo placeholder */}
-        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-          <span className="text-xl font-bold text-primary">
-            {project.title.charAt(0)}
-          </span>
-        </div>
+        <ProjectLogo
+          logo={project.media?.logo ?? ""}
+          title={project.title}
+          className="mb-4 group-hover:bg-primary/20 transition-colors"
+          iconSize={24}
+        />
 
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">

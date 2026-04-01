@@ -69,7 +69,7 @@ export const statusSchema = z.object({
 export type Status = z.infer<typeof statusSchema>;
 
 // ============================================================================
-// Shared URL Helpers
+// Shared URL / Icon Helpers
 // ============================================================================
 
 /**
@@ -84,6 +84,25 @@ const optionalUrl = (label: string) =>
     })
     .default("");
 
+/**
+ * Helper: accepts a valid HTTPS URL, a lucide-react icon name, or an empty string.
+ * Icon names are lowercase-kebab-case identifiers (e.g. "globe", "map-pin").
+ */
+const logoValue = () =>
+  z
+    .string()
+    .refine(
+      (val) =>
+        val === "" ||
+        z.string().url().safeParse(val).success ||
+        /^[a-z][a-z0-9-]*$/.test(val),
+      {
+        message:
+          "Logo must be a valid URL or a lucide-react icon name (lowercase-kebab-case)",
+      },
+    )
+    .default("");
+
 // ============================================================================
 // Media Schema
 // ============================================================================
@@ -92,7 +111,7 @@ const optionalUrl = (label: string) =>
  * Project media assets schema
  */
 export const mediaSchema = z.object({
-  logo: optionalUrl("Logo"),
+  logo: logoValue(),
   images: z.array(z.string().url("Image URLs must be valid")).default([]),
 });
 
