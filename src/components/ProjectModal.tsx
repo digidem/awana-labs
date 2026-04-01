@@ -234,7 +234,7 @@ const ProjectModal = ({
               <X className="w-5 h-5" />
             </button>
 
-            <div className="overflow-y-auto max-h-[90vh]">
+            <div className="overflow-y-auto overflow-x-hidden max-h-[90vh]">
               {/* Image Carousel */}
               {hasImages && (
                 <div className="relative aspect-video bg-muted">

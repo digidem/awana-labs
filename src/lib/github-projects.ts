@@ -20,21 +20,6 @@ const GITHUB_REPO = "awana-labs";
 const PUBLISH_LABEL = "publish:yes";
 
 // =============================================================================
-// Image URL Validation
-// =============================================================================
-
-function isValidImageUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    // Must be HTTPS — no host allowlist needed since images render in
-    // sandboxed <img> tags and can't execute code.
-    return parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-// =============================================================================
 // Parsing Functions
 // =============================================================================
 
@@ -136,14 +121,14 @@ function extractLogo(section: SectionContent | null): string {
     const urlMatch = logoLine.match(/https?:\/\/[^\s]+/i);
     if (urlMatch) {
       const url = urlMatch[0].replace(/["')\]]+$/, "").trim();
-      if (isValidImageUrl(url)) return url;
+      if (url) return url;
     }
 
     if (logoIndex + 1 < section.lines.length) {
       const nextUrlMatch = section.lines[logoIndex + 1].match(/https?:\/\/[^\s]+/i);
       if (nextUrlMatch) {
         const url = nextUrlMatch[0].replace(/["')\]]+$/, "").trim();
-        if (isValidImageUrl(url)) return url;
+        if (url) return url;
       }
     }
   }
@@ -173,7 +158,7 @@ function parseImages(section: SectionContent | null): string[] {
     // Strip trailing characters commonly appended by HTML attributes or
     // markdown syntax: quotes (src="..."), parentheses ([text](url)), etc.
     const url = match[0].replace(/["')\]]+$/, "").trim();
-    if (url && url !== logoUrl && isValidImageUrl(url)) {
+    if (url && url !== logoUrl) {
       urls.push(url);
     }
   }
