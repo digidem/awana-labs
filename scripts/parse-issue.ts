@@ -209,15 +209,34 @@ function extractLogo(section: SectionContent | null): string {
     const logoLine = section.lines[logoIndex];
     const urlMatch = logoLine.match(/https?:\/\/[^\s]+/i);
     if (urlMatch) {
-      return urlMatch[0].trim();
+      return urlMatch[0].replace(/["')\]]+$/, "").trim();
     }
 
-    // If not found on the same line, check the next line
+    // Extract value after the colon — may be an icon name instead of a URL
+    // Handle format: **Logo:** globe → after colon is "** globe", need to strip bold markers
+    const colonIdx = logoLine.indexOf(":");
+    if (colonIdx !== -1) {
+      const rawValue = logoLine
+        .slice(colonIdx + 1)
+        .trim()
+        .replace(/\*\*/g, "")
+        .trim()
+        .replace(/["')\]]+$/, "")
+        .trim();
+      if (rawValue) return rawValue;
+    }
+
+    // If not found on the same line, check the next line for URL or icon name
     if (logoIndex + 1 < section.lines.length) {
       const nextLine = section.lines[logoIndex + 1];
       const nextUrlMatch = nextLine.match(/https?:\/\/[^\s]+/i);
       if (nextUrlMatch) {
-        return nextUrlMatch[0].trim();
+        return nextUrlMatch[0].replace(/["')\]]+$/, "").trim();
+      }
+      // Check next line for an icon name (non-URL text)
+      const nextTrimmed = nextLine.trim();
+      if (nextTrimmed && !/^https?:\/\//i.test(nextTrimmed)) {
+        return nextTrimmed;
       }
     }
   }
@@ -434,7 +453,7 @@ export function parseIssueBody(
     },
     status: {
       state: statusState,
-      usage: statusUsage || "unknown",
+      usage: statusUsage || "experimental",
       notes: statusNotes,
     },
     tags,
