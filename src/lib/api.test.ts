@@ -9,6 +9,8 @@ import {
   ApiError,
   getErrorMessage,
   PROJECTS_CACHE_KEY,
+  PROJECTS_CACHE_VERSION,
+  deduplicateProjects,
 } from "./api";
 
 function createProjectsData() {
@@ -94,6 +96,56 @@ describe("API Client", () => {
     });
   });
 
+  describe("deduplicateProjects", () => {
+    it("removes duplicate slugs keeping the most recently updated", () => {
+      const projects = [
+        {
+          ...createProjectsData().projects[0],
+          slug: "comapeo-local-server",
+          title: "CoMapeo Local Server (new)",
+          timestamps: {
+            created_at: "2024-01-01T00:00:00.000Z",
+            last_updated_at: "2024-06-01T00:00:00.000Z",
+          },
+        },
+        {
+          ...createProjectsData().projects[0],
+          slug: "comapeo-local-server",
+          title: "CoMapeo Local Server (old)",
+          timestamps: {
+            created_at: "2024-01-01T00:00:00.000Z",
+            last_updated_at: "2024-03-01T00:00:00.000Z",
+          },
+        },
+        {
+          ...createProjectsData().projects[0],
+          slug: "unique-project",
+          title: "Unique Project",
+          timestamps: {
+            created_at: "2024-01-01T00:00:00.000Z",
+            last_updated_at: "2024-04-01T00:00:00.000Z",
+          },
+        },
+      ];
+
+      const result = deduplicateProjects(projects);
+
+      expect(result).toHaveLength(2);
+      expect(result.map((p) => p.slug).sort()).toEqual(["comapeo-local-server", "unique-project"]);
+      const comapeo = result.find((p) => p.slug === "comapeo-local-server")!;
+      expect(comapeo.title).toBe("CoMapeo Local Server (new)");
+    });
+
+    it("returns all projects when there are no duplicates", () => {
+      const projects = [
+        { ...createProjectsData().projects[0], slug: "project-a" },
+        { ...createProjectsData().projects[0], slug: "project-b" },
+      ];
+
+      expect(deduplicateProjects(projects)).toHaveLength(2);
+    });
+  });
+
   describe("fetchProjects", () => {
     it("fetches validated project data from GitHub on cold start", async () => {
       const mockData = createProjectsData();
@@ -117,7 +169,7 @@ describe("API Client", () => {
       localStorage.setItem(
         PROJECTS_CACHE_KEY,
         JSON.stringify({
-          version: 1,
+          version: PROJECTS_CACHE_VERSION,
           cachedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h old
           data: mockData,
         }),

@@ -6,7 +6,7 @@
  */
 
 import type { QueryFunction } from "@tanstack/react-query";
-import { parseProjectsData, type ProjectsData } from "@/types/project.schema";
+import { parseProjectsData, type ProjectsData, type Project } from "@/types/project.schema";
 import { fetchValidatedProjectsFromGitHub } from "./github-projects";
 import { isRateLimitError as isGitHubRateLimitError } from "./github";
 
@@ -35,12 +35,39 @@ export type ProjectLoadErrorType = "offline" | "timeout" | "rate-limit" | "gener
 
 export const PROJECTS_CACHE_KEY = "awana-labs-projects-cache";
 export const PROJECTS_DATA_UPDATED_EVENT = "awana-labs-projects-updated";
-export const PROJECTS_CACHE_VERSION = 1;
+export const PROJECTS_CACHE_VERSION = 2;
 export const PROJECTS_CACHE_MAX_AGE_MS = 1000 * 60 * 60;
 /** Stale-while-revalidate upper bound: serve stale cache up to 24 hours old. */
 export const PROJECTS_STALE_WINDOW_MS = 1000 * 60 * 60 * 24;
 export const MAX_CACHE_SIZE_BYTES = 4 * 1024 * 1024; // 4MB safety margin under 5MB limit
 export const MAX_CACHE_PROJECT_COUNT = 200;
+
+/**
+ * Deduplicate projects by slug, keeping the entry with the most recent
+ * `last_updated_at` timestamp.  This is a safety net so stale cache or
+ * transient GitHub responses never render duplicates.
+ */
+export function deduplicateProjects(projects: Project[]): Project[] {
+  const map = new Map<string, Project>();
+  for (const project of projects) {
+    const existing = map.get(project.slug);
+    if (!existing) {
+      map.set(project.slug, project);
+      continue;
+    }
+    const existingTime = Date.parse(existing.timestamps.last_updated_at) || 0;
+    const projectTime = Date.parse(project.timestamps.last_updated_at) || 0;
+    if (projectTime > existingTime) {
+      map.set(project.slug, project);
+    }
+  }
+  return [...map.values()];
+}
+
+/** Deduplicate projects inside a ProjectsData wrapper. */
+function deduplicateCached(data: ProjectsData): ProjectsData {
+  return { ...data, projects: deduplicateProjects(data.projects) };
+}
 
 export interface ProjectsCacheEntry {
   version: number;
@@ -217,9 +244,10 @@ export async function fetchProjectsFromGitHub(): Promise<ProjectsData> {
     import.meta.env.VITE_GITHUB_LABEL || "publish:yes",
   );
 
-  writeProjectsCache(data);
-  dispatchProjectsDataUpdated(data);
-  return data;
+  const deduped: ProjectsData = { ...data, projects: deduplicateProjects(data.projects) };
+  writeProjectsCache(deduped);
+  dispatchProjectsDataUpdated(deduped);
+  return deduped;
 }
 
 /**
@@ -246,7 +274,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
   const online = isOnline();
 
   if (cachedProjects && (!cachedProjects.isStale || !online)) {
-    return cachedProjects.entry.data;
+    return deduplicateCached(cachedProjects.entry.data);
   }
 
   // Stale-while-revalidate: if cache is between 1h and 24h old, serve it
@@ -256,7 +284,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
     fetchProjectsFromGitHub().catch((error: unknown) => {
       console.warn("Background refresh failed:", error);
     });
-    return cachedProjects.entry.data;
+    return deduplicateCached(cachedProjects.entry.data);
   }
 
   if (!online) {
@@ -279,7 +307,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
       } else {
         console.warn("Using cached projects after GitHub refresh failed:", error);
       }
-      return cachedProjects.entry.data;
+      return deduplicateCached(cachedProjects.entry.data);
     }
 
     console.error("GitHub API error (no cache available):", error);
