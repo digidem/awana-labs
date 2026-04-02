@@ -331,6 +331,41 @@ function createClient(token?: string): GitHubClient {
 }
 
 /**
+ * Enrich projects with repository metadata (pushed_at, stargazers_count, forks_count).
+ * Fetches repo data in parallel with a concurrency limit to avoid rate limits.
+ * Failures are silently skipped — the project simply stays without repoMetadata.
+ */
+async function enrichWithRepoMetadata(
+  projects: Project[],
+  client: GitHubClient,
+): Promise<void> {
+  const BATCH_SIZE = 5;
+  const withRepo = projects.filter((p) => p.links.repository);
+
+  for (let i = 0; i < withRepo.length; i += BATCH_SIZE) {
+    const batch = withRepo.slice(i, i + BATCH_SIZE);
+    await Promise.allSettled(
+      batch.map(async (project) => {
+        try {
+          const url = project.links.repository.replace(/\.git$/, "").replace(/\/+$/, "");
+          const match = url.match(/(?:www\.)?github\.com\/([^/]+)\/([^/]+)/);
+          if (!match) return;
+          const [, owner, repo] = match;
+          const repoData = await client.getRepository(owner, repo);
+          project.repoMetadata = {
+            pushed_at: repoData.pushed_at,
+            stargazers_count: repoData.stargazers_count,
+            forks_count: repoData.forks_count,
+          };
+        } catch {
+          // Graceful degradation — skip this repo
+        }
+      }),
+    );
+  }
+}
+
+/**
  * Fetch projects from GitHub issues
  * Fetches issues with 'publish:yes' label and parses them into projects.
  * The runtime path reads issues directly from GitHub; it does not depend on a
@@ -367,6 +402,9 @@ export async function fetchProjectsFromGitHub(
     }
 
     console.log(`Successfully parsed ${projects.length} projects`);
+
+    // Enrich projects with repo metadata (pushed_at, stargazers, forks)
+    await enrichWithRepoMetadata(projects, client);
 
     return { projects };
   } catch (error) {

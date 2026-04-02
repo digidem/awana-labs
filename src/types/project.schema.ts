@@ -191,6 +191,13 @@ export const projectSchema = z.object({
   media: mediaSchema,
   links: linksSchema,
   timestamps: timestampsSchema,
+  repoMetadata: z
+    .object({
+      pushed_at: z.string(),
+      stargazers_count: z.number(),
+      forks_count: z.number(),
+    })
+    .optional(),
 });
 
 export type Project = z.infer<typeof projectSchema>;

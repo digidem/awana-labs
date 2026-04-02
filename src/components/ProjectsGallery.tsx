@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Input } from "@/components/ui/input";
+import { sortProjects } from "@/lib/sort-projects";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 
@@ -71,8 +72,10 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
     img.src = firstImage;
   }, []);
 
+  const sortedProjects = useMemo(() => sortProjects(projects), [projects]);
+
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return sortedProjects.filter((project) => {
       // Status filter
       if (statusFilter !== "all" && project.status.state !== statusFilter) {
         return false;
@@ -90,7 +93,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
 
       return true;
     });
-  }, [projects, statusFilter, searchQuery]);
+  }, [sortedProjects, statusFilter, searchQuery]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

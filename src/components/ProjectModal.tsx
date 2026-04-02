@@ -53,8 +53,12 @@ const ProjectModal = ({
   const prefetchCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const locale = i18n.resolvedLanguage ?? i18n.language;
 
-  const formatDate = (value: string) =>
-    new Intl.DateTimeFormat(locale).format(new Date(value));
+  const formatDate = (value: string) => {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime())
+      ? value
+      : new Intl.DateTimeFormat(locale).format(parsed);
+  };
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -449,7 +453,7 @@ const ProjectModal = ({
                   </span>
                   <span>
                     {t("projects.updated")}:{" "}
-                    {formatDate(project.timestamps.last_updated_at)}
+                    {formatDate(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at)}
                   </span>
                 </div>
               </div>
