@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/StatusBadge";
 import ProjectLogo from "@/components/ProjectLogo";
+import { formatRelativeTime } from "@/lib/utils";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -52,17 +53,6 @@ const ProjectModal = ({
   /** Cache of prefetched Image objects keyed by URL for adjacent carousel images. */
   const prefetchCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const locale = i18n.resolvedLanguage ?? i18n.language;
-
-  const formatDate = (value: string) => {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime())
-      ? value
-      : new Intl.DateTimeFormat(locale, {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        }).format(parsed);
-  };
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -454,7 +444,7 @@ const ProjectModal = ({
                 <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
                   <span className="bg-muted/40 rounded-md px-2 py-1">
                     {t("projects.updated")}:{" "}
-                    {formatDate(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at)}
+                    {formatRelativeTime(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at, locale)}
                   </span>
                 </div>
               </div>

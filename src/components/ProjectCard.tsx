@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
 import ProjectLogo from "@/components/ProjectLogo";
+import { formatRelativeTime } from "@/lib/utils";
 
 interface ProjectCardProps {
   project: Project;
@@ -26,14 +27,7 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   }, [onPrefetch]);
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const updatedDate = project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at;
-  const parsed = new Date(updatedDate);
-  const lastUpdatedLabel = Number.isNaN(parsed.getTime())
-    ? updatedDate
-    : new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      }).format(parsed);
+  const lastUpdatedLabel = formatRelativeTime(updatedDate, locale);
 
   const cardVariants: Variants = {
     hidden: {

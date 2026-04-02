@@ -4,6 +4,10 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
 import ProjectCard from "./ProjectCard";
 
+// Freeze system time so relative-time assertions are deterministic
+const FIXED_NOW = new Date("2026-04-02T12:00:00.000Z");
+vi.useFakeTimers({ now: FIXED_NOW });
+
 const project = {
   id: "test-project",
   issue_number: 1,
@@ -65,7 +69,7 @@ describe("ProjectCard", () => {
     expect(onClick.mock.calls[0][0]).toBe(button);
   });
 
-  it("formats project dates using the active app language", async () => {
+  it("formats project dates as relative time using the active app language", async () => {
     await act(async () => {
       await i18n.changeLanguage("pt");
     });
@@ -76,17 +80,16 @@ describe("ProjectCard", () => {
       </I18nextProvider>,
     );
 
-    const formattedDate = new Intl.DateTimeFormat("pt", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    }).format(new Date(project.timestamps.last_updated_at));
+    // project.timestamps.last_updated_at is 2024-01-02, FIXED_NOW is 2026-04-02 → ~2 years ago
+    const expected = new Intl.RelativeTimeFormat("pt", {
+      numeric: "auto",
+    }).format(-2, "year");
 
     expect(
       screen.getByText((_, node) => {
         return node?.tagName === "DIV" &&
           node?.textContent ===
-          `${i18n.t("projects.updated")} ${formattedDate}`;
+          `${i18n.t("projects.updated")} ${expected}`;
       }),
     ).toBeInTheDocument();
   });
