@@ -5,7 +5,6 @@ import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/StatusBadge";
-import { getUsageLabel } from "@/lib/status-utils";
 import ProjectLogo from "@/components/ProjectLogo";
 
 interface ProjectCardProps {
@@ -67,19 +66,19 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
       aria-label={t("aria.viewDetails", { title: project.title })}
     >
       <CardHeader className="pb-3">
-        <ProjectLogo
-          logo={project.media?.logo ?? ""}
-          title={project.title}
-          className="mb-4 group-hover:bg-primary/20 transition-colors"
-          iconSize={24}
-        />
-
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
-            {project.title}
-          </h3>
-          <StatusBadge state={project.status.state} />
+        <div className="flex items-center gap-3 mb-4">
+          <ProjectLogo
+            logo={project.media?.logo ?? ""}
+            title={project.title}
+            className="group-hover:bg-primary/20 transition-colors"
+            iconSize={24}
+          />
+          <StatusBadge state={project.status.state} usage={project.status.usage} />
         </div>
+
+        <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
+          {project.title}
+        </h3>
       </CardHeader>
 
       <CardContent className="pt-0">
@@ -100,8 +99,7 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
           )}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{getUsageLabel(project.status.usage, t)}</span>
+        <div className="flex items-center justify-end text-xs text-muted-foreground">
           <span>
             {t("projects.updated")} {lastUpdatedLabel}
           </span>
