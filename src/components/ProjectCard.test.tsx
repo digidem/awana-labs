@@ -81,9 +81,8 @@ describe("ProjectCard", () => {
     );
 
     // project.timestamps.last_updated_at is 2024-01-02, FIXED_NOW is 2026-04-02 → ~2 years ago
-    const expected = new Intl.RelativeTimeFormat("pt", {
-      numeric: "auto",
-    }).format(-2, "year");
+    // Should render the i18n "over X years ago" key with count=2
+    const expected = i18n.t("timeAgo.overYears", { count: 2 });
 
     expect(
       screen.getByText((_, node) => {

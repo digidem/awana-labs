@@ -444,7 +444,7 @@ const ProjectModal = ({
                 <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
                   <span className="bg-muted/40 rounded-md px-2 py-1">
                     {t("projects.updated")}:{" "}
-                    {formatRelativeTime(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at, locale)}
+                    {formatRelativeTime(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at, locale, t)}
                   </span>
                 </div>
               </div>

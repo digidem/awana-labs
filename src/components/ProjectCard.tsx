@@ -27,7 +27,7 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   }, [onPrefetch]);
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const updatedDate = project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at;
-  const lastUpdatedLabel = formatRelativeTime(updatedDate, locale);
+  const lastUpdatedLabel = formatRelativeTime(updatedDate, locale, t);
 
   const cardVariants: Variants = {
     hidden: {

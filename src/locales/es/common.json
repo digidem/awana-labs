@@ -91,5 +91,9 @@
     "visitGithub": "Visitar repositorio de GitHub",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú"
+  },
+  "timeAgo": {
+    "overYears_one": "hace más de un año",
+    "overYears_other": "hace más de {{count}} años"
   }
 }
