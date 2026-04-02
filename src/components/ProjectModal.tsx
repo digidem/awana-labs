@@ -57,7 +57,11 @@ const ProjectModal = ({
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime())
       ? value
-      : new Intl.DateTimeFormat(locale).format(parsed);
+      : new Intl.DateTimeFormat(locale, {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }).format(parsed);
   };
 
   useEffect(() => {
@@ -448,10 +452,7 @@ const ProjectModal = ({
 
                 {/* Timestamps */}
                 <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
-                  <span>
-                    {t("projects.created")}: {formatDate(project.timestamps.created_at)}
-                  </span>
-                  <span>
+                  <span className="bg-muted/40 rounded-md px-2 py-1">
                     {t("projects.updated")}:{" "}
                     {formatDate(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at)}
                   </span>

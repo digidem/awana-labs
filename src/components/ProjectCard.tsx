@@ -29,7 +29,11 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   const parsed = new Date(updatedDate);
   const lastUpdatedLabel = Number.isNaN(parsed.getTime())
     ? updatedDate
-    : new Intl.DateTimeFormat(locale).format(parsed);
+    : new Intl.DateTimeFormat(locale, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      }).format(parsed);
 
   const cardVariants: Variants = {
     hidden: {
@@ -99,7 +103,7 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
           )}
         </div>
 
-        <div className="flex items-center justify-end text-xs text-muted-foreground">
+        <div className="flex items-center justify-end text-xs text-muted-foreground bg-muted/40 rounded-md px-2 py-1">
           <span>
             {t("projects.updated")} {lastUpdatedLabel}
           </span>

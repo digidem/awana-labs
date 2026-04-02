@@ -76,13 +76,16 @@ describe("ProjectCard", () => {
       </I18nextProvider>,
     );
 
-    const formattedDate = new Intl.DateTimeFormat("pt").format(
-      new Date(project.timestamps.last_updated_at),
-    );
+    const formattedDate = new Intl.DateTimeFormat("pt", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    }).format(new Date(project.timestamps.last_updated_at));
 
     expect(
       screen.getByText((_, node) => {
-        return node?.textContent ===
+        return node?.tagName === "DIV" &&
+          node?.textContent ===
           `${i18n.t("projects.updated")} ${formattedDate}`;
       }),
     ).toBeInTheDocument();
