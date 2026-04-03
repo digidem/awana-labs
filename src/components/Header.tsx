@@ -1,33 +1,24 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
 import { GithubIcon } from "./GithubIcon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-// import LanguageSwitcher from "./LanguageSwitcher";
 
 interface HeaderProps {
   className?: string;
 }
 
-// Logo fade animation thresholds (in pixels from viewport top)
 const LOGO_FADE_START = 150;
 const LOGO_FULL_OPACITY = 50;
-const LOGO_INTERACTIVE_THRESHOLD = 0.01;
 
 const Header = ({ className }: HeaderProps) => {
   const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLogoInteractive, setIsLogoInteractive] = useState(false);
+  const logoOpacityRef = useRef(0);
+  const logoContainerRef = useRef<HTMLDivElement>(null);
   const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
   const heroTitleDocumentTopRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const logoOpacity = useMotionValue(0);
-  const logoX = useTransform(logoOpacity, [0, 1], [100, 0]);
 
   const cacheHeroTitlePosition = useCallback(() => {
     heroTitleRef.current =
@@ -37,80 +28,83 @@ const Header = ({ className }: HeaderProps) => {
       : null;
   }, []);
 
-  const calculateLogoOpacity = useCallback(() => {
-    if (heroTitleDocumentTopRef.current === null) {
-      return 0;
-    }
-
-    const currentTop = heroTitleDocumentTopRef.current - window.scrollY;
-
-    if (currentTop <= LOGO_FULL_OPACITY) {
-      return 1;
-    }
-
-    if (currentTop <= LOGO_FADE_START) {
-      const progress =
-        (LOGO_FADE_START - currentTop) / (LOGO_FADE_START - LOGO_FULL_OPACITY);
-      return Math.max(0, Math.min(1, progress));
-    }
-    return 0;
-  }, []);
-
   useEffect(() => {
     const updateHeaderState = () => {
-      const nextLogoOpacity = calculateLogoOpacity();
-      const nextIsScrolled = window.scrollY > 10;
-      const nextIsLogoInteractive =
-        nextLogoOpacity > LOGO_INTERACTIVE_THRESHOLD;
-
-      logoOpacity.set(nextLogoOpacity);
-      setIsScrolled((prev) => (prev === nextIsScrolled ? prev : nextIsScrolled));
-      setIsLogoInteractive((prev) =>
-        prev === nextIsLogoInteractive ? prev : nextIsLogoInteractive,
-      );
-      animationFrameRef.current = null;
-    };
-
-    const scheduleHeaderUpdate = () => {
-      if (animationFrameRef.current !== null) {
+      if (heroTitleDocumentTopRef.current === null) {
+        logoOpacityRef.current = 0;
+        if (logoContainerRef.current) {
+          logoContainerRef.current.style.opacity = "0";
+          logoContainerRef.current.style.transform = "translateX(100px)";
+        }
+        setIsLogoInteractive((prev) => (prev ? false : prev));
+        setIsScrolled(window.scrollY > 10);
+        animationFrameRef.current = null;
         return;
       }
 
+      const currentTop = heroTitleDocumentTopRef.current - window.scrollY;
+      let opacity = 0;
+      if (currentTop <= LOGO_FULL_OPACITY) {
+        opacity = 1;
+      } else if (currentTop <= LOGO_FADE_START) {
+        opacity = (LOGO_FADE_START - currentTop) / (LOGO_FADE_START - LOGO_FULL_OPACITY);
+      }
+
+      logoOpacityRef.current = opacity;
+      if (logoContainerRef.current) {
+        logoContainerRef.current.style.opacity = String(opacity);
+        logoContainerRef.current.style.transform = `translateX(${(1 - opacity) * 100}px)`;
+      }
+
+      setIsScrolled((prev) => {
+        const next = window.scrollY > 10;
+        return prev === next ? prev : next;
+      });
+      setIsLogoInteractive((prev) => {
+        const next = opacity > 0.01;
+        return prev === next ? prev : next;
+      });
+      animationFrameRef.current = null;
+    };
+
+    const scheduleUpdate = () => {
+      if (animationFrameRef.current !== null) return;
       animationFrameRef.current = window.requestAnimationFrame(updateHeaderState);
     };
 
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      cacheHeroTitlePosition();
-      scheduleHeaderUpdate();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        cacheHeroTitlePosition();
+        scheduleUpdate();
+      }, 100);
     };
 
     cacheHeroTitlePosition();
-    scheduleHeaderUpdate();
+    scheduleUpdate();
 
-    window.addEventListener("scroll", scheduleHeaderUpdate, { passive: true });
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", handleResize);
 
     return () => {
       if (animationFrameRef.current !== null) {
         window.cancelAnimationFrame(animationFrameRef.current);
       }
-
-      window.removeEventListener("scroll", scheduleHeaderUpdate);
+      clearTimeout(resizeTimer);
+      window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", handleResize);
     };
-  }, [cacheHeroTitlePosition, calculateLogoOpacity, logoOpacity]);
+  }, [cacheHeroTitlePosition]);
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   return (
-    <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+    <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "header-animate-in fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
           ? "bg-background/80 backdrop-blur-lg border-b border-border/50 shadow-sm"
           : "bg-transparent",
@@ -119,12 +113,12 @@ const Header = ({ className }: HeaderProps) => {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo/Brand - fades in with slide animation on scroll */}
-          <motion.div
+          <div
+            ref={logoContainerRef}
             className="flex items-center gap-2"
             style={{
-              opacity: logoOpacity,
-              x: logoX,
+              opacity: 0,
+              transform: "translateX(100px)",
               pointerEvents: isLogoInteractive ? "auto" : "none",
             }}
           >
@@ -134,14 +128,10 @@ const Header = ({ className }: HeaderProps) => {
             >
               🧪 {t("hero.title")}
             </button>
-          </motion.div>
+          </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            {/* GitHub Link - shown on all screen sizes */}
-            <motion.a
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+            <a
               href="https://github.com/digidem/awana-labs"
               target="_blank"
               rel="noopener noreferrer"
@@ -149,40 +139,11 @@ const Header = ({ className }: HeaderProps) => {
               aria-label={t("aria.visitGithub")}
             >
               <GithubIcon className="h-5 w-5" />
-            </motion.a>
-
-            {/* Language Switcher - commented out pending translation strategy
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              <LanguageSwitcher variant="default" />
-            </motion.div>
-            */}
-
-            {/* Mobile Menu Button - commented out for now
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-foreground hover:bg-accent transition-colors"
-              aria-label={
-                isMobileMenuOpen ? t("aria.closeMenu") : t("aria.openMenu")
-              }
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </motion.button>
-            */}</div>
+            </a>
+          </div>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 };
 
