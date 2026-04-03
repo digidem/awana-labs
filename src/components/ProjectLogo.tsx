@@ -1,5 +1,4 @@
-import { useMemo, createElement, type SVGProps } from "react";
-import { icons } from "lucide-react";
+import { useState, useEffect, createElement, type SVGProps } from "react";
 
 type LucideIconComponent = React.ComponentType<
   SVGProps<SVGSVGElement> & { size?: number | string }
@@ -16,20 +15,6 @@ function kebabToPascal(kebab: string): string {
     .join("");
 }
 
-/**
- * Resolve a lucide icon name (kebab-case or PascalCase) to the component.
- */
-function resolveIcon(name: string): LucideIconComponent | null {
-  // Try direct PascalCase lookup first (in case the value is already PascalCase)
-  const direct = icons[name as keyof typeof icons];
-  if (direct) return direct as LucideIconComponent;
-
-  // Try converting from kebab-case
-  const pascal = kebabToPascal(name);
-  const resolved = icons[pascal as keyof typeof icons];
-  return resolved ? (resolved as LucideIconComponent) : null;
-}
-
 interface ProjectLogoProps {
   /** A URL string, a lucide icon name (kebab-case), or empty string. */
   logo: string;
@@ -44,7 +29,7 @@ interface ProjectLogoProps {
 /**
  * Renders a project logo that can be:
  * 1. An `<img>` if the logo is a URL
- * 2. A lucide-react icon if the logo is an icon name
+ * 2. A lucide-react icon if the logo is an icon name (lazy-loaded on demand)
  * 3. A text fallback (first letter of title) if no logo is set
  */
 const ProjectLogo = ({
@@ -53,10 +38,38 @@ const ProjectLogo = ({
   className = "",
   iconSize = 24,
 }: ProjectLogoProps) => {
-  const iconComponent = useMemo(
-    () => (logo && !logo.startsWith("http") ? resolveIcon(logo) : null),
-    [logo],
-  );
+  const [iconComponent, setIconComponent] = useState<LucideIconComponent | null>(null);
+  const [iconLoading, setIconLoading] = useState(false);
+
+  useEffect(() => {
+    if (!logo || logo.startsWith("http")) {
+      setIconComponent(null);
+      setIconLoading(false);
+      return;
+    }
+
+    const pascal = kebabToPascal(logo);
+    setIconLoading(true);
+
+    let cancelled = false;
+    // Dynamic import keeps the full icons map in a separate chunk
+    // that loads only when a project needs a lucide icon for its logo.
+    import("@/lib/all-icons").then((mod) => {
+      if (cancelled) return;
+      const resolved =
+        mod.icons[pascal as keyof typeof mod.icons] ??
+        mod.icons[logo as keyof typeof mod.icons];
+      setIconComponent(() => (resolved as LucideIconComponent) ?? null);
+      setIconLoading(false);
+    }).catch(() => {
+      if (!cancelled) {
+        setIconComponent(null);
+        setIconLoading(false);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [logo]);
 
   // URL-based logo
   if (logo.startsWith("http")) {
@@ -87,7 +100,18 @@ const ProjectLogo = ({
     );
   }
 
-  // Fallback: first letter of title
+  // Loading shimmer while icon chunk loads (prevents FOUC)
+  if (iconLoading) {
+    return (
+      <div
+        className={`w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden ${className}`}
+      >
+        <div className="w-full h-full animate-shimmer bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
+      </div>
+    );
+  }
+
+  // Fallback: first letter of title (no logo set, or icon not found)
   return (
     <div
       className={`w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center ${className}`}
