@@ -15,7 +15,8 @@ if (
   import.meta.env.PROD
 ) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((error) => {
+    const swPath = import.meta.env.BASE_URL + "sw.js";
+    navigator.serviceWorker.register(swPath).catch((error) => {
       console.warn("SW registration failed:", error);
     });
   });
