@@ -2,7 +2,6 @@
 
 [![Deploy to GitHub Pages](https://github.com/digidem/awana-labs/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/digidem/awana-labs/actions/workflows/deploy.yml)
 [![E2E Tests](https://github.com/digidem/awana-labs/actions/workflows/test-e2e.yml/badge.svg?branch=main)](https://github.com/digidem/awana-labs/actions/workflows/test-e2e.yml)
-[![Test Deployed Site](https://github.com/digidem/awana-labs/actions/workflows/test-deployed.yml/badge.svg?branch=main)](https://github.com/digidem/awana-labs/actions/workflows/test-deployed.yml)
 
 Showcase for Awana Labs. Its goal is to build tech tools that resolve users' workflow problems using our apps, APIs, and support materials.
 
