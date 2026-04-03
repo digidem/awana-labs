@@ -42,7 +42,7 @@ const projectsPayload = {
 
 function createCacheEntry(stale = false) {
   return {
-    version: 1,
+    version: 2,
     cachedAt: new Date(
       stale ? Date.now() - 1000 * 60 * 60 * 2 : Date.now(),
     ).toISOString(),
@@ -160,7 +160,7 @@ test.describe("Projects runtime contract", () => {
       JSON.parse(window.localStorage.getItem("awana-labs-projects-cache") ?? "null"),
     );
 
-    expect(cacheEntry?.version).toBe(1);
+    expect(cacheEntry?.version).toBe(2);
     expect(cacheEntry?.data?.projects?.[0]?.title).toBe(
       "CoMapeo Config Spreadsheet Plugin",
     );
@@ -173,7 +173,7 @@ test.describe("Projects runtime contract", () => {
       window.localStorage.setItem(
         "awana-labs-projects-cache",
         JSON.stringify({
-          version: 1,
+          version: 2,
           cachedAt: "2026-03-25T00:00:00.000Z",
           data: { projects: [{ id: "broken-project" }] },
         }),

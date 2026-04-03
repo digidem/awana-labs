@@ -8,7 +8,7 @@ const BREAKPOINTS = {
 };
 
 const runtimeProjectsCacheEntry = {
-  version: 1,
+  version: 2,
   cachedAt: new Date().toISOString(),
   data: {
     projects: [

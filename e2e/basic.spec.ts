@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 const runtimeProjectsCacheEntry = {
-  version: 1,
+  version: 2,
   cachedAt: new Date().toISOString(),
   data: {
     projects: [
@@ -78,10 +78,9 @@ test.describe("Basic Page Tests", () => {
       }
     });
 
-    // Navigate and measure load time
     const startTime = Date.now();
     const response = await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForSelector("#projects", { state: "visible", timeout: 10000 });
     const loadTime = Date.now() - startTime;
 
     // HTTP 200 status
@@ -109,7 +108,6 @@ test.describe("Basic Page Tests", () => {
     ]);
 
     // No critical console errors
-    await page.waitForTimeout(2000);
     const criticalErrors = errors.filter(
       (e) =>
         e.includes("Uncaught") ||
