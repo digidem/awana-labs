@@ -85,7 +85,8 @@
     "returnHome": "Volver al Inicio"
   },
   "accessibility": {
-    "skipToContent": "Saltar al contenido"
+    "skipToContent": "Saltar al contenido",
+    "scrollToTop": "Volver arriba"
   },
   "aria": {
     "viewDetails": "Ver detalles de {{title}}",

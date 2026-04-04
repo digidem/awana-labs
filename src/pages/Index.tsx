@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 import Header from "@/components/Header";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const ProjectsGallery = lazy(() => import("@/components/ProjectsGallery"));
 const Footer = lazy(() => import("@/components/Footer"));
@@ -85,6 +86,7 @@ const Index = () => {
       <Suspense fallback={<div className="py-8" />}>
         <Footer />
       </Suspense>
+      <ScrollToTop />
     </main>
   );
 };
