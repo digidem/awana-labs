@@ -162,7 +162,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
                 aria-pressed={statusFilter === option.value}
                 className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                   statusFilter === option.value
-                    ? "bg-primary text-primary-foreground shadow-md"
+                    ? "bg-primary text-primary-foreground shadow-md ring-2 ring-primary-foreground/30"
                     : "bg-card hover:bg-secondary text-foreground border border-border"
                 }`}
               >
