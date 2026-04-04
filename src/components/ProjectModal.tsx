@@ -150,6 +150,8 @@ const ProjectModal = ({
     );
   }, [project]);
 
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
   const handleModalKeyDown = useCallback(
     (event: ReactKeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Escape") {
@@ -161,6 +163,27 @@ const ProjectModal = ({
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
         goToNextImage();
+      } else if (event.key === "Tab") {
+        // Focus trap: wrap Tab/Shift+Tab within focusable elements
+        const modal = modalRef.current;
+        if (!modal) return;
+        const focusable = modal.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey) {
+          if (document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
       }
     },
     [goToNextImage, goToPreviousImage, onClose],
@@ -212,6 +235,7 @@ const ProjectModal = ({
 
           {/* Modal */}
           <motion.div
+            ref={modalRef}
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -311,6 +335,7 @@ const ProjectModal = ({
                           <button
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
+                            aria-current={index === currentImageIndex ? "true" : undefined}
                             className={`w-2 h-2 rounded-full transition-colors ${
                               index === currentImageIndex
                                 ? "bg-primary"

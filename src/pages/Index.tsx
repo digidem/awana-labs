@@ -71,6 +71,12 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
+      <a
+        href="#projects"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:shadow-lg"
+      >
+        {t("accessibility.skipToContent")}
+      </a>
       <Header />
       <Hero />
       <Suspense fallback={<div className="py-20 min-h-[400px]" />}>

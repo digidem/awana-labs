@@ -84,6 +84,9 @@
     "message": "¡Ups! Página no encontrada",
     "returnHome": "Volver al Inicio"
   },
+  "accessibility": {
+    "skipToContent": "Saltar al contenido"
+  },
   "aria": {
     "viewDetails": "Ver detalles de {{title}}",
     "selectLanguage": "Seleccionar idioma",

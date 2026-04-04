@@ -84,6 +84,9 @@
     "message": "Oops! Page not found",
     "returnHome": "Return to Home"
   },
+  "accessibility": {
+    "skipToContent": "Skip to content"
+  },
   "aria": {
     "viewDetails": "View details for {{title}}",
     "selectLanguage": "Select language",

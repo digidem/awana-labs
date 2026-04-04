@@ -106,7 +106,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
   };
 
   return (
-    <section id="projects" className="py-20 px-6">
+    <section id="projects" tabIndex={-1} className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div
