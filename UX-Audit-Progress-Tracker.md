@@ -9,8 +9,8 @@ Remaining issues from the UX/Design and Quality Assessment audit of the Awana La
 - [x] **HIGH**: Add skip-navigation link for keyboard accessibility.
   - *Location*: Top of page — `src/pages/Index.tsx`
   - *Description*: No `<a href="#projects">Skip to content</a>` link exists. Keyboard-only users must tab through the entire header on every page visit. WCAG 2.1 Level A failure (criterion 2.4.1 "Bypass Blocks").
-- [ ] **MEDIUM**: Add scroll-to-top mechanism.
-  - *Location*: Global — floating button
+- [x] **MEDIUM**: Add scroll-to-top mechanism.
+  - *Location*: Global — floating button (`src/components/ScrollToTop.tsx`)
   - *Description*: After scrolling through 16+ projects, there is no way to return to top besides native browser scroll.
 
 ## 2. Accessibility (WCAG Compliance)
@@ -21,9 +21,9 @@ Remaining issues from the UX/Design and Quality Assessment audit of the Awana La
 - [x] **MEDIUM**: Add `aria-current` to carousel dot indicators.
   - *Location*: `src/components/ProjectModal.tsx` — dot buttons
   - *Description*: Dot indicators have `aria-label` but don't communicate which is active. Add `aria-current={index === currentImageIndex ? "true" : undefined}`.
-- [ ] **MEDIUM**: Status filter pills rely on color alone for active state.
+- [x] **MEDIUM**: Status filter pills — added non-color active indicator.
   - *Location*: `src/components/ProjectsGallery.tsx` — filter buttons
-  - *Description*: `aria-pressed` is used (good), but visual active state relies solely on color change. Users with color vision deficiencies may struggle.
+  - *Description*: Active pill now has `ring-2 ring-primary-foreground/30` outline in addition to color change, making the active state distinguishable for color-deficient users.
 
 ## 3. Performance & Technical Quality
 
