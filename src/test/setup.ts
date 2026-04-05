@@ -75,7 +75,7 @@ Object.defineProperty(window, "sessionStorage", {
   writable: true,
 });
 
-// Mock IntersectionObserver for framer-motion
+// Mock IntersectionObserver (required by jsdom test environment)
 class IntersectionObserverMock {
   constructor() {}
   disconnect() {}
