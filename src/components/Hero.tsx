@@ -41,7 +41,7 @@ const Hero = () => {
 
         <button
           onClick={scrollToProjects}
-          className="hero-item-5 group inline-flex flex-col items-center gap-2 text-primary/70 hover:text-primary transition-colors cursor-pointer"
+          className="hero-item-5 group inline-flex flex-col items-center gap-2 text-primary/70 hover:text-primary transition-colors"
         >
           <span className="text-sm font-medium">{t("hero.cta")}</span>
           <div className="hero-bounce">
