@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
+import { Button } from "@/components/ui/button";
 
 const ProjectsGallery = lazy(() => import("@/components/ProjectsGallery"));
 const Footer = lazy(() => import("@/components/Footer"));
@@ -59,12 +60,9 @@ const Index = () => {
           <p className="text-muted-foreground mb-6">
             {errorCopy.description}
           </p>
-          <button
-            onClick={() => void refetch()}
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
+          <Button onClick={() => void refetch()} variant="default">
             {t("common.retry")}
-          </button>
+          </Button>
         </div>
       </div>
     );
