@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
@@ -43,7 +42,6 @@ type StatusFilter = "all" | "active" | "paused" | "archived";
 
 const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
   const { t } = useTranslation();
-  const prefersReducedMotion = useReducedMotion();
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: "all", label: t("common.all") },
@@ -95,43 +93,21 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
     });
   }, [sortedProjects, statusFilter, searchQuery]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.1,
-      },
-    },
-  };
-
   return (
     <section id="projects" tabIndex={-1} className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8 sm:mb-12 px-4"
-        >
+        <div className="text-center mb-8 sm:mb-12 px-4 animate-fade-up">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
             {t("projects.title")}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
             {t("projects.subtitle")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex flex-col gap-4 mb-8"
-        >
+        <div className="flex flex-col gap-4 mb-8 animate-fade-up" style={{ animationDelay: "0.1s" }}>
           {/* Search */}
           <div className="relative w-full sm:max-w-md mx-auto sm:mx-0">
             <label htmlFor="project-search" className="sr-only">
@@ -170,36 +146,35 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Projects Grid */}
         {filteredProjects.length > 0 ? (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+          <div
             id="projects-grid"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredProjects.map((project) => (
-              <ProjectCard
+            {filteredProjects.map((project, index) => (
+              <div
                 key={project.id}
-                project={project}
-                onClick={(trigger) => {
-                  setActiveTrigger(trigger);
-                  setSelectedProject(project);
+                className="animate-card-in"
+                style={{
+                  animationDelay: `${Math.min(index * 0.1, 0.9)}s`,
                 }}
-                onPrefetch={() => handlePrefetch(project)}
-              />
+              >
+                <ProjectCard
+                  project={project}
+                  onClick={(trigger) => {
+                    setActiveTrigger(trigger);
+                    setSelectedProject(project);
+                  }}
+                  onPrefetch={() => handlePrefetch(project)}
+                />
+              </div>
             ))}
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
-          >
+          <div className="text-center py-16 animate-fade-in">
             <p className="text-muted-foreground text-lg">
               {t("projects.noResults")}
             </p>
@@ -212,7 +187,7 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             >
               {t("projects.clearFilters")}
             </button>
-          </motion.div>
+          </div>
         )}
       </div>
 

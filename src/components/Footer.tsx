@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -6,13 +5,7 @@ const Footer = () => {
   const { t } = useTranslation();
 
   return (
-    <motion.footer
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-      className="py-8 sm:py-12 px-4 sm:px-6 border-t border-border bg-card/30"
-    >
+    <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-border bg-card/30 animate-fade-in">
       <div className="max-w-7xl mx-auto text-center">
         <p className="text-sm sm:text-base text-muted-foreground flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
           <span className="flex items-center gap-1 sm:gap-1.5">
@@ -32,7 +25,7 @@ const Footer = () => {
           </span>
         </p>
       </div>
-    </motion.footer>
+    </footer>
   );
 };
 

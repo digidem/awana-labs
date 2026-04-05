@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +16,6 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   const { t, i18n } = useTranslation();
-  const prefersReducedMotion = useReducedMotion();
   const hasPrefetchedRef = useRef(false);
 
   const handlePrefetch = useCallback(() => {
@@ -29,38 +27,14 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   const updatedDate = project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at;
   const lastUpdatedLabel = formatRelativeTime(updatedDate, locale, t);
 
-  const cardVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: prefersReducedMotion ? 0 : 30,
-      scale: prefersReducedMotion ? 1 : 0.95,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: [0.25, 0.1, 0.25, 1],
-      },
-    },
-  };
-
   return (
-    <motion.button
+    <button
       type="button"
       onClick={(event) => onClick(event.currentTarget)}
       onMouseEnter={handlePrefetch}
       onFocus={handlePrefetch}
       onTouchStart={handlePrefetch}
-      variants={cardVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      whileHover={
-        prefersReducedMotion ? {} : { y: -8, transition: { duration: 0.2 } }
-      }
-      className="h-full w-full rounded-lg border border-border/50 bg-card/80 text-left text-card-foreground shadow-sm backdrop-blur-sm transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
+      className="animate-card-in h-full w-full rounded-lg border border-border/50 bg-card/80 text-left text-card-foreground shadow-sm backdrop-blur-sm transition-[box-shadow,transform] duration-300 hover:shadow-xl hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
       aria-label={t("aria.viewDetails", { title: project.title })}
     >
       <CardHeader className="pb-3">
@@ -103,7 +77,7 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
           </span>
         </div>
       </CardContent>
-    </motion.button>
+    </button>
   );
 };
 
