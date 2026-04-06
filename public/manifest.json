@@ -1,0 +1,17 @@
+{
+  "name": "Awana Labs",
+  "short_name": "Awana Labs",
+  "description": "Open source tools, libraries, and frameworks by Awana Digital",
+  "start_url": "/awana-labs/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/awana-labs/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "lang": "en"
+}

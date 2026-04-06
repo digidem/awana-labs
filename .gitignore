@@ -42,3 +42,22 @@ stats.html
 *.njsproj
 *.sln
 *.sw?
+
+# AI agent/tool state
+.agent/
+.agents/
+.claude-flow/
+.claude/
+.codex/
+.factory/
+.forge/
+.gemini/
+.hive-mind/
+.junie/
+.kilocode/
+.qwen/
+.mcp.json
+*.skill
+skills-lock.json
+plans/
+data/
