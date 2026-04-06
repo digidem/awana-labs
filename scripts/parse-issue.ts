@@ -65,7 +65,7 @@ interface RawProjectData {
  * Validated project data type exported from this module
  * Re-exported from the schema for convenience
  */
-export type ProjectData = Project;
+type ProjectData = Project;
 
 // ============================================================================
 // Main Parser Function

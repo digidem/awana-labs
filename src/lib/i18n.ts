@@ -62,6 +62,6 @@ i18n
   } as Parameters<typeof i18n.init>[0]);
 
 // Export a typed t function that accepts any string key
-export const t = i18n.t.bind(i18n);
+const t = i18n.t.bind(i18n);
 
 export default i18n;

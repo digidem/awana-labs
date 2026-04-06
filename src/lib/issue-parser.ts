@@ -10,7 +10,7 @@
 // =============================================================================
 
 /** Raw section content extracted from an issue body */
-export interface SectionContent {
+interface SectionContent {
   raw: string;
   lines: string[];
 }
@@ -25,7 +25,7 @@ function escapeRegex(str: string): string {
 }
 
 /** Check whether a string looks like a URL */
-export function isUrl(value: string): boolean {
+function isUrl(value: string): boolean {
   return /^https?:\/\//i.test(value);
 }
 

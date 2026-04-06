@@ -2,7 +2,7 @@ export const SUPPORTED_LANGUAGES = ["en", "pt", "es"] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
-export interface LanguageOption {
+interface LanguageOption {
   code: Language;
   name: string;
   nativeName: string;
