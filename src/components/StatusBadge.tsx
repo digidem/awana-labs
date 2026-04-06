@@ -6,7 +6,7 @@ import type {
   ProjectStatusUsage,
 } from "@/lib/status-utils";
 
-export interface StatusBadgeProps {
+interface StatusBadgeProps {
   /** The status state to display */
   state: ProjectStatusState;
   /** Optional usage status to display as a secondary badge */
@@ -50,4 +50,3 @@ export function StatusBadge({
   );
 }
 
-export default StatusBadge;

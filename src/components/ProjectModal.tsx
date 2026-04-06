@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import StatusBadge from "@/components/StatusBadge";
+import { StatusBadge } from "@/components/StatusBadge";
 import ProjectLogo from "@/components/ProjectLogo";
 import { formatRelativeTime } from "@/lib/utils";
 
