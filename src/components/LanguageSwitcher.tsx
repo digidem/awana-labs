@@ -100,10 +100,7 @@ const LanguageSwitcher = ({
               </div>
             </span>
             {option.code === language && (
-              <Check
-                className="h-4 w-4 text-primary"
-                aria-hidden="true"
-              />
+              <Check className="h-4 w-4 text-primary" aria-hidden="true" />
             )}
           </DropdownMenuItem>
         ))}

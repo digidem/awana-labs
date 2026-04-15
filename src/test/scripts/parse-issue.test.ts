@@ -29,7 +29,12 @@ react, typescript, open source
 **Documentation:** https://docs.awana-labs.com
 `;
 
-    const result = parseIssueBody(validMarkdown, 1, "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z");
+    const result = parseIssueBody(
+      validMarkdown,
+      1,
+      "2024-01-01T00:00:00Z",
+      "2024-01-01T00:00:00Z",
+    );
 
     expect(result).toBeDefined();
     expect(result?.title).toBe("Awana Labs Showcase");

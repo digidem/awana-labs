@@ -131,7 +131,10 @@ describe("API Client", () => {
       const result = deduplicateProjects(projects);
 
       expect(result).toHaveLength(2);
-      expect(result.map((p) => p.slug).sort()).toEqual(["comapeo-local-server", "unique-project"]);
+      expect(result.map((p) => p.slug).sort()).toEqual([
+        "comapeo-local-server",
+        "unique-project",
+      ]);
       const comapeo = result.find((p) => p.slug === "comapeo-local-server")!;
       expect(comapeo.title).toBe("CoMapeo Local Server (new)");
     });
@@ -175,7 +178,10 @@ describe("API Client", () => {
         }),
       );
 
-      vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockRejectedValue(
+      vi.spyOn(
+        githubProjects,
+        "fetchValidatedProjectsFromGitHub",
+      ).mockRejectedValue(
         Object.assign(new Error("API rate limit exceeded"), { status: 403 }),
       );
 

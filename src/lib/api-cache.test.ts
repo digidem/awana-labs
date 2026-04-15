@@ -92,9 +92,10 @@ describe("projects cache contract", () => {
 
   it("writes validated GitHub payloads to localStorage", async () => {
     const mockData = createProjectsData();
-    vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockResolvedValue(
-      mockData,
-    );
+    vi.spyOn(
+      githubProjects,
+      "fetchValidatedProjectsFromGitHub",
+    ).mockResolvedValue(mockData);
 
     await fetchProjects();
 
@@ -168,9 +169,10 @@ describe("projects cache contract", () => {
         },
       ],
     };
-    vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockResolvedValue(
-      refreshedData,
-    );
+    vi.spyOn(
+      githubProjects,
+      "fetchValidatedProjectsFromGitHub",
+    ).mockResolvedValue(refreshedData);
     const updatedListener = vi.fn();
     window.addEventListener(PROJECTS_DATA_UPDATED_EVENT, updatedListener);
 
@@ -296,8 +298,12 @@ describe("corrupted cache edge cases", () => {
       data: createProjectsData(),
     };
     // Force the serialized size past the limit by adding padding inside the JSON
-    const raw = JSON.stringify(oversizedData).slice(0, -1) +
-      "," + "\"_padding\":\"" + "x".repeat(MAX_CACHE_SIZE_BYTES) + "\"}";
+    const raw =
+      JSON.stringify(oversizedData).slice(0, -1) +
+      "," +
+      '"_padding":"' +
+      "x".repeat(MAX_CACHE_SIZE_BYTES) +
+      '"}';
     localStorage.setItem(PROJECTS_CACHE_KEY, raw);
 
     const mockData = createProjectsData();
@@ -313,9 +319,10 @@ describe("corrupted cache edge cases", () => {
 
   it("returns data even when localStorage.setItem throws", async () => {
     const mockData = createProjectsData();
-    vi.spyOn(githubProjects, "fetchValidatedProjectsFromGitHub").mockResolvedValue(
-      mockData,
-    );
+    vi.spyOn(
+      githubProjects,
+      "fetchValidatedProjectsFromGitHub",
+    ).mockResolvedValue(mockData);
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("QuotaExceededError");
     });

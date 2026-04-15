@@ -26,8 +26,7 @@ const projectFixture = {
   },
   links: {
     homepage: "https://www.digital-democracy.org/comapeo",
-    repository:
-      "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
+    repository: "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
     documentation: "https://docs.example.com/comapeo",
   },
   timestamps: {
@@ -95,7 +94,10 @@ ${projectFixture.media.images.join("\n")}
 
 async function seedProjectsCache(page: Page, cacheEntry = createCacheEntry()) {
   await page.addInitScript((entry) => {
-    window.localStorage.setItem("awana-labs-projects-cache", JSON.stringify(entry));
+    window.localStorage.setItem(
+      "awana-labs-projects-cache",
+      JSON.stringify(entry),
+    );
   }, cacheEntry);
 }
 
@@ -111,14 +113,17 @@ async function setNavigatorOffline(page: Page) {
 async function mockGitHubProjects(page: Page) {
   let requestCount = 0;
 
-  await page.route("https://api.github.com/repos/**/issues**", async (route) => {
-    requestCount += 1;
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify([githubIssueFixture]),
-    });
-  });
+  await page.route(
+    "https://api.github.com/repos/**/issues**",
+    async (route) => {
+      requestCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([githubIssueFixture]),
+      });
+    },
+  );
 
   return {
     getRequestCount: () => requestCount,
@@ -157,7 +162,9 @@ test.describe("Projects runtime contract", () => {
     ).toBeVisible();
 
     const cacheEntry = await page.evaluate(() =>
-      JSON.parse(window.localStorage.getItem("awana-labs-projects-cache") ?? "null"),
+      JSON.parse(
+        window.localStorage.getItem("awana-labs-projects-cache") ?? "null",
+      ),
     );
 
     expect(cacheEntry?.version).toBe(2);
@@ -191,7 +198,9 @@ test.describe("Projects runtime contract", () => {
     ).toBeVisible();
 
     const cacheEntry = await page.evaluate(() =>
-      JSON.parse(window.localStorage.getItem("awana-labs-projects-cache") ?? "null"),
+      JSON.parse(
+        window.localStorage.getItem("awana-labs-projects-cache") ?? "null",
+      ),
     );
 
     expect(cacheEntry?.data?.projects?.[0]?.slug).toBe(

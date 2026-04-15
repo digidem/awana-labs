@@ -125,10 +125,24 @@ describe("useProjects", () => {
 
   it("updates cached query data when the runtime refresh event fires", async () => {
     const initialData = {
-      projects: [createMockProject({ id: "1", title: "Initial Project", slug: "initial-project", description: "Initial project data" })],
+      projects: [
+        createMockProject({
+          id: "1",
+          title: "Initial Project",
+          slug: "initial-project",
+          description: "Initial project data",
+        }),
+      ],
     };
     const refreshedData = {
-      projects: [createMockProject({ id: "2", title: "Refreshed Project", slug: "refreshed-project", description: "Refreshed project data" })],
+      projects: [
+        createMockProject({
+          id: "2",
+          title: "Refreshed Project",
+          slug: "refreshed-project",
+          description: "Refreshed project data",
+        }),
+      ],
     };
 
     mockFetchProjectsQuery.mockResolvedValue(initialData);
@@ -175,7 +189,10 @@ describe("useProjects", () => {
 
     // Make fetch take a while so we can observe placeholder state
     mockFetchProjectsQuery.mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve(cachedData.entry.data), 200)),
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve(cachedData.entry.data), 200),
+        ),
     );
 
     const { result } = renderHook(() => useProjects(), {
@@ -232,7 +249,14 @@ describe("useProjectsWithError", () => {
 
   it("should return projects array on success", async () => {
     const mockData = {
-      projects: [createMockProject({ id: "1", title: "Project 1", slug: "project-1", description: "First project" })],
+      projects: [
+        createMockProject({
+          id: "1",
+          title: "Project 1",
+          slug: "project-1",
+          description: "First project",
+        }),
+      ],
     };
 
     mockFetchProjectsQuery.mockResolvedValue(mockData);
@@ -252,12 +276,9 @@ describe("useProjectsWithError", () => {
     mockGetProjectLoadErrorType.mockReturnValue("offline");
     mockFetchProjectsQuery.mockRejectedValue(mockError);
 
-    const { result } = renderHook(
-      () => useProjectsWithError({ retry: 0 }),
-      {
-        wrapper: createWrapper(queryClient),
-      },
-    );
+    const { result } = renderHook(() => useProjectsWithError({ retry: 0 }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true), {
       timeout: 3000,
@@ -276,12 +297,9 @@ describe("useProjectsWithError", () => {
     mockFetchProjectsQuery.mockRejectedValue(abortError);
     mockGetProjectLoadErrorType.mockReturnValue("timeout");
 
-    const { result } = renderHook(
-      () => useProjectsWithError({ retry: 0 }),
-      {
-        wrapper: createWrapper(queryClient),
-      },
-    );
+    const { result } = renderHook(() => useProjectsWithError({ retry: 0 }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true), {
       timeout: 3000,
@@ -297,12 +315,9 @@ describe("useProjectsWithError", () => {
     mockFetchProjectsQuery.mockRejectedValue(rateLimitError);
     mockGetProjectLoadErrorType.mockReturnValue("rate-limit");
 
-    const { result } = renderHook(
-      () => useProjectsWithError({ retry: 0 }),
-      {
-        wrapper: createWrapper(queryClient),
-      },
-    );
+    const { result } = renderHook(() => useProjectsWithError({ retry: 0 }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true), {
       timeout: 3000,
@@ -315,7 +330,14 @@ describe("useProjectsWithError", () => {
 
   it("should handle slow responses gracefully", async () => {
     const mockData = {
-      projects: [createMockProject({ id: "1", title: "Slow Project", slug: "slow-project", description: "A slow-loading project" })],
+      projects: [
+        createMockProject({
+          id: "1",
+          title: "Slow Project",
+          slug: "slow-project",
+          description: "A slow-loading project",
+        }),
+      ],
     };
 
     mockFetchProjectsQuery.mockImplementation(
@@ -339,7 +361,14 @@ describe("useProjectsWithError", () => {
 
   it("should refetch after error when refetch is called", async () => {
     const mockData = {
-      projects: [createMockProject({ id: "1", title: "Refetched Project", slug: "refetched-project", description: "A project loaded after refetch" })],
+      projects: [
+        createMockProject({
+          id: "1",
+          title: "Refetched Project",
+          slug: "refetched-project",
+          description: "A project loaded after refetch",
+        }),
+      ],
     };
 
     const fetchError = new Error("Network failure");
@@ -348,12 +377,9 @@ describe("useProjectsWithError", () => {
       .mockResolvedValueOnce(mockData);
     mockGetProjectLoadErrorType.mockReturnValue("generic");
 
-    const { result } = renderHook(
-      () => useProjectsWithError({ retry: 0 }),
-      {
-        wrapper: createWrapper(queryClient),
-      },
-    );
+    const { result } = renderHook(() => useProjectsWithError({ retry: 0 }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true), {
       timeout: 3000,
@@ -372,12 +398,9 @@ describe("useProjectsWithError", () => {
     mockFetchProjectsQuery.mockRejectedValue(rateLimitError);
     mockGetProjectLoadErrorType.mockReturnValue("rate-limit");
 
-    const { result } = renderHook(
-      () => useProjectsWithError({ retry: 3 }),
-      {
-        wrapper: createWrapper(queryClient),
-      },
-    );
+    const { result } = renderHook(() => useProjectsWithError({ retry: 3 }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true), {
       timeout: 5000,

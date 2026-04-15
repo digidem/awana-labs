@@ -3,7 +3,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { GitHubClient, GitHubApiError, createGitHubClient, isRateLimitError } from "./github";
+import {
+  GitHubClient,
+  GitHubApiError,
+  createGitHubClient,
+  isRateLimitError,
+} from "./github";
 
 // Use vi.hoisted to properly mock Octokit
 const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
@@ -30,7 +35,7 @@ const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
   }) {
     this.rest = mockRest;
     this.paginate = {
-      iterator: mockPaginateIterator
+      iterator: mockPaginateIterator,
     };
     this.auth = undefined;
   };
@@ -114,7 +119,7 @@ describe("GitHubClient", () => {
       mockPaginateIterator.mockReturnValue(
         (async function* () {
           yield { data: mockIssues };
-        })()
+        })(),
       );
 
       const issues = await client.getIssues("owner", "repo");
@@ -131,7 +136,7 @@ describe("GitHubClient", () => {
           labels: undefined,
           state: "open",
           per_page: 100,
-        }
+        },
       );
     });
 
@@ -139,7 +144,7 @@ describe("GitHubClient", () => {
       mockPaginateIterator.mockReturnValue(
         (async function* () {
           yield { data: [] };
-        })()
+        })(),
       );
 
       await client.getIssues("owner", "repo", { labels: "publish:yes" });
@@ -156,7 +161,7 @@ describe("GitHubClient", () => {
       mockPaginateIterator.mockReturnValue(
         (async function* () {
           yield { data: [] };
-        })()
+        })(),
       );
 
       await client.getIssues("owner", "repo", { state: "all" });
@@ -192,14 +197,16 @@ describe("GitHubClient", () => {
           updated_at: "2024-01-04T00:00:00Z",
           labels: [{ name: "enhancement" }],
           user: { login: "testuser", type: "User" },
-          pull_request: { url: "https://api.github.com/repos/owner/repo/pulls/2" },
+          pull_request: {
+            url: "https://api.github.com/repos/owner/repo/pulls/2",
+          },
         },
       ];
 
       mockPaginateIterator.mockReturnValue(
         (async function* () {
           yield { data: mockIssues };
-        })()
+        })(),
       );
 
       const issues = await client.getIssues("owner", "repo");
@@ -225,17 +232,24 @@ describe("GitHubClient", () => {
     it("returns partial issues when rate-limited mid-pagination", async () => {
       const firstPage = [
         {
-          number: 1, title: "Issue 1", body: null, state: "open",
+          number: 1,
+          title: "Issue 1",
+          body: null,
+          state: "open",
           html_url: "https://github.com/o/r/issues/1",
-          created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-02T00:00:00Z",
-          labels: [], user: { login: "u", type: "User" },
+          created_at: "2024-01-01T00:00:00Z",
+          updated_at: "2024-01-02T00:00:00Z",
+          labels: [],
+          user: { login: "u", type: "User" },
         },
       ];
 
       mockPaginateIterator.mockReturnValue(
         (async function* () {
           yield { data: firstPage };
-          throw Object.assign(new Error("rate limit exceeded"), { status: 403 });
+          throw Object.assign(new Error("rate limit exceeded"), {
+            status: 403,
+          });
         })(),
       );
 
@@ -252,7 +266,9 @@ describe("GitHubClient", () => {
         })(),
       );
 
-      await expect(client.getIssues("owner", "repo")).rejects.toThrow(GitHubApiError);
+      await expect(client.getIssues("owner", "repo")).rejects.toThrow(
+        GitHubApiError,
+      );
     });
   });
 
@@ -322,9 +338,7 @@ describe("GitHubClient", () => {
     });
 
     it("should handle API errors", async () => {
-      mockRest.repos.get.mockRejectedValue(
-        new Error("Not Found"),
-      );
+      mockRest.repos.get.mockRejectedValue(new Error("Not Found"));
 
       await expect(
         client.getRepository("owner", "nonexistent"),
@@ -357,9 +371,7 @@ describe("GitHubClient", () => {
     });
 
     it("should handle API errors", async () => {
-      mockRest.rateLimit.get.mockRejectedValue(
-        new Error("Rate limit error"),
-      );
+      mockRest.rateLimit.get.mockRejectedValue(new Error("Rate limit error"));
 
       await expect(client.getRateLimit()).rejects.toThrow(GitHubApiError);
     });
@@ -396,7 +408,9 @@ describe("GitHubClient", () => {
       mockPaginateIterator.mockReturnValue(
         // eslint-disable-next-line require-yield
         (async function* () {
-          throw Object.assign(new Error("Rate limit exceeded"), { status: 403 });
+          throw Object.assign(new Error("Rate limit exceeded"), {
+            status: 403,
+          });
         })(),
       );
 
@@ -417,7 +431,11 @@ describe("GitHubApiError", () => {
   });
 
   it("should include documentation URL when provided", () => {
-    const error = new GitHubApiError("Test error", 404, "https://docs.github.com");
+    const error = new GitHubApiError(
+      "Test error",
+      404,
+      "https://docs.github.com",
+    );
 
     expect(error.documentation_url).toBe("https://docs.github.com");
   });
@@ -476,27 +494,43 @@ describe("isRateLimitError", () => {
   });
 
   it("returns true for GitHubApiError with status 403 and x-ratelimit-remaining: 0 header", () => {
-    const error = new GitHubApiError("Forbidden", 403, undefined, { "x-ratelimit-remaining": "0" });
+    const error = new GitHubApiError("Forbidden", 403, undefined, {
+      "x-ratelimit-remaining": "0",
+    });
     expect(isRateLimitError(error)).toBe(true);
   });
 
   it("returns false for GitHubApiError with status 403 and x-ratelimit-remaining: 5 header", () => {
-    const error = new GitHubApiError("Forbidden", 403, undefined, { "x-ratelimit-remaining": "5" });
+    const error = new GitHubApiError("Forbidden", 403, undefined, {
+      "x-ratelimit-remaining": "5",
+    });
     expect(isRateLimitError(error)).toBe(false);
   });
 
   it("returns true for duck-typed error with status 403 and x-ratelimit-remaining: 0 header", () => {
-    const error = { status: 403, message: "forbidden", headers: { "x-ratelimit-remaining": "0" } };
+    const error = {
+      status: 403,
+      message: "forbidden",
+      headers: { "x-ratelimit-remaining": "0" },
+    };
     expect(isRateLimitError(error)).toBe(true);
   });
 
   it("returns true for duck-typed error with status 403 and nested response header", () => {
-    const error = { status: 403, message: "forbidden", response: { headers: { "x-ratelimit-remaining": "0" } } };
+    const error = {
+      status: 403,
+      message: "forbidden",
+      response: { headers: { "x-ratelimit-remaining": "0" } },
+    };
     expect(isRateLimitError(error)).toBe(true);
   });
 
   it("returns false for duck-typed error with status 403 and non-zero remaining header", () => {
-    const error = { status: 403, message: "forbidden", headers: { "x-ratelimit-remaining": "10" } };
+    const error = {
+      status: 403,
+      message: "forbidden",
+      headers: { "x-ratelimit-remaining": "10" },
+    };
     expect(isRateLimitError(error)).toBe(false);
   });
 });

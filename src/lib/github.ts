@@ -59,9 +59,7 @@ function normalizeLabels(
   labels: Array<string | { name?: string | null }>,
 ): string[] {
   return labels
-    .map((label) =>
-      typeof label === "string" ? label : label.name ?? "",
-    )
+    .map((label) => (typeof label === "string" ? label : (label.name ?? "")))
     .map((label) => label.trim())
     .filter((label): label is string => label.length > 0);
 }
@@ -107,7 +105,8 @@ export function isRateLimitError(error: unknown): boolean {
     if (!isRateLimitStatus(error.status)) return false;
     return (
       hasRateLimitMessage(error.message) ||
-      (!!error.headers && hasRateLimitHeader(error as unknown as Record<string, unknown>))
+      (!!error.headers &&
+        hasRateLimitHeader(error as unknown as Record<string, unknown>))
     );
   }
 
@@ -116,9 +115,7 @@ export function isRateLimitError(error: unknown): boolean {
     const err = error as Record<string, unknown>;
     const status = err["status"];
     if (!isRateLimitStatus(status)) return false;
-    return (
-      hasRateLimitMessage(err["message"]) || hasRateLimitHeader(err)
-    );
+    return hasRateLimitMessage(err["message"]) || hasRateLimitHeader(err);
   }
 
   return false;
@@ -205,7 +202,7 @@ export class GitHubClient {
         labels: options.labels,
         state: options.state || "open",
         per_page: options.per_page || 100,
-      }
+      },
     );
 
     try {
@@ -333,8 +330,9 @@ export class GitHubClient {
       const status = (error as { status?: number }).status || 500;
       const documentation_url = (error as { documentation_url?: string })
         .documentation_url;
-      const headers = (error as { response?: { headers?: Record<string, string> } })
-        .response?.headers;
+      const headers = (
+        error as { response?: { headers?: Record<string, string> } }
+      ).response?.headers;
 
       if (error.message.includes("Bad credentials")) {
         return new GitHubApiError(
@@ -363,7 +361,12 @@ export class GitHubClient {
         );
       }
 
-      return new GitHubApiError(error.message, status, documentation_url, headers);
+      return new GitHubApiError(
+        error.message,
+        status,
+        documentation_url,
+        headers,
+      );
     }
 
     return new GitHubApiError("Unknown GitHub API error", 500);

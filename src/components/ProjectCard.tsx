@@ -24,7 +24,8 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
     onPrefetch?.();
   }, [onPrefetch]);
   const locale = i18n.resolvedLanguage ?? i18n.language;
-  const updatedDate = project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at;
+  const updatedDate =
+    project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at;
   const lastUpdatedLabel = formatRelativeTime(updatedDate, locale, t);
 
   return (
@@ -45,7 +46,10 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
             className="group-hover:bg-primary/20 transition-colors"
             iconSize={24}
           />
-          <StatusBadge state={project.status.state} usage={project.status.usage} />
+          <StatusBadge
+            state={project.status.state}
+            usage={project.status.usage}
+          />
         </div>
 
         <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
@@ -60,7 +64,11 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
 
         <div className="flex flex-wrap gap-1.5 mb-4">
           {project.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs bg-secondary/50">
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="text-xs bg-secondary/50"
+            >
               {tag}
             </Badge>
           ))}

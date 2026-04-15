@@ -83,7 +83,9 @@ describe("Index page states", () => {
 
   it("renders projects from placeholder data immediately", async () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      projects: [{ id: "1" }] as unknown as ReturnType<
+        typeof useProjectsWithError
+      >["projects"],
       isLoading: false,
       isFetching: true,
       isPlaceholderData: true,
@@ -184,7 +186,9 @@ describe("Index page states", () => {
 
   it("shows cached projects when fetch fails but placeholder data exists", () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      projects: [{ id: "1" }] as unknown as ReturnType<
+        typeof useProjectsWithError
+      >["projects"],
       isLoading: false,
       isFetching: false,
       isPlaceholderData: false,
@@ -202,14 +206,20 @@ describe("Index page states", () => {
     // Should show projects from cache, not error screen
     expect(screen.getByText("Projects: 1")).toBeInTheDocument();
     // Full-screen error layout should not be shown (its title would be present)
-    expect(screen.queryByText("Unable to load projects")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Unable to load projects"),
+    ).not.toBeInTheDocument();
     // Should show stale data warning
-    expect(screen.getByText("Showing cached projects. Data may be outdated.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Showing cached projects. Data may be outdated."),
+    ).toBeInTheDocument();
   });
 
   it("renders Footer eagerly (not behind Suspense)", () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      projects: [{ id: "1" }] as unknown as ReturnType<
+        typeof useProjectsWithError
+      >["projects"],
       isLoading: false,
       isFetching: false,
       isPlaceholderData: false,
@@ -229,7 +239,9 @@ describe("Index page states", () => {
 
   it("does not show stale data warning when data is fresh", () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      projects: [{ id: "1" }] as unknown as ReturnType<
+        typeof useProjectsWithError
+      >["projects"],
       isLoading: false,
       isFetching: false,
       isPlaceholderData: false,
@@ -244,6 +256,8 @@ describe("Index page states", () => {
 
     renderIndex();
 
-    expect(screen.queryByText("Showing cached projects. Data may be outdated.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Showing cached projects. Data may be outdated."),
+    ).not.toBeInTheDocument();
   });
 });

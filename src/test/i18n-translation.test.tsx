@@ -26,10 +26,7 @@ describe("i18n Translation Tests", () => {
     });
   });
 
-  const collectTranslationKeys = (
-    value: unknown,
-    prefix = "",
-  ): string[] => {
+  const collectTranslationKeys = (value: unknown, prefix = ""): string[] => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       return [];
     }
@@ -300,10 +297,14 @@ describe("i18n Translation Tests", () => {
       >;
 
       // Get all leaf keys from English (reference language)
-      const englishKeys = collectTranslationKeys(resources.en.translation).sort();
+      const englishKeys = collectTranslationKeys(
+        resources.en.translation,
+      ).sort();
 
       languages.forEach((lang) => {
-        const langKeys = collectTranslationKeys(resources[lang].translation).sort();
+        const langKeys = collectTranslationKeys(
+          resources[lang].translation,
+        ).sort();
         expect(langKeys).toEqual(englishKeys);
       });
     });

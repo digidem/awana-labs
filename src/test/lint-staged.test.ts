@@ -52,8 +52,8 @@ describe("lint-staged configuration", () => {
     const lintStagedConfig = packageJson["lint-staged"];
 
     // Check for TypeScript-specific pattern (may be combined with JS)
-    const tsPattern = Object.keys(lintStagedConfig).find(
-      (pattern) => pattern.includes("ts"),
+    const tsPattern = Object.keys(lintStagedConfig).find((pattern) =>
+      pattern.includes("ts"),
     );
 
     expect(tsPattern).toBeDefined();

@@ -38,7 +38,8 @@ const ProjectLogo = ({
   className = "",
   iconSize = 24,
 }: ProjectLogoProps) => {
-  const [iconComponent, setIconComponent] = useState<LucideIconComponent | null>(null);
+  const [iconComponent, setIconComponent] =
+    useState<LucideIconComponent | null>(null);
   const [iconLoading, setIconLoading] = useState(false);
 
   useEffect(() => {
@@ -54,21 +55,25 @@ const ProjectLogo = ({
     let cancelled = false;
     // Dynamic import keeps the full icons map in a separate chunk
     // that loads only when a project needs a lucide icon for its logo.
-    import("@/lib/all-icons").then((mod) => {
-      if (cancelled) return;
-      const resolved =
-        mod.icons[pascal as keyof typeof mod.icons] ??
-        mod.icons[logo as keyof typeof mod.icons];
-      setIconComponent(() => (resolved as LucideIconComponent) ?? null);
-      setIconLoading(false);
-    }).catch(() => {
-      if (!cancelled) {
-        setIconComponent(null);
+    import("@/lib/all-icons")
+      .then((mod) => {
+        if (cancelled) return;
+        const resolved =
+          mod.icons[pascal as keyof typeof mod.icons] ??
+          mod.icons[logo as keyof typeof mod.icons];
+        setIconComponent(() => (resolved as LucideIconComponent) ?? null);
         setIconLoading(false);
-      }
-    });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIconComponent(null);
+          setIconLoading(false);
+        }
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [logo]);
 
   // URL-based logo
@@ -116,9 +121,7 @@ const ProjectLogo = ({
     <div
       className={`w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center ${className}`}
     >
-      <span className="text-xl font-bold text-primary">
-        {title.charAt(0)}
-      </span>
+      <span className="text-xl font-bold text-primary">{title.charAt(0)}</span>
     </div>
   );
 };

@@ -47,7 +47,9 @@ const Header = ({ className }: HeaderProps) => {
       if (currentTop <= LOGO_FULL_OPACITY) {
         opacity = 1;
       } else if (currentTop <= LOGO_FADE_START) {
-        opacity = (LOGO_FADE_START - currentTop) / (LOGO_FADE_START - LOGO_FULL_OPACITY);
+        opacity =
+          (LOGO_FADE_START - currentTop) /
+          (LOGO_FADE_START - LOGO_FULL_OPACITY);
       }
 
       logoOpacityRef.current = opacity;
@@ -69,7 +71,8 @@ const Header = ({ className }: HeaderProps) => {
 
     const scheduleUpdate = () => {
       if (animationFrameRef.current !== null) return;
-      animationFrameRef.current = window.requestAnimationFrame(updateHeaderState);
+      animationFrameRef.current =
+        window.requestAnimationFrame(updateHeaderState);
     };
 
     let resizeTimer: ReturnType<typeof setTimeout>;

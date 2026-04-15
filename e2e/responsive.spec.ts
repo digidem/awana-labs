@@ -81,7 +81,9 @@ test.describe("Responsive Design", () => {
       test("renders the header with the shipped controls", async ({ page }) => {
         const header = page.locator("header");
         await expect(header).toBeVisible();
-        await expect(header.getByLabel("Visit GitHub repository")).toBeVisible();
+        await expect(
+          header.getByLabel("Visit GitHub repository"),
+        ).toBeVisible();
         await expect(header.getByRole("combobox")).toHaveCount(0);
         await expect(header.locator('[aria-label*="menu" i]')).toHaveCount(0);
       });
@@ -151,7 +153,9 @@ test.describe("Responsive Design", () => {
       });
 
       test("avoids horizontal scrolling", async ({ page }) => {
-        const bodyScrollWidth = await page.evaluate(() => document.body.scrollWidth);
+        const bodyScrollWidth = await page.evaluate(
+          () => document.body.scrollWidth,
+        );
         expect(bodyScrollWidth).toBeLessThanOrEqual(width + 20);
       });
     });

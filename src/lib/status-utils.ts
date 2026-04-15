@@ -6,7 +6,10 @@
 import type { ProjectState, ProjectUsage } from "@/types/project.schema";
 
 // Re-export under legacy names for backward compatibility
-export type { ProjectState as ProjectStatusState, ProjectUsage as ProjectStatusUsage } from "@/types/project.schema";
+export type {
+  ProjectState as ProjectStatusState,
+  ProjectUsage as ProjectStatusUsage,
+} from "@/types/project.schema";
 
 /**
  * Tailwind CSS classes for status badge styling

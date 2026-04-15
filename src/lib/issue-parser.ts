@@ -97,7 +97,10 @@ export function extractKeyValue(
       let value = (match[1] || match[2] || "").trim();
       value = value.replace(/^\*\*|\*\*$/g, "").trim();
       if (!value && i + 1 < section.lines.length) {
-        value = section.lines[i + 1].trim().replace(/^\*\*|\*\*$/g, "").trim();
+        value = section.lines[i + 1]
+          .trim()
+          .replace(/^\*\*|\*\*$/g, "")
+          .trim();
       }
       return value;
     }
@@ -148,7 +151,8 @@ export function extractLogo(section: SectionContent | null): string {
     }
 
     if (logoIndex + 1 < section.lines.length) {
-      const nextUrlMatch = section.lines[logoIndex + 1].match(/https?:\/\/[^\s]+/i);
+      const nextUrlMatch =
+        section.lines[logoIndex + 1].match(/https?:\/\/[^\s]+/i);
       if (nextUrlMatch) {
         return nextUrlMatch[0].replace(/["')\]]+$/, "").trim();
       }
