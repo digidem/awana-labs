@@ -1,56 +1,44 @@
 import { lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import GallerySkeleton from "@/components/GallerySkeleton";
+import { useProjectsWithError } from "@/hooks/useProjects";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 const ProjectsGallery = lazy(() => import("@/components/ProjectsGallery"));
-const Footer = lazy(() => import("@/components/Footer"));
-import { useProjectsWithError } from "@/hooks/useProjects";
-import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { t } = useTranslation();
   const { projects, isLoading, isError, errorType, refetch } =
     useProjectsWithError();
 
-  const errorCopy =
-    errorType === "offline"
-      ? {
-          title: t("index.offlineTitle"),
-          description: t("index.offlineDescription"),
-        }
-      : errorType === "timeout"
+  // When placeholder data exists but fetch fails, show cached data instead of error.
+  // The existing fetchProjects() already falls back to cache on error (api.ts:298-315).
+  if (isError && projects.length === 0) {
+    const errorCopy =
+      errorType === "offline"
         ? {
-            title: t("index.timeoutTitle"),
-            description: t("index.timeoutDescription"),
+            title: t("index.offlineTitle"),
+            description: t("index.offlineDescription"),
           }
-        : errorType === "rate-limit"
+        : errorType === "timeout"
           ? {
-              title: t("index.rateLimitTitle"),
-              description: t("index.rateLimitDescription"),
+              title: t("index.timeoutTitle"),
+              description: t("index.timeoutDescription"),
             }
-          : {
-              title: t("index.errorTitle"),
-              description: t("index.errorDescription"),
-            };
+          : errorType === "rate-limit"
+            ? {
+                title: t("index.rateLimitTitle"),
+                description: t("index.rateLimitDescription"),
+              }
+            : {
+                title: t("index.errorTitle"),
+                description: t("index.errorDescription"),
+              };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="max-w-md px-6 text-center">
-          <h1 className="animate-pulse text-2xl font-semibold text-primary">
-            {t("index.loadingTitle")}
-          </h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            {t("index.loadingDescription")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <div className="max-w-md text-center">
@@ -78,12 +66,28 @@ const Index = () => {
       </a>
       <Header />
       <Hero />
-      <Suspense fallback={<div className="py-20 min-h-[400px]" />}>
-        <ProjectsGallery projects={projects} />
-      </Suspense>
-      <Suspense fallback={<div className="py-8" />}>
-        <Footer />
-      </Suspense>
+      {isError && projects.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6" role="alert">
+          <div className="bg-muted/60 border border-border rounded-md px-4 py-2 text-sm text-muted-foreground flex items-center justify-between">
+            <span>{t("index.staleDataWarning")}</span>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="text-primary hover:underline text-sm font-medium ml-4"
+            >
+              {t("common.retry")}
+            </button>
+          </div>
+        </div>
+      )}
+      {isLoading ? (
+        <GallerySkeleton count={6} />
+      ) : (
+        <Suspense fallback={<GallerySkeleton count={6} />}>
+          <ProjectsGallery projects={projects} />
+        </Suspense>
+      )}
+      <Footer />
       <ScrollToTop />
     </main>
   );

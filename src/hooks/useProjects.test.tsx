@@ -19,10 +19,49 @@ vi.mock("@/lib/api", () => ({
   fetchProjectsQuery: vi.fn(),
   getProjectLoadErrorType: vi.fn(() => "generic"),
   getErrorMessage: vi.fn((error) => error?.message ?? "Unknown error"),
+  readProjectsCache: vi.fn(() => null),
+  deduplicateProjects: vi.fn((projects) => projects),
 }));
 
 const mockFetchProjectsQuery = vi.mocked(api.fetchProjectsQuery);
 const mockGetProjectLoadErrorType = vi.mocked(api.getProjectLoadErrorType);
+const mockReadProjectsCache = vi.mocked(api.readProjectsCache);
+
+/** Helper to create a valid project object for tests */
+function createMockProject(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "1",
+    issue_number: 1,
+    title: "Test Project",
+    slug: "test-project",
+    description: "A test project",
+    organization: {
+      name: "Test Org",
+      short_name: "Test",
+      url: "https://example.com",
+    },
+    status: {
+      state: "active" as const,
+      usage: "experimental" as const,
+      notes: "",
+    },
+    tags: ["test"],
+    media: {
+      logo: "",
+      images: [],
+    },
+    links: {
+      homepage: "",
+      repository: "",
+      documentation: "",
+    },
+    timestamps: {
+      created_at: "2024-01-01",
+      last_updated_at: "2024-01-01",
+    },
+    ...overrides,
+  };
+}
 
 describe("useProjects", () => {
   let queryClient: QueryClient;
@@ -37,6 +76,7 @@ describe("useProjects", () => {
     });
     mockFetchProjectsQuery.mockClear();
     mockGetProjectLoadErrorType.mockClear();
+    mockReadProjectsCache.mockClear();
   });
 
   function createWrapper(client: QueryClient) {
@@ -49,39 +89,7 @@ describe("useProjects", () => {
 
   it("should fetch projects successfully", async () => {
     const mockData = {
-      projects: [
-        {
-          id: "1",
-          issue_number: 1,
-          title: "Test Project",
-          slug: "test-project",
-          description: "A test project",
-          organization: {
-            name: "Test Org",
-            short_name: "Test",
-            url: "https://example.com",
-          },
-          status: {
-            state: "active" as const,
-            usage: "experimental" as const,
-            notes: "",
-          },
-          tags: ["test"],
-          media: {
-            logo: "",
-            images: [],
-          },
-          links: {
-            homepage: "",
-            repository: "",
-            documentation: "",
-          },
-          timestamps: {
-            created_at: "2024-01-01",
-            last_updated_at: "2024-01-01",
-          },
-        },
-      ],
+      projects: [createMockProject()],
     };
 
     mockFetchProjectsQuery.mockResolvedValue(mockData);
@@ -117,51 +125,10 @@ describe("useProjects", () => {
 
   it("updates cached query data when the runtime refresh event fires", async () => {
     const initialData = {
-      projects: [
-        {
-          id: "1",
-          issue_number: 1,
-          title: "Initial Project",
-          slug: "initial-project",
-          description: "Initial project data",
-          organization: {
-            name: "Test Org",
-            short_name: "Test",
-            url: "https://example.com",
-          },
-          status: {
-            state: "active" as const,
-            usage: "experimental" as const,
-            notes: "",
-          },
-          tags: ["test"],
-          media: {
-            logo: "",
-            images: [],
-          },
-          links: {
-            homepage: "",
-            repository: "",
-            documentation: "",
-          },
-          timestamps: {
-            created_at: "2024-01-01",
-            last_updated_at: "2024-01-01",
-          },
-        },
-      ],
+      projects: [createMockProject({ id: "1", title: "Initial Project", slug: "initial-project", description: "Initial project data" })],
     };
     const refreshedData = {
-      projects: [
-        {
-          ...initialData.projects[0],
-          id: "2",
-          issue_number: 2,
-          title: "Refreshed Project",
-          slug: "refreshed-project",
-          description: "Refreshed project data",
-        },
-      ],
+      projects: [createMockProject({ id: "2", title: "Refreshed Project", slug: "refreshed-project", description: "Refreshed project data" })],
     };
 
     mockFetchProjectsQuery.mockResolvedValue(initialData);
@@ -193,6 +160,50 @@ describe("useProjects", () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBeUndefined();
   });
+
+  it("should provide placeholder data from localStorage cache", async () => {
+    const mockProject = createMockProject();
+    const cachedData = {
+      entry: {
+        version: 2,
+        cachedAt: new Date().toISOString(),
+        data: { projects: [mockProject] },
+      },
+      isStale: false,
+    };
+    mockReadProjectsCache.mockReturnValue(cachedData);
+
+    // Make fetch take a while so we can observe placeholder state
+    mockFetchProjectsQuery.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(cachedData.entry.data), 200)),
+    );
+
+    const { result } = renderHook(() => useProjects(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    // Immediately after mount, data should be populated via placeholderData
+    expect(result.current.data).toEqual(cachedData.entry.data);
+    expect(result.current.isPlaceholderData).toBe(true);
+
+    // After fetch resolves, placeholder is replaced
+    await waitFor(() => expect(result.current.isPlaceholderData).toBe(false));
+    expect(result.current.data).toEqual(cachedData.entry.data);
+  });
+
+  it("should show undefined data when no cache exists", () => {
+    mockReadProjectsCache.mockReturnValue(null);
+    mockFetchProjectsQuery.mockImplementation(
+      () => new Promise(() => {}), // never resolves
+    );
+
+    const { result } = renderHook(() => useProjects(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.isPlaceholderData).toBe(false);
+  });
 });
 
 describe("useProjectsWithError", () => {
@@ -208,6 +219,7 @@ describe("useProjectsWithError", () => {
     });
     mockFetchProjectsQuery.mockClear();
     mockGetProjectLoadErrorType.mockClear();
+    mockReadProjectsCache.mockClear();
   });
 
   function createWrapper(client: QueryClient) {
@@ -220,32 +232,7 @@ describe("useProjectsWithError", () => {
 
   it("should return projects array on success", async () => {
     const mockData = {
-      projects: [
-        {
-          id: "1",
-          issue_number: 1,
-          title: "Project 1",
-          slug: "project-1",
-          description: "First project",
-          organization: {
-            name: "Org 1",
-            short_name: "O1",
-            url: "https://example.com",
-          },
-          status: {
-            state: "active" as const,
-            usage: "experimental" as const,
-            notes: "",
-          },
-          tags: [],
-          media: { logo: "", images: [] },
-          links: { homepage: "", repository: "", documentation: "" },
-          timestamps: {
-            created_at: "2024-01-01",
-            last_updated_at: "2024-01-01",
-          },
-        },
-      ],
+      projects: [createMockProject({ id: "1", title: "Project 1", slug: "project-1", description: "First project" })],
     };
 
     mockFetchProjectsQuery.mockResolvedValue(mockData);
@@ -328,39 +315,7 @@ describe("useProjectsWithError", () => {
 
   it("should handle slow responses gracefully", async () => {
     const mockData = {
-      projects: [
-        {
-          id: "1",
-          issue_number: 1,
-          title: "Slow Project",
-          slug: "slow-project",
-          description: "A slow-loading project",
-          organization: {
-            name: "Test Org",
-            short_name: "Test",
-            url: "https://example.com",
-          },
-          status: {
-            state: "active" as const,
-            usage: "experimental" as const,
-            notes: "",
-          },
-          tags: ["test"],
-          media: {
-            logo: "",
-            images: [],
-          },
-          links: {
-            homepage: "",
-            repository: "",
-            documentation: "",
-          },
-          timestamps: {
-            created_at: "2024-01-01",
-            last_updated_at: "2024-01-01",
-          },
-        },
-      ],
+      projects: [createMockProject({ id: "1", title: "Slow Project", slug: "slow-project", description: "A slow-loading project" })],
     };
 
     mockFetchProjectsQuery.mockImplementation(
@@ -384,39 +339,7 @@ describe("useProjectsWithError", () => {
 
   it("should refetch after error when refetch is called", async () => {
     const mockData = {
-      projects: [
-        {
-          id: "1",
-          issue_number: 1,
-          title: "Refetched Project",
-          slug: "refetched-project",
-          description: "A project loaded after refetch",
-          organization: {
-            name: "Test Org",
-            short_name: "Test",
-            url: "https://example.com",
-          },
-          status: {
-            state: "active" as const,
-            usage: "experimental" as const,
-            notes: "",
-          },
-          tags: ["test"],
-          media: {
-            logo: "",
-            images: [],
-          },
-          links: {
-            homepage: "",
-            repository: "",
-            documentation: "",
-          },
-          timestamps: {
-            created_at: "2024-01-01",
-            last_updated_at: "2024-01-01",
-          },
-        },
-      ],
+      projects: [createMockProject({ id: "1", title: "Refetched Project", slug: "refetched-project", description: "A project loaded after refetch" })],
     };
 
     const fetchError = new Error("Network failure");
@@ -463,5 +386,50 @@ describe("useProjectsWithError", () => {
     // Should only be called once — no retries for rate-limit errors
     expect(mockFetchProjectsQuery).toHaveBeenCalledTimes(1);
     expect(result.current.isRateLimitError).toBe(true);
+  });
+
+  it("reports isLoading false when placeholderData exists", () => {
+    const mockProject = createMockProject();
+    const cachedData = {
+      entry: {
+        version: 2,
+        cachedAt: new Date().toISOString(),
+        data: { projects: [mockProject] },
+      },
+      isStale: false,
+    };
+    mockReadProjectsCache.mockReturnValue(cachedData);
+    mockFetchProjectsQuery.mockImplementation(
+      () => new Promise(() => {}), // never resolves
+    );
+
+    const { result } = renderHook(() => useProjectsWithError(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    // isLoading should be false because data is populated via placeholder
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.projects.length).toBeGreaterThan(0);
+    expect(result.current.isPlaceholderData).toBe(true);
+    expect(result.current.isFetching).toBe(true);
+  });
+
+  it("reports isLoading false when query is disabled", () => {
+    mockReadProjectsCache.mockReturnValue(null);
+    mockFetchProjectsQuery.mockImplementation(
+      () => new Promise(() => {}), // never resolves
+    );
+
+    const { result } = renderHook(
+      () => useProjectsWithError({ enabled: false }),
+      {
+        wrapper: createWrapper(queryClient),
+      },
+    );
+
+    // isLoading should be false because the query is disabled, not loading
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.projects).toEqual([]);
+    expect(result.current.isFetching).toBe(false);
   });
 });

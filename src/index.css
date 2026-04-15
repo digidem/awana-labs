@@ -122,6 +122,12 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer {
+    animation: none;
+  }
+}
+
 /* Header slide-down entrance animation (replaces framer-motion) */
 @keyframes header-slide-down {
   from {

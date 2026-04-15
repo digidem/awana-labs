@@ -14,6 +14,8 @@ import {
   PROJECTS_CACHE_MAX_AGE_MS,
   PROJECTS_DATA_UPDATED_EVENT,
   queryKeys,
+  readProjectsCache,
+  deduplicateProjects,
 } from "@/lib/api";
 import { isRateLimitError as isGitHubRateLimitError } from "@/lib/github";
 import type { ProjectsData } from "@/types/project";
@@ -85,6 +87,11 @@ export function useProjects(options: UseProjectsOptions = {}) {
     gcTime,
     refetchOnWindowFocus,
     refetchOnReconnect,
+    placeholderData: () => {
+      const cached = readProjectsCache();
+      if (!cached) return undefined;
+      return { projects: deduplicateProjects(cached.entry.data.projects) };
+    },
     retry: (failureCount, error) => {
       // Never retry rate-limit errors — they won't resolve until the reset window passes
       if (isGitHubRateLimitError(error)) return false;
@@ -102,7 +109,9 @@ export function useProjectsWithError(options?: UseProjectsOptions) {
 
   return {
     projects: result.data?.projects ?? [],
-    isLoading: result.isLoading,
+    isLoading: result.data === undefined && result.isFetching,
+    isFetching: result.isFetching,
+    isPlaceholderData: result.isPlaceholderData,
     isError: result.isError,
     error: result.error,
     errorType,

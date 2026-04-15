@@ -27,6 +27,16 @@ vi.mock("@/components/ProjectsGallery", () => ({
   ),
 }));
 
+vi.mock("@/components/GallerySkeleton", () => ({
+  default: ({ count }: { count?: number }) => (
+    <div data-testid="gallery-skeleton">Skeleton: {count ?? 6}</div>
+  ),
+}));
+
+vi.mock("@/components/ScrollToTop", () => ({
+  default: () => null,
+}));
+
 const mockUseProjectsWithError = vi.mocked(useProjectsWithError);
 
 function renderIndex() {
@@ -46,10 +56,12 @@ describe("Index page states", () => {
     });
   });
 
-  it("renders localized loading copy", () => {
+  it("shows skeleton when loading with no cache", () => {
     mockUseProjectsWithError.mockReturnValue({
       projects: [],
       isLoading: true,
+      isFetching: true,
+      isPlaceholderData: false,
       isError: false,
       error: null,
       errorType: null,
@@ -61,16 +73,44 @@ describe("Index page states", () => {
 
     renderIndex();
 
-    expect(screen.getByText("Loading projects")).toBeInTheDocument();
-    expect(
-      screen.getByText("Fetching the latest published projects from GitHub."),
-    ).toBeInTheDocument();
+    // Should show the full layout with skeleton, not a loading spinner
+    expect(screen.getByText("Header")).toBeInTheDocument();
+    expect(screen.getByText("Hero")).toBeInTheDocument();
+    expect(screen.getByTestId("gallery-skeleton")).toBeInTheDocument();
+    // Should NOT show the old loading text
+    expect(screen.queryByText("Loading projects")).not.toBeInTheDocument();
+  });
+
+  it("renders projects from placeholder data immediately", async () => {
+    mockUseProjectsWithError.mockReturnValue({
+      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      isLoading: false,
+      isFetching: true,
+      isPlaceholderData: true,
+      isError: false,
+      error: null,
+      errorType: null,
+      isOfflineError: false,
+      isRateLimitError: false,
+      errorMessage: null,
+      refetch: vi.fn(),
+    });
+
+    renderIndex();
+
+    expect(screen.getByText("Header")).toBeInTheDocument();
+    expect(screen.getByText("Hero")).toBeInTheDocument();
+    // ProjectsGallery is lazy-loaded; wait for Suspense to resolve
+    expect(await screen.findByText("Projects: 1")).toBeInTheDocument();
+    expect(screen.queryByTestId("gallery-skeleton")).not.toBeInTheDocument();
   });
 
   it("renders a localized offline message", () => {
     mockUseProjectsWithError.mockReturnValue({
       projects: [],
       isLoading: false,
+      isFetching: false,
+      isPlaceholderData: false,
       isError: true,
       error: new Error("Offline"),
       errorType: "offline",
@@ -95,6 +135,8 @@ describe("Index page states", () => {
     mockUseProjectsWithError.mockReturnValue({
       projects: [],
       isLoading: false,
+      isFetching: false,
+      isPlaceholderData: false,
       isError: true,
       error: new Error("Request timeout"),
       errorType: "timeout",
@@ -119,6 +161,8 @@ describe("Index page states", () => {
     mockUseProjectsWithError.mockReturnValue({
       projects: [],
       isLoading: false,
+      isFetching: false,
+      isPlaceholderData: false,
       isError: true,
       error: new Error("rate limit exceeded"),
       errorType: "rate-limit",
@@ -136,5 +180,70 @@ describe("Index page states", () => {
         "Too many requests to GitHub. Please wait a moment and try again.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("shows cached projects when fetch fails but placeholder data exists", () => {
+    mockUseProjectsWithError.mockReturnValue({
+      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      isLoading: false,
+      isFetching: false,
+      isPlaceholderData: false,
+      isError: true,
+      error: new Error("Network error"),
+      errorType: "generic",
+      isOfflineError: false,
+      isRateLimitError: false,
+      errorMessage: "Network error",
+      refetch: vi.fn(),
+    });
+
+    renderIndex();
+
+    // Should show projects from cache, not error screen
+    expect(screen.getByText("Projects: 1")).toBeInTheDocument();
+    // Full-screen error layout should not be shown (its title would be present)
+    expect(screen.queryByText("Unable to load projects")).not.toBeInTheDocument();
+    // Should show stale data warning
+    expect(screen.getByText("Showing cached projects. Data may be outdated.")).toBeInTheDocument();
+  });
+
+  it("renders Footer eagerly (not behind Suspense)", () => {
+    mockUseProjectsWithError.mockReturnValue({
+      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      isLoading: false,
+      isFetching: false,
+      isPlaceholderData: false,
+      isError: false,
+      error: null,
+      errorType: null,
+      isOfflineError: false,
+      isRateLimitError: false,
+      errorMessage: null,
+      refetch: vi.fn(),
+    });
+
+    renderIndex();
+
+    expect(screen.getByText("Footer")).toBeInTheDocument();
+  });
+
+  it("does not show stale data warning when data is fresh", () => {
+    mockUseProjectsWithError.mockReturnValue({
+      projects: [{ id: "1" }] as unknown as ReturnType<typeof useProjectsWithError>["projects"],
+      isLoading: false,
+      isFetching: false,
+      isPlaceholderData: false,
+      isError: false,
+      error: null,
+      errorType: null,
+      isOfflineError: false,
+      isRateLimitError: false,
+      errorMessage: null,
+      refetch: vi.fn(),
+    });
+
+    renderIndex();
+
+    expect(screen.queryByText("Showing cached projects. Data may be outdated.")).not.toBeInTheDocument();
   });
 });

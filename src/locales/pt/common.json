@@ -53,7 +53,8 @@
     "timeoutTitle": "A solicitação dos projetos expirou",
     "timeoutDescription": "O GitHub demorou demais para responder. Tente novamente.",
     "rateLimitTitle": "Limite de requisições do GitHub atingido",
-    "rateLimitDescription": "Muitas requisições ao GitHub. Aguarde um momento e tente novamente."
+    "rateLimitDescription": "Muitas requisições ao GitHub. Aguarde um momento e tente novamente.",
+    "staleDataWarning": "Exibindo projetos em cache. Os dados podem estar desatualizados."
   },
   "common": {
     "loading": "Carregando...",

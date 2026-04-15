@@ -27,7 +27,17 @@ const AppContent = () => {
     <TooltipProvider>
       <Sonner />
       <HashRouter>
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-primary/60 text-lg font-light">Loading…</div></div>}>
+        <Suspense fallback={
+          <div className="min-h-screen bg-background">
+            <div className="h-16 md:h-20" />
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center px-6">
+                <div className="h-8 w-48 rounded bg-muted/50 mx-auto mb-4 animate-pulse" />
+                <div className="h-4 w-64 rounded bg-muted/30 mx-auto animate-pulse" />
+              </div>
+            </div>
+          </div>
+        }>
           <Routes>
             <Route path="/" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

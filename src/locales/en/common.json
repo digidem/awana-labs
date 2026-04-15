@@ -53,7 +53,8 @@
     "timeoutTitle": "Project request timed out",
     "timeoutDescription": "GitHub took too long to respond. Try again.",
     "rateLimitTitle": "GitHub rate limit reached",
-    "rateLimitDescription": "Too many requests to GitHub. Please wait a moment and try again."
+    "rateLimitDescription": "Too many requests to GitHub. Please wait a moment and try again.",
+    "staleDataWarning": "Showing cached projects. Data may be outdated."
   },
   "common": {
     "loading": "Loading...",
