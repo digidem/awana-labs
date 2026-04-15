@@ -30,4 +30,4 @@ jobs:
         run: npx prettier --write "src/**/*.{ts,tsx,css,json,md}" "e2e/**/*.ts" "e2e-live/**/*.ts"
 
       - name: Run autofix.ci
-        uses: autofix-ci/action@ff5e2e6e16312a8d1c2d8a3f0f1e3e9a2f6d9a1f1b6c2b # v1.3.3
+        uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8 # v1.3.3
