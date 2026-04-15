@@ -85,6 +85,11 @@
     "message": "Oops! Page not found",
     "returnHome": "Return to Home"
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try reloading the page.",
+    "retry": "Try Again"
+  },
   "accessibility": {
     "skipToContent": "Skip to content",
     "scrollToTop": "Scroll to top"

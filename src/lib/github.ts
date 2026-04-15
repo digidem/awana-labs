@@ -265,7 +265,7 @@ export class GitHubClient {
       return {
         number: issue.number,
         title: issue.title,
-        body: issue.body,
+        body: issue.body ?? null,
         state: issue.state || "open",
         html_url: issue.html_url,
         created_at: issue.created_at,

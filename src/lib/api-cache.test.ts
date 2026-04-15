@@ -128,7 +128,7 @@ describe("projects cache contract", () => {
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
 
-    const result = await fetchProjects();
+    await fetchProjects();
 
     expect(fetchValidatedProjectsFromGitHub).toHaveBeenCalledTimes(1);
     expect(readProjectsCache()?.entry.data).toEqual(mockData);

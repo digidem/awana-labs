@@ -1,16 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { getStatusClasses, getUsageLabel } from "@/lib/status-utils";
-import type {
-  ProjectStatusState,
-  ProjectStatusUsage,
-} from "@/lib/status-utils";
+import type { ProjectState, ProjectUsage } from "@/types/project.schema";
 
 interface StatusBadgeProps {
   /** The status state to display */
-  state: ProjectStatusState;
+  state: ProjectState;
   /** Optional usage status to display as a secondary badge */
-  usage?: ProjectStatusUsage;
+  usage?: ProjectUsage;
   /** Badge variant */
   variant?: "default" | "outline" | "secondary";
   /** Optional className for additional styling */

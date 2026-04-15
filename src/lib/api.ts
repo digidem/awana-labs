@@ -93,10 +93,6 @@ function getProjectsStorage(): Storage | null {
   }
 }
 
-function estimateEntrySizeBytes(entry: ProjectsCacheEntry): number {
-  return new Blob([JSON.stringify(entry)]).size;
-}
-
 function parseProjectsCacheEntry(value: unknown): ProjectsCacheEntry {
   if (!value || typeof value !== "object") {
     throw new Error("Projects cache entry must be an object");
@@ -320,7 +316,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
  */
 export const fetchProjectsQuery: QueryFunction<
   ProjectsData,
-  ["projects"]
+  readonly ["projects"]
 > = async () => {
   return await fetchProjects();
 };

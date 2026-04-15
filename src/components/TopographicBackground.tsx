@@ -95,8 +95,8 @@ const StaticTopographicBackground = () => {
 };
 
 function useScrollParallax(
-  layer1: React.RefObject<SVGSVGElement>,
-  layer2: React.RefObject<SVGSVGElement>,
+  layer1: React.RefObject<SVGSVGElement | null>,
+  layer2: React.RefObject<SVGSVGElement | null>,
 ) {
   useEffect(() => {
     let rafId: number;

@@ -23,7 +23,11 @@ const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
   const mockPaginateIterator = vi.fn();
 
   // Create a constructor function that can be called with new
-  const MockOctokitClass = function () {
+  const MockOctokitClass = function (this: {
+    rest: typeof mockRest;
+    paginate: { iterator: typeof mockPaginateIterator };
+    auth: undefined;
+  }) {
     this.rest = mockRest;
     this.paginate = {
       iterator: mockPaginateIterator

@@ -3,13 +3,15 @@
  * Centralized styling and label mappings for project status
  */
 
-export type ProjectStatusState = "active" | "paused" | "archived";
-export type ProjectStatusUsage = "experimental" | "used" | "widely-used";
+import type { ProjectState, ProjectUsage } from "@/types/project.schema";
+
+// Re-export under legacy names for backward compatibility
+export type { ProjectState as ProjectStatusState, ProjectUsage as ProjectStatusUsage } from "@/types/project.schema";
 
 /**
  * Tailwind CSS classes for status badge styling
  */
-export const statusColors: Record<ProjectStatusState, string> = {
+export const statusColors: Record<ProjectState, string> = {
   active: "bg-green-500/10 text-green-700 border-green-500/20",
   paused: "bg-amber-500/10 text-amber-700 border-amber-500/20",
   archived: "bg-muted text-muted-foreground border-border",
@@ -18,7 +20,7 @@ export const statusColors: Record<ProjectStatusState, string> = {
 /**
  * Translation key mappings for usage status
  */
-export const usageTranslationKeys: Record<ProjectStatusUsage, string> = {
+export const usageTranslationKeys: Record<ProjectUsage, string> = {
   experimental: "status.experimental",
   used: "status.used",
   "widely-used": "status.widelyUsed",
@@ -29,7 +31,7 @@ export const usageTranslationKeys: Record<ProjectStatusUsage, string> = {
  * @param state - The project status state
  * @returns CSS class string for styling
  */
-export function getStatusClasses(state: ProjectStatusState): string {
+export function getStatusClasses(state: ProjectState): string {
   return statusColors[state];
 }
 
@@ -40,7 +42,7 @@ export function getStatusClasses(state: ProjectStatusState): string {
  * @returns Translated human-readable label
  */
 export function getUsageLabel(
-  usage: ProjectStatusUsage,
+  usage: ProjectUsage,
   t: (key: string) => string,
 ): string {
   return t(usageTranslationKeys[usage]);
