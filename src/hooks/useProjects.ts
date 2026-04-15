@@ -111,7 +111,7 @@ export function useProjectsWithError(options?: UseProjectsOptions) {
     projects: result.data?.projects ?? [],
     isLoading: result.data === undefined && result.isFetching,
     isFetching: result.isFetching,
-    isPlaceholderData: result.isPlaceholderData as boolean,
+    isPlaceholderData: result.isPlaceholderData ?? false,
     isError: result.isError,
     error: result.error,
     errorType,

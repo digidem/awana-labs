@@ -24,8 +24,11 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    // Always log in production for observability; include component stack in DEV
     if (import.meta.env.DEV) {
       console.error("[ErrorBoundary]", error, errorInfo);
+    } else {
+      console.error("[ErrorBoundary]", error);
     }
   }
 
