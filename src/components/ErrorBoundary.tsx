@@ -32,6 +32,18 @@ export class ErrorBoundary extends React.Component<
     }
   }
 
+  componentDidMount(): void {
+    i18n.on("languageChanged", this.handleLanguageChanged);
+  }
+
+  componentWillUnmount(): void {
+    i18n.off("languageChanged", this.handleLanguageChanged);
+  }
+
+  private handleLanguageChanged = () => {
+    this.forceUpdate();
+  };
+
   private handleRetry = () => {
     this.setState({ hasError: false, error: null });
   };

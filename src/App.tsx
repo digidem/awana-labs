@@ -57,13 +57,13 @@ const App = () => {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
           <AppContent />
-        </ErrorBoundary>
-      </LanguageProvider>
-    </QueryClientProvider>
+        </LanguageProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
