@@ -16,7 +16,9 @@ const Hero = () => {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      <Suspense fallback={<div className="absolute inset-0 pointer-events-none" />}>
+      <Suspense
+        fallback={<div className="absolute inset-0 pointer-events-none" />}
+      >
         <TopographicBackground />
       </Suspense>
 

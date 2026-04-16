@@ -85,6 +85,11 @@
     "message": "¡Ups! Página no encontrada",
     "returnHome": "Volver al Inicio"
   },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Intenta recargar la página.",
+    "retry": "Intentar de Nuevo"
+  },
   "accessibility": {
     "skipToContent": "Saltar al contenido",
     "scrollToTop": "Volver arriba"

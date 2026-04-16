@@ -79,7 +79,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
     };
   }, [queryClient]);
 
-  return useQuery<ProjectsData, Error>({
+  return useQuery<ProjectsData, Error, ProjectsData, readonly ["projects"]>({
     queryKey: queryKeys.projects,
     queryFn,
     enabled,
@@ -111,7 +111,7 @@ export function useProjectsWithError(options?: UseProjectsOptions) {
     projects: result.data?.projects ?? [],
     isLoading: result.data === undefined && result.isFetching,
     isFetching: result.isFetching,
-    isPlaceholderData: result.isPlaceholderData,
+    isPlaceholderData: result.isPlaceholderData ?? false,
     isError: result.isError,
     error: result.error,
     errorType,

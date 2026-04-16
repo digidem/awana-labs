@@ -69,7 +69,15 @@ function parseIssueToProject(issue: GitHubIssue): Project | null {
   const description = parseDescription(descriptionSection);
 
   // Validate required fields
-  if (!title || !description || !orgName || !orgShortName || !orgUrl || !statusState || !homepage) {
+  if (
+    !title ||
+    !description ||
+    !orgName ||
+    !orgShortName ||
+    !orgUrl ||
+    !statusState ||
+    !homepage
+  ) {
     console.error(`Missing required fields for project: ${title}`);
     return null;
   }
@@ -145,7 +153,9 @@ async function enrichWithRepoMetadata(
     await Promise.allSettled(
       batch.map(async (project) => {
         try {
-          const url = project.links.repository.replace(/\.git$/, "").replace(/\/+$/, "");
+          const url = project.links.repository
+            .replace(/\.git$/, "")
+            .replace(/\/+$/, "");
           const match = url.match(/(?:www\.)?github\.com\/([^/]+)\/([^/]+)/);
           if (!match) return;
           const [, owner, repo] = match;

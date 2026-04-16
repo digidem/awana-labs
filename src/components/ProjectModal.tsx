@@ -55,7 +55,8 @@ const ProjectModal = ({
   useEffect(() => {
     if (isOpen) {
       previousTriggerRef.current =
-        triggerElement ?? (document.activeElement instanceof HTMLElement
+        triggerElement ??
+        (document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null);
       document.body.style.overflow = "hidden";
@@ -104,18 +105,15 @@ const ProjectModal = ({
       img.src = url;
       // .decode() may not be available in all environments (e.g., jsdom)
       if (typeof img.decode === "function") {
-        img
-          .decode()
-          .catch(() => {
-            // Decode failure is non-critical — browser will still render
-          });
+        img.decode().catch(() => {
+          // Decode failure is non-critical — browser will still render
+        });
       }
       prefetchCacheRef.current.set(url, img);
     };
 
     const nextIndex = (currentImageIndex + 1) % images.length;
-    const prevIndex =
-      (currentImageIndex - 1 + images.length) % images.length;
+    const prevIndex = (currentImageIndex - 1 + images.length) % images.length;
 
     prefetchAndDecode(images[nextIndex]);
     if (nextIndex !== prevIndex) {
@@ -289,7 +287,9 @@ const ProjectModal = ({
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        aria-current={index === currentImageIndex ? "true" : undefined}
+                        aria-current={
+                          index === currentImageIndex ? "true" : undefined
+                        }
                         className={`w-2 h-2 rounded-full transition-colors ${
                           index === currentImageIndex
                             ? "bg-primary"
@@ -370,11 +370,7 @@ const ProjectModal = ({
             {/* Links */}
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3">
               {project.links.homepage && (
-                <Button
-                  asChild
-                  variant="default"
-                  className="w-full sm:w-auto"
-                >
+                <Button asChild variant="default" className="w-full sm:w-auto">
                   <a
                     href={project.links.homepage}
                     target="_blank"
@@ -386,11 +382,7 @@ const ProjectModal = ({
                 </Button>
               )}
               {project.links.repository && (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                >
+                <Button asChild variant="outline" className="w-full sm:w-auto">
                   <a
                     href={project.links.repository}
                     target="_blank"
@@ -402,11 +394,7 @@ const ProjectModal = ({
                 </Button>
               )}
               {project.links.documentation && (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                >
+                <Button asChild variant="outline" className="w-full sm:w-auto">
                   <a
                     href={project.links.documentation}
                     target="_blank"
@@ -423,7 +411,12 @@ const ProjectModal = ({
             <div className="mt-6 pt-6 border-t border-border flex flex-wrap gap-4 text-xs text-muted-foreground">
               <span className="bg-muted/40 rounded-md px-2 py-1">
                 {t("projects.updated")}:{" "}
-                {formatRelativeTime(project.repoMetadata?.pushed_at ?? project.timestamps.last_updated_at, locale, t)}
+                {formatRelativeTime(
+                  project.repoMetadata?.pushed_at ??
+                    project.timestamps.last_updated_at,
+                  locale,
+                  t,
+                )}
               </span>
             </div>
           </div>

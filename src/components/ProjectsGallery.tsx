@@ -107,7 +107,10 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col gap-4 mb-8 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+        <div
+          className="flex flex-col gap-4 mb-8 animate-fade-up"
+          style={{ animationDelay: "0.1s" }}
+        >
           {/* Search */}
           <div className="relative w-full sm:max-w-md mx-auto sm:mx-0">
             <label htmlFor="project-search" className="sr-only">

@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  getProjectLoadErrorType,
-  ApiError,
-} from "./api";
+import { getProjectLoadErrorType, ApiError } from "./api";
 import { GitHubApiError } from "./github";
 
 function setOnlineStatus(value: boolean) {

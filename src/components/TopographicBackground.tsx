@@ -2,21 +2,29 @@ import { useEffect, useRef, useState } from "react";
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
   return reduced;
 }
 
 const PRIMARY_CONTOURS = [
   { d: "M-100,400 Q150,200 400,350 T800,300 T1300,400", duration: 2, delay: 0 },
-  { d: "M-100,420 Q160,230 420,370 T820,320 T1300,420", duration: 2, delay: 0.1 },
-  { d: "M-100,440 Q170,260 440,390 T840,340 T1300,440", duration: 2, delay: 0.2 },
+  {
+    d: "M-100,420 Q160,230 420,370 T820,320 T1300,420",
+    duration: 2,
+    delay: 0.1,
+  },
+  {
+    d: "M-100,440 Q170,260 440,390 T840,340 T1300,440",
+    duration: 2,
+    delay: 0.2,
+  },
   { d: "M100,380 Q300,280 500,360 T900,330", duration: 1.8, delay: 0.3 },
   { d: "M100,400 Q310,300 520,380 T920,350", duration: 1.8, delay: 0.4 },
   { d: "M250,370 Q400,320 550,370 T750,350", duration: 1.5, delay: 0.5 },
@@ -57,9 +65,9 @@ const ContourPath = ({
     const el = ref.current;
     if (!el) return;
     const length = el.getTotalLength?.() ?? 1000;
-    el.style.setProperty('--path-length', String(length));
-    el.style.setProperty('--anim-duration', `${duration}s`);
-    el.style.setProperty('--anim-delay', `${delay}s`);
+    el.style.setProperty("--path-length", String(length));
+    el.style.setProperty("--anim-duration", `${duration}s`);
+    el.style.setProperty("--anim-delay", `${delay}s`);
   }, [duration, delay]);
   return <path ref={ref} d={d} className="topo-path" />;
 };
@@ -72,7 +80,12 @@ const StaticTopographicBackground = () => {
         viewBox="0 0 1200 800"
         preserveAspectRatio="xMidYMid slice"
       >
-        <g stroke="currentColor" strokeWidth="1" fill="none" className="text-primary">
+        <g
+          stroke="currentColor"
+          strokeWidth="1"
+          fill="none"
+          className="text-primary"
+        >
           {PRIMARY_CONTOURS.map((path) => (
             <path key={path.d} d={path.d} />
           ))}
@@ -84,7 +97,12 @@ const StaticTopographicBackground = () => {
         viewBox="0 0 1200 800"
         preserveAspectRatio="xMidYMid slice"
       >
-        <g stroke="currentColor" strokeWidth="0.5" fill="none" className="text-primary">
+        <g
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          className="text-primary"
+        >
           {SECONDARY_CONTOURS.map((path) => (
             <path key={path.d} d={path.d} />
           ))}
@@ -95,8 +113,8 @@ const StaticTopographicBackground = () => {
 };
 
 function useScrollParallax(
-  layer1: React.RefObject<SVGSVGElement>,
-  layer2: React.RefObject<SVGSVGElement>,
+  layer1: React.RefObject<SVGSVGElement | null>,
+  layer2: React.RefObject<SVGSVGElement | null>,
 ) {
   useEffect(() => {
     let rafId: number;
@@ -105,20 +123,20 @@ function useScrollParallax(
         const y = window.scrollY;
         if (layer1.current) {
           const y1 = Math.min(y * (100 / 500), 100);
-          const opacity = 0.15 - Math.min(y / 400, 1) * 0.10;
-          layer1.current.style.setProperty('--scroll-y', `${y1}px`);
-          layer1.current.style.setProperty('--scroll-opacity', String(opacity));
+          const opacity = 0.15 - Math.min(y / 400, 1) * 0.1;
+          layer1.current.style.setProperty("--scroll-y", `${y1}px`);
+          layer1.current.style.setProperty("--scroll-opacity", String(opacity));
         }
         if (layer2.current) {
           const y2 = Math.min(y * (50 / 500), 50);
-          layer2.current.style.setProperty('--scroll-y', `${y2}px`);
+          layer2.current.style.setProperty("--scroll-y", `${y2}px`);
         }
       });
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(rafId);
     };
   }, [layer1, layer2]);
@@ -137,7 +155,12 @@ const AnimatedTopographicBackground = () => {
         viewBox="0 0 1200 800"
         preserveAspectRatio="xMidYMid slice"
       >
-        <g stroke="currentColor" strokeWidth="1" fill="none" className="text-primary">
+        <g
+          stroke="currentColor"
+          strokeWidth="1"
+          fill="none"
+          className="text-primary"
+        >
           {PRIMARY_CONTOURS.map((path) => (
             <ContourPath
               key={path.d}
@@ -155,7 +178,12 @@ const AnimatedTopographicBackground = () => {
         viewBox="0 0 1200 800"
         preserveAspectRatio="xMidYMid slice"
       >
-        <g stroke="currentColor" strokeWidth="0.5" fill="none" className="text-primary">
+        <g
+          stroke="currentColor"
+          strokeWidth="0.5"
+          fill="none"
+          className="text-primary"
+        >
           {SECONDARY_CONTOURS.map((path) => (
             <ContourPath
               key={path.d}
@@ -177,9 +205,7 @@ const TopographicBackground = () => {
     return <StaticTopographicBackground />;
   }
 
-  return (
-    <AnimatedTopographicBackground />
-  );
+  return <AnimatedTopographicBackground />;
 };
 
 export default TopographicBackground;

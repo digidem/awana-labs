@@ -26,7 +26,7 @@ describe("Husky TypeCheck Integration", () => {
       );
       expect(tsPattern).toBeDefined();
 
-      const tsConfig = packageJson["lint-staged"][tsPattern];
+      const tsConfig = packageJson["lint-staged"][tsPattern!];
       expect(Array.isArray(tsConfig)).toBe(true);
       expect(tsConfig.every((cmd: string) => typeof cmd === "string")).toBe(
         true,

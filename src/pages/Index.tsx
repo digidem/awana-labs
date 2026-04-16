@@ -45,9 +45,7 @@ const Index = () => {
           <h1 className="text-2xl font-bold text-destructive mb-4">
             {errorCopy.title}
           </h1>
-          <p className="text-muted-foreground mb-6">
-            {errorCopy.description}
-          </p>
+          <p className="text-muted-foreground mb-6">{errorCopy.description}</p>
           <Button onClick={() => void refetch()} variant="default">
             {t("common.retry")}
           </Button>

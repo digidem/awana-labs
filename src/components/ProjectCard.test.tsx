@@ -86,9 +86,10 @@ describe("ProjectCard", () => {
 
     expect(
       screen.getByText((_, node) => {
-        return node?.tagName === "DIV" &&
-          node?.textContent ===
-          `${i18n.t("projects.updated")} ${expected}`;
+        return (
+          node?.tagName === "DIV" &&
+          node?.textContent === `${i18n.t("projects.updated")} ${expected}`
+        );
       }),
     ).toBeInTheDocument();
   });

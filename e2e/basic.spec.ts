@@ -80,7 +80,10 @@ test.describe("Basic Page Tests", () => {
 
     const startTime = Date.now();
     const response = await page.goto("/");
-    await page.waitForSelector("#projects", { state: "visible", timeout: 10000 });
+    await page.waitForSelector("#projects", {
+      state: "visible",
+      timeout: 10000,
+    });
     const loadTime = Date.now() - startTime;
 
     // HTTP 200 status

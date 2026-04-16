@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import i18n, { supportedLanguages } from "./i18n";
 
 describe("i18n configuration", () => {

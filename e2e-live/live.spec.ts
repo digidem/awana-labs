@@ -20,7 +20,10 @@ test.describe("Live Site Tests", () => {
 
     expect(response, "Page should return a response").toBeDefined();
     const status = response!.status();
-    expect(status, `Expected 2xx/3xx status, got ${status}`).toBeGreaterThanOrEqual(200);
+    expect(
+      status,
+      `Expected 2xx/3xx status, got ${status}`,
+    ).toBeGreaterThanOrEqual(200);
     expect(status, `Expected < 400 status, got ${status}`).toBeLessThan(400);
 
     expect(page.url()).toBeTruthy();
@@ -44,7 +47,10 @@ test.describe("Live Site Tests", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const bodyText = await page.locator("body").textContent();
-    expect(bodyText?.trim().length, "Page should have substantial content").toBeGreaterThan(100);
+    expect(
+      bodyText?.trim().length,
+      "Page should have substantial content",
+    ).toBeGreaterThan(100);
     expect(bodyText?.trim(), "Page should not be blank").not.toBe("");
   });
 
@@ -54,7 +60,10 @@ test.describe("Live Site Tests", () => {
     await page.waitForLoadState("domcontentloaded");
     const loadTime = Date.now() - startTime;
 
-    expect(loadTime, `Site took ${loadTime}ms to load, expected < 10000ms`).toBeLessThan(10000);
+    expect(
+      loadTime,
+      `Site took ${loadTime}ms to load, expected < 10000ms`,
+    ).toBeLessThan(10000);
   });
 
   test("critical assets load successfully", async ({ page }) => {
@@ -116,7 +125,10 @@ test.describe("Live Site Tests", () => {
     await expect(body).toBeVisible();
 
     const bodyText = await body.textContent();
-    expect(bodyText?.trim().length, "Mobile page should have content").toBeGreaterThan(50);
+    expect(
+      bodyText?.trim().length,
+      "Mobile page should have content",
+    ).toBeGreaterThan(50);
   });
 
   test("site is responsive on desktop viewport", async ({ page }) => {
@@ -128,7 +140,10 @@ test.describe("Live Site Tests", () => {
     await expect(body).toBeVisible();
 
     const bodyText = await body.textContent();
-    expect(bodyText?.trim().length, "Desktop page should have content").toBeGreaterThan(50);
+    expect(
+      bodyText?.trim().length,
+      "Desktop page should have content",
+    ).toBeGreaterThan(50);
   });
 
   test("site navigation works", async ({ page }) => {
@@ -138,12 +153,18 @@ test.describe("Live Site Tests", () => {
     const links = page.locator("a[href]");
     const linkCount = await links.count();
 
-    expect(linkCount, "Page should have at least one navigable link").toBeGreaterThan(0);
+    expect(
+      linkCount,
+      "Page should have at least one navigable link",
+    ).toBeGreaterThan(0);
 
     // Click the first link and verify navigation occurs
     await links.first().click();
     await page.waitForTimeout(1000);
 
-    expect(page.url(), "Page should have navigated to a valid URL").toBeTruthy();
+    expect(
+      page.url(),
+      "Page should have navigated to a valid URL",
+    ).toBeTruthy();
   });
 });

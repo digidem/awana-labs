@@ -6,7 +6,11 @@
  */
 
 import type { QueryFunction } from "@tanstack/react-query";
-import { parseProjectsData, type ProjectsData, type Project } from "@/types/project.schema";
+import {
+  parseProjectsData,
+  type ProjectsData,
+  type Project,
+} from "@/types/project.schema";
 import { fetchValidatedProjectsFromGitHub } from "./github-projects";
 import { isRateLimitError as isGitHubRateLimitError } from "./github";
 
@@ -27,7 +31,11 @@ export class ApiError extends Error {
   }
 }
 
-export type ProjectLoadErrorType = "offline" | "timeout" | "rate-limit" | "generic";
+export type ProjectLoadErrorType =
+  | "offline"
+  | "timeout"
+  | "rate-limit"
+  | "generic";
 
 // =============================================================================
 // Project Runtime Data Contract
@@ -93,10 +101,6 @@ function getProjectsStorage(): Storage | null {
   }
 }
 
-function estimateEntrySizeBytes(entry: ProjectsCacheEntry): number {
-  return new Blob([JSON.stringify(entry)]).size;
-}
-
 function parseProjectsCacheEntry(value: unknown): ProjectsCacheEntry {
   if (!value || typeof value !== "object") {
     throw new Error("Projects cache entry must be an object");
@@ -151,7 +155,8 @@ export function readProjectsCache(): CachedProjectsResult | null {
 
     return {
       entry,
-      isStale: getProjectsCacheAgeMs(entry.cachedAt) > PROJECTS_CACHE_MAX_AGE_MS,
+      isStale:
+        getProjectsCacheAgeMs(entry.cachedAt) > PROJECTS_CACHE_MAX_AGE_MS,
     };
   } catch (error) {
     console.warn("Discarding invalid projects cache entry:", error);
@@ -160,7 +165,9 @@ export function readProjectsCache(): CachedProjectsResult | null {
   }
 }
 
-export function writeProjectsCache(data: ProjectsData): ProjectsCacheEntry | null {
+export function writeProjectsCache(
+  data: ProjectsData,
+): ProjectsCacheEntry | null {
   const storage = getProjectsStorage();
   if (!storage) {
     return null;
@@ -175,7 +182,10 @@ export function writeProjectsCache(data: ProjectsData): ProjectsCacheEntry | nul
       const bTime = Date.parse(b.timestamps.last_updated_at) || 0;
       return bTime - aTime;
     });
-    validatedData = { ...validatedData, projects: sorted.slice(0, MAX_CACHE_PROJECT_COUNT) };
+    validatedData = {
+      ...validatedData,
+      projects: sorted.slice(0, MAX_CACHE_PROJECT_COUNT),
+    };
   }
 
   // Sort once by oldest-first so we can efficiently trim from the front
@@ -244,7 +254,10 @@ export async function fetchProjectsFromGitHub(): Promise<ProjectsData> {
     import.meta.env.VITE_GITHUB_LABEL || "publish:yes",
   );
 
-  const deduped: ProjectsData = { ...data, projects: deduplicateProjects(data.projects) };
+  const deduped: ProjectsData = {
+    ...data,
+    projects: deduplicateProjects(data.projects),
+  };
   writeProjectsCache(deduped);
   dispatchProjectsDataUpdated(deduped);
   return deduped;
@@ -279,7 +292,11 @@ export async function fetchProjects(): Promise<ProjectsData> {
 
   // Stale-while-revalidate: if cache is between 1h and 24h old, serve it
   // immediately and kick off a background refresh.
-  if (cachedProjects && online && isWithinStaleWindow(cachedProjects.entry.cachedAt)) {
+  if (
+    cachedProjects &&
+    online &&
+    isWithinStaleWindow(cachedProjects.entry.cachedAt)
+  ) {
     // Fire-and-forget background refresh
     fetchProjectsFromGitHub().catch((error: unknown) => {
       console.warn("Background refresh failed:", error);
@@ -305,7 +322,10 @@ export async function fetchProjects(): Promise<ProjectsData> {
           getProjectsCacheAgeMs(cachedProjects.entry.cachedAt),
         );
       } else {
-        console.warn("Using cached projects after GitHub refresh failed:", error);
+        console.warn(
+          "Using cached projects after GitHub refresh failed:",
+          error,
+        );
       }
       return deduplicateCached(cachedProjects.entry.data);
     }
@@ -320,7 +340,7 @@ export async function fetchProjects(): Promise<ProjectsData> {
  */
 export const fetchProjectsQuery: QueryFunction<
   ProjectsData,
-  ["projects"]
+  readonly ["projects"]
 > = async () => {
   return await fetchProjects();
 };

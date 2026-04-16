@@ -1,10 +1,10 @@
 /* Inter font - self-hosted (v20, Latin subset) */
 @font-face {
-  font-family: 'Inter';
+  font-family: "Inter";
   font-style: normal;
   font-weight: 300 400 500 600 700;
   font-display: swap;
-  src: url('/fonts/inter-latin.woff2') format('woff2');
+  src: url("/fonts/inter-latin.woff2") format("woff2");
 }
 
 @tailwind base;
@@ -92,10 +92,15 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold tracking-tight;
   }
 }
@@ -161,13 +166,22 @@
 }
 
 @keyframes hero-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes hero-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
 }
 
 @layer utilities {
@@ -175,11 +189,21 @@
     animation: hero-fade-in 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) both;
   }
 
-  .hero-item-1 { animation: hero-fade-up 0.6s 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-  .hero-item-2 { animation: hero-fade-up 0.6s 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-  .hero-item-3 { animation: hero-fade-up 0.6s 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-  .hero-item-4 { animation: hero-fade-up 0.6s 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-  .hero-item-5 { animation: hero-fade-up 0.6s 1.1s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+  .hero-item-1 {
+    animation: hero-fade-up 0.6s 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+  .hero-item-2 {
+    animation: hero-fade-up 0.6s 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+  .hero-item-3 {
+    animation: hero-fade-up 0.6s 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+  .hero-item-4 {
+    animation: hero-fade-up 0.6s 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+  .hero-item-5 {
+    animation: hero-fade-up 0.6s 1.1s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
 
   .hero-bounce {
     animation: hero-bounce 1.5s ease-in-out infinite;
@@ -205,8 +229,12 @@
 
 /* Generic fade-in animation (replaces framer-motion opacity transitions) */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @layer utilities {
@@ -309,7 +337,8 @@
   .topo-path {
     stroke-dasharray: var(--path-length, 1000);
     stroke-dashoffset: var(--path-length, 1000);
-    animation: topo-draw var(--anim-duration, 2s) var(--anim-delay, 0s) ease-in-out forwards;
+    animation: topo-draw var(--anim-duration, 2s) var(--anim-delay, 0s)
+      ease-in-out forwards;
   }
 
   /* Topographic background scroll-parallax hook (replaces framer-motion useScroll/useTransform) */
@@ -325,5 +354,3 @@
     stroke-dashoffset: 0;
   }
 }
-
-
