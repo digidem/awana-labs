@@ -1,7 +1,3 @@
-/**
- * Tests for API client module
- */
-
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as githubProjects from "./github-projects";
 import {
@@ -12,44 +8,7 @@ import {
   PROJECTS_CACHE_VERSION,
   deduplicateProjects,
 } from "./api";
-
-function createProjectsData() {
-  return {
-    projects: [
-      {
-        id: "test-project",
-        issue_number: 1,
-        title: "Test Project",
-        slug: "test-project",
-        description: "A test project",
-        organization: {
-          name: "Test Org",
-          short_name: "Test",
-          url: "https://example.com",
-        },
-        status: {
-          state: "active" as const,
-          usage: "experimental" as const,
-          notes: "",
-        },
-        tags: ["test"],
-        media: {
-          logo: "https://example.com/logo.png",
-          images: ["https://example.com/image.png"],
-        },
-        links: {
-          homepage: "https://example.com",
-          repository: "https://github.com/test/repo",
-          documentation: "https://docs.example.com",
-        },
-        timestamps: {
-          created_at: "2024-01-01T00:00:00.000Z",
-          last_updated_at: "2024-01-02T00:00:00.000Z",
-        },
-      },
-    ],
-  };
-}
+import { createMockProjectsData } from "@/test/fixtures";
 
 describe("API Client", () => {
   beforeEach(() => {
@@ -100,7 +59,7 @@ describe("API Client", () => {
     it("removes duplicate slugs keeping the most recently updated", () => {
       const projects = [
         {
-          ...createProjectsData().projects[0],
+          ...createMockProjectsData().projects[0],
           slug: "comapeo-local-server",
           title: "CoMapeo Local Server (new)",
           timestamps: {
@@ -109,7 +68,7 @@ describe("API Client", () => {
           },
         },
         {
-          ...createProjectsData().projects[0],
+          ...createMockProjectsData().projects[0],
           slug: "comapeo-local-server",
           title: "CoMapeo Local Server (old)",
           timestamps: {
@@ -118,7 +77,7 @@ describe("API Client", () => {
           },
         },
         {
-          ...createProjectsData().projects[0],
+          ...createMockProjectsData().projects[0],
           slug: "unique-project",
           title: "Unique Project",
           timestamps: {
@@ -141,8 +100,8 @@ describe("API Client", () => {
 
     it("returns all projects when there are no duplicates", () => {
       const projects = [
-        { ...createProjectsData().projects[0], slug: "project-a" },
-        { ...createProjectsData().projects[0], slug: "project-b" },
+        { ...createMockProjectsData().projects[0], slug: "project-a" },
+        { ...createMockProjectsData().projects[0], slug: "project-b" },
       ];
 
       expect(deduplicateProjects(projects)).toHaveLength(2);
@@ -151,7 +110,7 @@ describe("API Client", () => {
 
   describe("fetchProjects", () => {
     it("fetches validated project data from GitHub on cold start", async () => {
-      const mockData = createProjectsData();
+      const mockData = createMockProjectsData();
       const fetchValidatedProjectsFromGitHub = vi
         .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
         .mockResolvedValue(mockData);
@@ -166,7 +125,7 @@ describe("API Client", () => {
     });
 
     it("serves stale cache on rate-limit error", async () => {
-      const mockData = createProjectsData();
+      const mockData = createMockProjectsData();
 
       // Prime the cache with valid data
       localStorage.setItem(

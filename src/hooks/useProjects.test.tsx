@@ -1,13 +1,10 @@
-/**
- * Tests for useProjects hook
- */
-
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useProjects, useProjectsWithError } from "./useProjects";
 import { GitHubApiError } from "@/lib/github";
 import * as api from "@/lib/api";
+import { createMockProject } from "@/test/fixtures";
 
 // Mock the API module
 vi.mock("@/lib/api", () => ({
@@ -26,42 +23,6 @@ vi.mock("@/lib/api", () => ({
 const mockFetchProjectsQuery = vi.mocked(api.fetchProjectsQuery);
 const mockGetProjectLoadErrorType = vi.mocked(api.getProjectLoadErrorType);
 const mockReadProjectsCache = vi.mocked(api.readProjectsCache);
-
-/** Helper to create a valid project object for tests */
-function createMockProject(overrides: Record<string, unknown> = {}) {
-  return {
-    id: "1",
-    issue_number: 1,
-    title: "Test Project",
-    slug: "test-project",
-    description: "A test project",
-    organization: {
-      name: "Test Org",
-      short_name: "Test",
-      url: "https://example.com",
-    },
-    status: {
-      state: "active" as const,
-      usage: "experimental" as const,
-      notes: "",
-    },
-    tags: ["test"],
-    media: {
-      logo: "",
-      images: [],
-    },
-    links: {
-      homepage: "",
-      repository: "",
-      documentation: "",
-    },
-    timestamps: {
-      created_at: "2024-01-01",
-      last_updated_at: "2024-01-01",
-    },
-    ...overrides,
-  };
-}
 
 describe("useProjects", () => {
   let queryClient: QueryClient;

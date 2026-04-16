@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getProjectLoadErrorType, ApiError } from "./api";
 import { GitHubApiError } from "./github";
-
-function setOnlineStatus(value: boolean) {
-  Object.defineProperty(window.navigator, "onLine", {
-    configurable: true,
-    get: () => value,
-  });
-}
+import { setOnlineStatus } from "@/test/helpers";
 
 describe("getProjectLoadErrorType", () => {
   beforeEach(() => {

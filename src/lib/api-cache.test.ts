@@ -10,51 +10,8 @@ import {
   readProjectsCache,
   writeProjectsCache,
 } from "./api";
-
-function createProjectsData() {
-  return {
-    projects: [
-      {
-        id: "test-project",
-        issue_number: 1,
-        title: "Test Project",
-        slug: "test-project",
-        description: "A test project",
-        organization: {
-          name: "Test Org",
-          short_name: "Test",
-          url: "https://example.com",
-        },
-        status: {
-          state: "active" as const,
-          usage: "experimental" as const,
-          notes: "",
-        },
-        tags: ["test"],
-        media: {
-          logo: "https://example.com/logo.png",
-          images: ["https://example.com/image.png"],
-        },
-        links: {
-          homepage: "https://example.com",
-          repository: "https://github.com/test/repo",
-          documentation: "https://docs.example.com",
-        },
-        timestamps: {
-          created_at: "2024-01-01T00:00:00.000Z",
-          last_updated_at: "2024-01-02T00:00:00.000Z",
-        },
-      },
-    ],
-  };
-}
-
-function setOnlineStatus(value: boolean) {
-  Object.defineProperty(window.navigator, "onLine", {
-    configurable: true,
-    get: () => value,
-  });
-}
+import { createMockProjectsData } from "@/test/fixtures";
+import { setOnlineStatus } from "@/test/helpers";
 
 function writeRawCache(data: unknown, cachedAt = new Date().toISOString()) {
   localStorage.setItem(
@@ -79,7 +36,7 @@ describe("projects cache contract", () => {
   });
 
   it("fetches from GitHub on cache miss", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     const fetchValidatedProjectsFromGitHub = vi
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
@@ -91,7 +48,7 @@ describe("projects cache contract", () => {
   });
 
   it("writes validated GitHub payloads to localStorage", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     vi.spyOn(
       githubProjects,
       "fetchValidatedProjectsFromGitHub",
@@ -107,7 +64,7 @@ describe("projects cache contract", () => {
   });
 
   it("reuses a fresh validated cache entry without refetching", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     writeProjectsCache(mockData);
     const fetchValidatedProjectsFromGitHub = vi.spyOn(
       githubProjects,
@@ -121,7 +78,7 @@ describe("projects cache contract", () => {
   });
 
   it("rejects invalid cached payloads and replaces them with fresh data", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     writeRawCache({
       projects: [{ id: "broken-project" }],
     });
@@ -136,7 +93,7 @@ describe("projects cache contract", () => {
   });
 
   it("falls back to cached projects while offline", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     writeRawCache(
       mockData,
       new Date(Date.now() - PROJECTS_CACHE_MAX_AGE_MS - 1000).toISOString(),
@@ -154,7 +111,7 @@ describe("projects cache contract", () => {
   });
 
   it("dispatches an update event after refreshing stale cached projects", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     writeRawCache(
       mockData,
       new Date(Date.now() - PROJECTS_CACHE_MAX_AGE_MS - 1000).toISOString(),
@@ -192,7 +149,7 @@ describe("projects cache contract", () => {
   });
 
   it("falls back to stale cached projects when a refresh fails", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     writeRawCache(
       mockData,
       new Date(Date.now() - PROJECTS_CACHE_MAX_AGE_MS - 1000).toISOString(),
@@ -221,7 +178,7 @@ describe("corrupted cache edge cases", () => {
 
   it("discards non-JSON string in localStorage and refetches", async () => {
     localStorage.setItem(PROJECTS_CACHE_KEY, "{invalid json");
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     const fetchValidatedProjectsFromGitHub = vi
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
@@ -238,10 +195,10 @@ describe("corrupted cache edge cases", () => {
       JSON.stringify({
         version: 999,
         cachedAt: new Date().toISOString(),
-        data: createProjectsData(),
+        data: createMockProjectsData(),
       }),
     );
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     const fetchValidatedProjectsFromGitHub = vi
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
@@ -257,10 +214,10 @@ describe("corrupted cache edge cases", () => {
       PROJECTS_CACHE_KEY,
       JSON.stringify({
         version: PROJECTS_CACHE_VERSION,
-        data: createProjectsData(),
+        data: createMockProjectsData(),
       }),
     );
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     const fetchValidatedProjectsFromGitHub = vi
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
@@ -277,10 +234,10 @@ describe("corrupted cache edge cases", () => {
       JSON.stringify({
         version: PROJECTS_CACHE_VERSION,
         cachedAt: "not-a-date",
-        data: createProjectsData(),
+        data: createMockProjectsData(),
       }),
     );
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     const fetchValidatedProjectsFromGitHub = vi
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
@@ -295,7 +252,7 @@ describe("corrupted cache edge cases", () => {
     const oversizedData = {
       version: PROJECTS_CACHE_VERSION,
       cachedAt: new Date().toISOString(),
-      data: createProjectsData(),
+      data: createMockProjectsData(),
     };
     // Force the serialized size past the limit by adding padding inside the JSON
     const raw =
@@ -306,7 +263,7 @@ describe("corrupted cache edge cases", () => {
       '"}';
     localStorage.setItem(PROJECTS_CACHE_KEY, raw);
 
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     const fetchValidatedProjectsFromGitHub = vi
       .spyOn(githubProjects, "fetchValidatedProjectsFromGitHub")
       .mockResolvedValue(mockData);
@@ -318,7 +275,7 @@ describe("corrupted cache edge cases", () => {
   });
 
   it("returns data even when localStorage.setItem throws", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     vi.spyOn(
       githubProjects,
       "fetchValidatedProjectsFromGitHub",
@@ -333,7 +290,7 @@ describe("corrupted cache edge cases", () => {
   });
 
   it("accepts cache entry with extra top-level fields", async () => {
-    const mockData = createProjectsData();
+    const mockData = createMockProjectsData();
     localStorage.setItem(
       PROJECTS_CACHE_KEY,
       JSON.stringify({
