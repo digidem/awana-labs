@@ -1,8 +1,5 @@
 import { test, expect } from "@playwright/test";
-import {
-  pinAppLanguage,
-  seedProjectsCache,
-} from "./fixtures";
+import { pinAppLanguage, seedProjectsCache } from "./fixtures";
 
 const BREAKPOINTS = {
   mobile: { width: 375, height: 667, name: "Mobile (iPhone SE)" },

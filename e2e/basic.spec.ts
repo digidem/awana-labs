@@ -1,8 +1,5 @@
 import { test, expect } from "@playwright/test";
-import {
-  pinAppLanguage,
-  seedProjectsCache,
-} from "./fixtures";
+import { pinAppLanguage, seedProjectsCache } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await pinAppLanguage(page);

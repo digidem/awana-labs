@@ -49,9 +49,7 @@ const defaultMockProject: Project = {
  * @example
  * createMockProject({ title: "Custom Title", tags: ["a", "b"] })
  */
-export function createMockProject(
-  overrides: Partial<Project> = {},
-): Project {
+export function createMockProject(overrides: Partial<Project> = {}): Project {
   return { ...defaultMockProject, ...overrides };
 }
 

@@ -34,8 +34,7 @@ export const projectFixture = {
   },
   links: {
     homepage: "https://www.digital-democracy.org/comapeo",
-    repository:
-      "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
+    repository: "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
     documentation: "https://docs.example.com/comapeo",
   },
   timestamps: {
