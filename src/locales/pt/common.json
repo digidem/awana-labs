@@ -1,10 +1,4 @@
 {
-  "nav": {
-    "home": "Início",
-    "about": "Sobre",
-    "projects": "Projetos",
-    "contact": "Contato"
-  },
   "hero": {
     "badge": "Experimental",
     "title": "Awana Labs",
@@ -15,13 +9,10 @@
   "projects": {
     "title": "Nossos Projetos",
     "subtitle": "Ferramentas práticas forjadas a partir de necessidades reais de parceiros e desafios de plataforma",
-    "viewProject": "Ver Projeto",
-    "technologies": "Tecnologias",
     "searchLabel": "Buscar projetos",
     "searchPlaceholder": "Buscar projetos...",
     "statusFilterLabel": "Filtrar projetos por status",
     "updated": "Atualizado",
-    "created": "Criado",
     "tags": "Tags",
     "statusLabel": "Status",
     "noResults": "Nenhum projeto encontrado com seus critérios.",
@@ -60,16 +51,6 @@
     "loading": "Carregando...",
     "error": "Ocorreu um erro",
     "retry": "Tentar Novamente",
-    "close": "Fechar",
-    "save": "Salvar",
-    "cancel": "Cancelar",
-    "delete": "Excluir",
-    "edit": "Editar",
-    "search": "Buscar",
-    "filter": "Filtrar",
-    "sort": "Ordenar",
-    "noResults": "Nenhum resultado encontrado",
-    "viewMore": "Ver Mais",
     "all": "Todos"
   },
   "status": {
@@ -98,9 +79,7 @@
     "viewDetails": "Ver detalhes de {{title}}",
     "selectLanguage": "Selecionar idioma",
     "switchLanguage": "Mudar para {{language}}",
-    "visitGithub": "Visitar repositório GitHub",
-    "openMenu": "Abrir menu",
-    "closeMenu": "Fechar menu"
+    "visitGithub": "Visitar repositório GitHub"
   },
   "timeAgo": {
     "overYears_one": "há mais de um ano",

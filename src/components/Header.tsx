@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { GithubIcon } from "./GithubIcon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface HeaderProps {
   className?: string;
@@ -134,6 +135,7 @@ const Header = ({ className }: HeaderProps) => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
+            <LanguageSwitcher variant="compact" />
             <a
               href="https://github.com/digidem/awana-labs"
               target="_blank"

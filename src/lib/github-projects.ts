@@ -234,6 +234,3 @@ export async function fetchValidatedProjectsFromGitHub(
   const data = await fetchProjectsFromGitHub(owner, repo, label, token);
   return parseProjectsData(data);
 }
-
-// Re-export for convenience
-export { GitHubClient, type GitHubIssue } from "./github";
