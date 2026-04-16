@@ -48,22 +48,22 @@ describe("i18n configuration", () => {
   });
 
   it("should translate differently based on language", async () => {
-    const key = "nav.home";
+    const key = "hero.cta";
 
     // English
     i18n.changeLanguage("en");
     const enTranslation = i18n.t(key);
-    expect(enTranslation).toBe("Home");
+    expect(enTranslation).toBe("Explore Projects");
 
     // Portuguese
     await i18n.changeLanguage("pt");
     const ptTranslation = i18n.t(key);
-    expect(ptTranslation).toBe("Início");
+    expect(ptTranslation).toBe("Explorar Projetos");
 
     // Spanish
     await i18n.changeLanguage("es");
     const esTranslation = i18n.t(key);
-    expect(esTranslation).toBe("Inicio");
+    expect(esTranslation).toBe("Explorar Proyectos");
   });
 
   it("should handle interpolation correctly", () => {

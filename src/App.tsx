@@ -1,6 +1,4 @@
 import { lazy, Suspense, useState } from "react";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/useLanguage";
@@ -14,9 +12,7 @@ const AppContent = () => {
   useDocumentMeta();
 
   return (
-    <TooltipProvider>
-      <Sonner />
-      <HashRouter>
+    <HashRouter>
         <Suspense
           fallback={
             <div className="min-h-screen bg-background">
@@ -37,7 +33,6 @@ const AppContent = () => {
           </Routes>
         </Suspense>
       </HashRouter>
-    </TooltipProvider>
   );
 };
 
