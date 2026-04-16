@@ -4,7 +4,12 @@ import {
   createCacheEntry,
   setNavigatorOffline,
   mockGitHubProjects,
+  pinAppLanguage,
 } from "./fixtures";
+
+test.beforeEach(async ({ page }) => {
+  await pinAppLanguage(page);
+});
 
 test.describe("Projects runtime contract", () => {
   test("renders projects from the runtime cache contract", async ({ page }) => {

@@ -135,13 +135,10 @@ ${projectFixture.media.images.join("\n")}
 } as const;
 
 /** Mock GitHub API to return the fixture issue */
-export async function mockGitHubProjects(page: Page) {
-  let requestCount = 0;
-
+export async function mockGitHubProjects(page: Page): Promise<void> {
   await page.route(
     "https://api.github.com/repos/**/issues**",
     async (route) => {
-      requestCount += 1;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -149,8 +146,4 @@ export async function mockGitHubProjects(page: Page) {
       });
     },
   );
-
-  return {
-    getRequestCount: () => requestCount,
-  };
 }

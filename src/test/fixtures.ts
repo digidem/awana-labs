@@ -46,6 +46,10 @@ const defaultMockProject: Project = {
 /**
  * Create a mock project with optional partial overrides.
  *
+ * Note: overrides are shallow-merged. Nested objects (e.g. `organization`,
+ * `status`, `media`, `links`, `timestamps`) must be provided in full —
+ * partial nested objects will replace the default entirely.
+ *
  * @example
  * createMockProject({ title: "Custom Title", tags: ["a", "b"] })
  */
