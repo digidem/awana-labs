@@ -1,69 +1,12 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
+import {
+  pinAppLanguage,
+  seedProjectsCache,
+} from "./fixtures";
 
-const runtimeProjectsCacheEntry = {
-  version: 2,
-  cachedAt: new Date().toISOString(),
-  data: {
-    projects: [
-      {
-        id: "comapeo-config-spreadsheet-plugin",
-        issue_number: 2,
-        title: "CoMapeo Config Spreadsheet Plugin",
-        slug: "comapeo-config-spreadsheet-plugin",
-        description: "Google Sheets plugin for CoMapeo configurations.",
-        organization: {
-          name: "Digital Democracy",
-          short_name: "Awana Digital",
-          url: "https://www.digital-democracy.org",
-        },
-        status: {
-          state: "active",
-          usage: "widely-used",
-          notes: "Used in multiple deployments.",
-        },
-        tags: ["CoMapeo", "Mapping", "Spreadsheet"],
-        media: {
-          logo: "https://images.unsplash.com/photo-1",
-          images: ["https://images.unsplash.com/photo-2"],
-        },
-        links: {
-          homepage: "https://www.digital-democracy.org/comapeo",
-          repository:
-            "https://github.com/digidem/comapeo-config-spreadsheet-plugin",
-          documentation: "https://docs.example.com/comapeo",
-        },
-        timestamps: {
-          created_at: "2024-01-01T00:00:00.000Z",
-          last_updated_at: "2024-01-02T00:00:00.000Z",
-        },
-      },
-    ],
-  },
-} as const;
-
-const pinAppLanguage = async (page: Page) => {
-  await page.addInitScript(() => {
-    window.localStorage.setItem("awana-labs-language", "en");
-    window.localStorage.setItem("i18nextLng", "en");
-  });
-};
-
-const seedRuntimeCache = async (page: Page) => {
-  await page.addInitScript((cacheEntry) => {
-    window.localStorage.setItem(
-      "awana-labs-projects-cache",
-      JSON.stringify(cacheEntry),
-    );
-  }, runtimeProjectsCacheEntry);
-};
-
-/**
- * Basic page load and rendering tests
- * These tests ensure the website loads correctly and displays content
- */
 test.beforeEach(async ({ page }) => {
   await pinAppLanguage(page);
-  await seedRuntimeCache(page);
+  await seedProjectsCache(page);
 });
 
 test.describe("Basic Page Tests", () => {

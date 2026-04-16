@@ -9,24 +9,9 @@ import {
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
 import ProjectModal from "./ProjectModal";
+import { createMockProject } from "@/test/fixtures";
 
-const project = {
-  id: "test-project",
-  issue_number: 1,
-  title: "Test Project",
-  slug: "test-project",
-  description: "A test project",
-  organization: {
-    name: "Test Org",
-    short_name: "Test",
-    url: "https://example.com",
-  },
-  status: {
-    state: "active" as const,
-    usage: "experimental" as const,
-    notes: "",
-  },
-  tags: ["test"],
+const project = createMockProject({
   media: {
     logo: "https://example.com/logo.png",
     images: [
@@ -34,16 +19,7 @@ const project = {
       "https://example.com/image-2.png",
     ],
   },
-  links: {
-    homepage: "https://example.com",
-    repository: "https://github.com/test/project",
-    documentation: "https://docs.example.com",
-  },
-  timestamps: {
-    created_at: "2024-01-01T00:00:00.000Z",
-    last_updated_at: "2024-01-02T00:00:00.000Z",
-  },
-};
+});
 
 function renderModal(
   isOpen: boolean,
