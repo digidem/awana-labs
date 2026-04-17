@@ -78,12 +78,12 @@ function parseIssueToProject(issue: GitHubIssue): Project | null {
     !statusState ||
     !homepage
   ) {
-    console.error(`Missing required fields for project: ${title}`);
+    console.warn(`Missing required fields for project: ${title}`);
     return null;
   }
 
   if (!isValidProjectState(statusState)) {
-    console.error(`Invalid project state for project: ${title}`);
+    console.warn(`Invalid project state for project: ${title}`);
     return null;
   }
 
@@ -187,7 +187,9 @@ export async function fetchProjectsFromGitHub(
 ): Promise<ProjectsData> {
   const client = createClient(token);
 
-  console.log(`Fetching issues with label "${label}" from ${owner}/${repo}...`);
+  if (import.meta.env.DEV) {
+    console.log(`Fetching issues with label "${label}" from ${owner}/${repo}...`);
+  }
 
   try {
     const issues = await client.getIssues(owner, repo, {
@@ -196,7 +198,9 @@ export async function fetchProjectsFromGitHub(
       per_page: 100,
     });
 
-    console.log(`Found ${issues.length} issues, parsing projects...`);
+    if (import.meta.env.DEV) {
+      console.log(`Found ${issues.length} issues, parsing projects...`);
+    }
 
     const projects: Project[] = [];
 
@@ -209,7 +213,9 @@ export async function fetchProjectsFromGitHub(
       }
     }
 
-    console.log(`Successfully parsed ${projects.length} projects`);
+    if (import.meta.env.DEV) {
+      console.log(`Successfully parsed ${projects.length} projects`);
+    }
 
     // Enrich projects with repo metadata (pushed_at, stargazers, forks)
     await enrichWithRepoMetadata(projects, client);
