@@ -95,16 +95,18 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
 
   /** Track whether the user has interacted with filters before announcing count. */
   const hasInteracted = useRef(false);
-  const [announceCount, setAnnounceCount] = useState(false);
+  const liveRegionRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     if (searchQuery || statusFilter !== "all") {
       hasInteracted.current = true;
     }
-    if (hasInteracted.current) {
-      setAnnounceCount(true);
+    if (hasInteracted.current && liveRegionRef.current) {
+      liveRegionRef.current.textContent = t("projects.resultsCount", {
+        count: filteredProjects.length,
+      });
     }
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, filteredProjects.length, t]);
 
   return (
     <section id="projects" tabIndex={-1} className="py-20 px-6">
@@ -165,11 +167,13 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
         </div>
 
         {/* Screen-reader announcement for filtered count */}
-        {announceCount && (
-          <p className="sr-only" aria-live="polite">
-            {t("projects.resultsCount", { count: filteredProjects.length })}
-          </p>
-        )}
+        <p
+          ref={liveRegionRef}
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        />
 
         {/* Projects Grid */}
         {filteredProjects.length > 0 ? (

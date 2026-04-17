@@ -53,8 +53,8 @@ i18n
       lookupSessionStorage: "i18nextLng",
       // Cache user language selection
       caches: ["localStorage", "cookie"],
-      // Only detect languages in supportedLngs
-      checkForSupportedInLng: true,
+      // Normalize regional codes (e.g. pt-BR → pt) to match supportedLngs
+      convertDetectedLanguage: (lng: string) => lng.split("-")[0],
     },
   } as Parameters<typeof i18n.init>[0]);
 
