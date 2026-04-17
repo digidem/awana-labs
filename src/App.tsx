@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import useDocumentMeta from "@/hooks/useDocumentMeta";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const Index = lazy(() => import("./pages/Index"));

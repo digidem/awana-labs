@@ -10,7 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 const DEFAULT_TITLE = PAGE_TITLES.en;
 
-const useDocumentMeta = () => {
+export const useDocumentMeta = () => {
   const { language } = useLanguage();
   const { t, ready } = useTranslation();
 
@@ -28,4 +28,3 @@ const useDocumentMeta = () => {
   }, [language, t, ready]);
 };
 
-export default useDocumentMeta;
