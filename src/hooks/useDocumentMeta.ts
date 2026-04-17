@@ -27,4 +27,3 @@ export const useDocumentMeta = () => {
     }
   }, [language, t, ready]);
 };
-

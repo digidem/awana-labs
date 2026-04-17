@@ -188,7 +188,9 @@ export async function fetchProjectsFromGitHub(
   const client = createClient(token);
 
   if (import.meta.env.DEV) {
-    console.log(`Fetching issues with label "${label}" from ${owner}/${repo}...`);
+    console.log(
+      `Fetching issues with label "${label}" from ${owner}/${repo}...`,
+    );
   }
 
   try {
