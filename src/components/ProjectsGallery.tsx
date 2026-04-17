@@ -151,6 +151,11 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
           </div>
         </div>
 
+        {/* Screen-reader announcement for filtered count */}
+        <p className="sr-only" aria-live="polite">
+          {t("projects.resultsCount", { count: filteredProjects.length })}
+        </p>
+
         {/* Projects Grid */}
         {filteredProjects.length > 0 ? (
           <div
