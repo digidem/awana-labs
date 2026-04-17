@@ -173,46 +173,38 @@ export function writeProjectsCache(
     return null;
   }
 
-  let validatedData = parseProjectsData(data);
+  let projects = [...data.projects];
 
-  // Truncate to most recent projects if count exceeds the safeguard
-  if (validatedData.projects.length > MAX_CACHE_PROJECT_COUNT) {
-    const sorted = [...validatedData.projects].sort((a, b) => {
-      const aTime = Date.parse(a.timestamps.last_updated_at) || 0;
-      const bTime = Date.parse(b.timestamps.last_updated_at) || 0;
-      return bTime - aTime;
-    });
-    validatedData = {
-      ...validatedData,
-      projects: sorted.slice(0, MAX_CACHE_PROJECT_COUNT),
-    };
-  }
-
-  // Sort once by oldest-first so we can efficiently trim from the front
-  const projectsByAge = [...validatedData.projects].sort((a, b) => {
+  // Sort once by oldest-first so we can efficiently truncate from the front
+  projects.sort((a, b) => {
     const aTime = Date.parse(a.timestamps.last_updated_at) || 0;
     const bTime = Date.parse(b.timestamps.last_updated_at) || 0;
     return aTime - bTime;
   });
 
+  // Truncate from front (oldest) if count exceeds the safeguard
+  if (projects.length > MAX_CACHE_PROJECT_COUNT) {
+    projects = projects.slice(projects.length - MAX_CACHE_PROJECT_COUNT);
+  }
+
   const entry: ProjectsCacheEntry = {
     version: PROJECTS_CACHE_VERSION,
     cachedAt: new Date().toISOString(),
-    data: validatedData,
+    data: { ...data, projects },
   };
 
   // Progressively remove oldest projects until the serialized entry fits.
   // Sort once above, then shrink from the front each iteration.
   let serialized = JSON.stringify(entry);
   while (new Blob([serialized]).size > MAX_CACHE_SIZE_BYTES) {
-    if (projectsByAge.length === 0) {
+    if (projects.length === 0) {
       console.warn(
         "Projects cache still exceeds size limit after removing all projects; skipping write",
       );
       return null;
     }
-    projectsByAge.shift();
-    entry.data = { ...validatedData, projects: [...projectsByAge] };
+    projects.shift();
+    entry.data = { ...data, projects: [...projects] };
     serialized = JSON.stringify(entry);
   }
 
