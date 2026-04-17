@@ -54,7 +54,7 @@ i18n
       // Cache user language selection
       caches: ["localStorage", "cookie"],
       // Only detect languages in supportedLngs
-      checkWhitelist: true,
+      checkForSupportedInLng: true,
     },
   } as Parameters<typeof i18n.init>[0]);
 
