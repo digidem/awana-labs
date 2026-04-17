@@ -16,7 +16,9 @@
     "tags": "Tags",
     "statusLabel": "Status",
     "noResults": "No projects found matching your criteria.",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "resultsCount_one": "{{count}} project found",
+    "resultsCount_other": "{{count}} projects found"
   },
   "projectModal": {
     "homepage": "Homepage",

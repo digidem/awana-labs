@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
@@ -93,6 +93,21 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
     });
   }, [sortedProjects, statusFilter, searchQuery]);
 
+  /** Track whether the user has interacted with filters before announcing count. */
+  const hasInteracted = useRef(false);
+  const liveRegionRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (searchQuery || statusFilter !== "all") {
+      hasInteracted.current = true;
+    }
+    if (hasInteracted.current && liveRegionRef.current) {
+      liveRegionRef.current.textContent = t("projects.resultsCount", {
+        count: filteredProjects.length,
+      });
+    }
+  }, [searchQuery, statusFilter, filteredProjects.length, t]);
+
   return (
     <section id="projects" tabIndex={-1} className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -150,6 +165,15 @@ const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
             ))}
           </div>
         </div>
+
+        {/* Screen-reader announcement for filtered count */}
+        <p
+          ref={liveRegionRef}
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        />
 
         {/* Projects Grid */}
         {filteredProjects.length > 0 ? (

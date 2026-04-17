@@ -35,7 +35,7 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
       onMouseEnter={handlePrefetch}
       onFocus={handlePrefetch}
       onTouchStart={handlePrefetch}
-      className="animate-card-in h-full w-full rounded-lg border border-border/50 bg-card/80 text-left text-card-foreground shadow-sm backdrop-blur-sm transition-[box-shadow,transform] duration-300 hover:shadow-xl hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
+      className="h-full w-full rounded-lg border border-border/50 bg-card/80 text-left text-card-foreground shadow-sm backdrop-blur-sm transition-[box-shadow,transform] duration-300 hover:shadow-xl hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
       aria-label={t("aria.viewDetails", { title: project.title })}
     >
       <CardHeader className="pb-3">
