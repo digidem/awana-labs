@@ -66,8 +66,7 @@ const Header = ({ className }: HeaderProps) => {
       opacity = 1;
     } else if (currentTop <= LOGO_FADE_START) {
       opacity =
-        (LOGO_FADE_START - currentTop) /
-        (LOGO_FADE_START - LOGO_FULL_OPACITY);
+        (LOGO_FADE_START - currentTop) / (LOGO_FADE_START - LOGO_FULL_OPACITY);
     }
 
     logoOpacityRef.current = opacity;

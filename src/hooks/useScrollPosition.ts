@@ -5,8 +5,7 @@ type ScrollCallback = (scrollY: number) => void;
 // Module-level shared state: one listener for all consumers
 const listeners = new Set<ScrollCallback>();
 let rafId: number | null = null;
-let currentScrollY =
-  typeof window !== "undefined" ? window.scrollY : 0;
+let currentScrollY = typeof window !== "undefined" ? window.scrollY : 0;
 let listenerCount = 0;
 
 function scheduleUpdate() {

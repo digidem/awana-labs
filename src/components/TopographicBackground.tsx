@@ -2,11 +2,10 @@ import { useRef, useState, useEffect } from "react";
 import { useScrollListener } from "@/hooks/useScrollPosition";
 
 function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(
-    () =>
-      typeof window !== "undefined"
-        ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        : false,
+  const [reduced, setReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
   );
   useEffect(() => {
     if (typeof window === "undefined") return;
