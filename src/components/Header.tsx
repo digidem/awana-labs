@@ -29,26 +29,8 @@ const Header = ({ className }: HeaderProps) => {
       : null;
   }, []);
 
-  // Resize handler: re-cache hero title position on viewport changes
-  useEffect(() => {
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        cacheHeroTitlePosition();
-      }, 100);
-    };
-
-    cacheHeroTitlePosition();
-    window.addEventListener("resize", handleResize);
-    return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [cacheHeroTitlePosition]);
-
-  // Scroll-driven header state updates via shared scroll listener
-  useScrollListener((scrollY) => {
+  /** Recompute logo opacity, transform, and interaction state from current scroll position. */
+  const updateHeaderState = useCallback((scrollY: number) => {
     if (heroTitleDocumentTopRef.current === null) {
       logoOpacityRef.current = 0;
       if (logoContainerRef.current) {
@@ -83,6 +65,30 @@ const Header = ({ className }: HeaderProps) => {
       const next = opacity > 0.01;
       return prev === next ? prev : next;
     });
+  }, []);
+
+  // Resize handler: re-cache hero title position and recompute header state
+  useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        cacheHeroTitlePosition();
+        updateHeaderState(window.scrollY);
+      }, 100);
+    };
+
+    cacheHeroTitlePosition();
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [cacheHeroTitlePosition, updateHeaderState]);
+
+  // Scroll-driven header state updates via shared scroll listener
+  useScrollListener((scrollY) => {
+    updateHeaderState(scrollY);
   });
 
   const scrollToTop = useCallback(() => {
