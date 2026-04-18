@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useScrollListener } from "@/hooks/useScrollPosition";
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () =>
+      typeof window !== "undefined"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        : false,
   );
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
     mq.addEventListener("change", handler);
@@ -116,30 +121,18 @@ function useScrollParallax(
   layer1: React.RefObject<SVGSVGElement | null>,
   layer2: React.RefObject<SVGSVGElement | null>,
 ) {
-  useEffect(() => {
-    let rafId: number;
-    const onScroll = () => {
-      rafId = requestAnimationFrame(() => {
-        const y = window.scrollY;
-        if (layer1.current) {
-          const y1 = Math.min(y * (100 / 500), 100);
-          const opacity = 0.15 - Math.min(y / 400, 1) * 0.1;
-          layer1.current.style.setProperty("--scroll-y", `${y1}px`);
-          layer1.current.style.setProperty("--scroll-opacity", String(opacity));
-        }
-        if (layer2.current) {
-          const y2 = Math.min(y * (50 / 500), 50);
-          layer2.current.style.setProperty("--scroll-y", `${y2}px`);
-        }
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(rafId);
-    };
-  }, [layer1, layer2]);
+  useScrollListener((y) => {
+    if (layer1.current) {
+      const y1 = Math.min(y * (100 / 500), 100);
+      const opacity = 0.15 - Math.min(y / 400, 1) * 0.1;
+      layer1.current.style.setProperty("--scroll-y", `${y1}px`);
+      layer1.current.style.setProperty("--scroll-opacity", String(opacity));
+    }
+    if (layer2.current) {
+      const y2 = Math.min(y * (50 / 500), 50);
+      layer2.current.style.setProperty("--scroll-y", `${y2}px`);
+    }
+  });
 }
 
 const AnimatedTopographicBackground = () => {

@@ -3,6 +3,7 @@ import { GithubIcon } from "./GithubIcon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useScrollListener } from "@/hooks/useScrollPosition";
 
 interface HeaderProps {
   className?: string;
@@ -19,7 +20,6 @@ const Header = ({ className }: HeaderProps) => {
   const logoContainerRef = useRef<HTMLDivElement>(null);
   const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
   const heroTitleDocumentTopRef = useRef<number | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
 
   const cacheHeroTitlePosition = useCallback(() => {
     heroTitleRef.current =
@@ -29,77 +29,62 @@ const Header = ({ className }: HeaderProps) => {
       : null;
   }, []);
 
+  // Resize handler: re-cache hero title position on viewport changes
   useEffect(() => {
-    const updateHeaderState = () => {
-      if (heroTitleDocumentTopRef.current === null) {
-        logoOpacityRef.current = 0;
-        if (logoContainerRef.current) {
-          logoContainerRef.current.style.opacity = "0";
-          logoContainerRef.current.style.transform = "translateX(100px)";
-        }
-        setIsLogoInteractive((prev) => (prev ? false : prev));
-        setIsScrolled(window.scrollY > 10);
-        animationFrameRef.current = null;
-        return;
-      }
-
-      const currentTop = heroTitleDocumentTopRef.current - window.scrollY;
-      let opacity = 0;
-      if (currentTop <= LOGO_FULL_OPACITY) {
-        opacity = 1;
-      } else if (currentTop <= LOGO_FADE_START) {
-        opacity =
-          (LOGO_FADE_START - currentTop) /
-          (LOGO_FADE_START - LOGO_FULL_OPACITY);
-      }
-
-      logoOpacityRef.current = opacity;
-      if (logoContainerRef.current) {
-        logoContainerRef.current.style.opacity = String(opacity);
-        logoContainerRef.current.style.transform = `translateX(${(1 - opacity) * 100}px)`;
-      }
-
-      setIsScrolled((prev) => {
-        const next = window.scrollY > 10;
-        return prev === next ? prev : next;
-      });
-      setIsLogoInteractive((prev) => {
-        const next = opacity > 0.01;
-        return prev === next ? prev : next;
-      });
-      animationFrameRef.current = null;
-    };
-
-    const scheduleUpdate = () => {
-      if (animationFrameRef.current !== null) return;
-      animationFrameRef.current =
-        window.requestAnimationFrame(updateHeaderState);
-    };
-
     let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         cacheHeroTitlePosition();
-        scheduleUpdate();
       }, 100);
     };
 
     cacheHeroTitlePosition();
-    scheduleUpdate();
-
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", handleResize);
-
     return () => {
-      if (animationFrameRef.current !== null) {
-        window.cancelAnimationFrame(animationFrameRef.current);
-      }
       clearTimeout(resizeTimer);
-      window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", handleResize);
     };
   }, [cacheHeroTitlePosition]);
+
+  // Scroll-driven header state updates via shared scroll listener
+  useScrollListener((scrollY) => {
+    if (heroTitleDocumentTopRef.current === null) {
+      logoOpacityRef.current = 0;
+      if (logoContainerRef.current) {
+        logoContainerRef.current.style.opacity = "0";
+        logoContainerRef.current.style.transform = "translateX(100px)";
+      }
+      setIsLogoInteractive((prev) => (prev ? false : prev));
+      setIsScrolled(scrollY > 10);
+      return;
+    }
+
+    const currentTop = heroTitleDocumentTopRef.current - scrollY;
+    let opacity = 0;
+    if (currentTop <= LOGO_FULL_OPACITY) {
+      opacity = 1;
+    } else if (currentTop <= LOGO_FADE_START) {
+      opacity =
+        (LOGO_FADE_START - currentTop) /
+        (LOGO_FADE_START - LOGO_FULL_OPACITY);
+    }
+
+    logoOpacityRef.current = opacity;
+    if (logoContainerRef.current) {
+      logoContainerRef.current.style.opacity = String(opacity);
+      logoContainerRef.current.style.transform = `translateX(${(1 - opacity) * 100}px)`;
+    }
+
+    setIsScrolled((prev) => {
+      const next = scrollY > 10;
+      return prev === next ? prev : next;
+    });
+    setIsLogoInteractive((prev) => {
+      const next = opacity > 0.01;
+      return prev === next ? prev : next;
+    });
+  });
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });

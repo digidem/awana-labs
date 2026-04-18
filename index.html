@@ -50,7 +50,25 @@
 
   <body>
     <noscript>
-      <p>Awana Labs - Open Source Projects. You need JavaScript enabled to view this site.</p>
+      <style>
+        .noscript-msg {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          margin: 0;
+          padding: 2rem;
+          font-family: system-ui, sans-serif;
+          background: #F7F3EB;
+          color: #4C1130;
+          text-align: center;
+          font-size: 1.125rem;
+          line-height: 1.6;
+        }
+      </style>
+      <div class="noscript-msg">
+        <p>Awana Labs - Open Source Projects. You need JavaScript enabled to view this site.</p>
+      </div>
     </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

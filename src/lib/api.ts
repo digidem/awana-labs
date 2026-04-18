@@ -50,6 +50,8 @@ export const PROJECTS_STALE_WINDOW_MS = 1000 * 60 * 60 * 24;
 export const MAX_CACHE_SIZE_BYTES = 4 * 1024 * 1024; // 4MB safety margin under 5MB limit
 export const MAX_CACHE_PROJECT_COUNT = 200;
 
+const textEncoder = new TextEncoder();
+
 /**
  * Deduplicate projects by slug, keeping the entry with the most recent
  * `last_updated_at` timestamp.  This is a safety net so stale cache or
@@ -143,8 +145,7 @@ export function readProjectsCache(): CachedProjectsResult | null {
     return null;
   }
 
-  if (new Blob([rawValue]).size > MAX_CACHE_SIZE_BYTES) {
-    console.warn("Discarding projects cache entry that exceeds size limit");
+  if (textEncoder.encode(rawValue).byteLength > MAX_CACHE_SIZE_BYTES) {
     storage.removeItem(PROJECTS_CACHE_KEY);
     return null;
   }
@@ -196,7 +197,7 @@ export function writeProjectsCache(
   // Progressively remove oldest projects until the serialized entry fits.
   // Sort once above, then shrink from the front each iteration.
   let serialized = JSON.stringify(entry);
-  while (new Blob([serialized]).size > MAX_CACHE_SIZE_BYTES) {
+  while (textEncoder.encode(serialized).byteLength > MAX_CACHE_SIZE_BYTES) {
     if (projects.length === 0) {
       console.warn(
         "Projects cache still exceeds size limit after removing all projects; skipping write",

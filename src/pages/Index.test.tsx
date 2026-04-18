@@ -33,6 +33,8 @@ vi.mock("@/components/GallerySkeleton", () => ({
   ),
 }));
 
+import { createMockProject } from "@/test/fixtures";
+
 vi.mock("@/components/ScrollToTop", () => ({
   default: () => null,
 }));
@@ -83,9 +85,7 @@ describe("Index page states", () => {
 
   it("renders projects from placeholder data immediately", async () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<
-        typeof useProjectsWithError
-      >["projects"],
+      projects: [createMockProject({ id: "1" })],
       isLoading: false,
       isFetching: true,
       isPlaceholderData: true,
@@ -186,9 +186,7 @@ describe("Index page states", () => {
 
   it("shows cached projects when fetch fails but placeholder data exists", () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<
-        typeof useProjectsWithError
-      >["projects"],
+      projects: [createMockProject({ id: "1" })],
       isLoading: false,
       isFetching: false,
       isPlaceholderData: false,
@@ -215,11 +213,9 @@ describe("Index page states", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders Footer eagerly (not behind Suspense)", () => {
+  it("renders Footer (lazy-loaded with Suspense)", () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<
-        typeof useProjectsWithError
-      >["projects"],
+      projects: [createMockProject({ id: "1" })],
       isLoading: false,
       isFetching: false,
       isPlaceholderData: false,
@@ -239,9 +235,7 @@ describe("Index page states", () => {
 
   it("does not show stale data warning when data is fresh", () => {
     mockUseProjectsWithError.mockReturnValue({
-      projects: [{ id: "1" }] as unknown as ReturnType<
-        typeof useProjectsWithError
-      >["projects"],
+      projects: [createMockProject({ id: "1" })],
       isLoading: false,
       isFetching: false,
       isPlaceholderData: false,
