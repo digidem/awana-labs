@@ -6,7 +6,6 @@ type ScrollCallback = (scrollY: number) => void;
 const listeners = new Set<ScrollCallback>();
 let rafId: number | null = null;
 let currentScrollY = typeof window !== "undefined" ? window.scrollY : 0;
-let listenerCount = 0;
 
 function scheduleUpdate() {
   if (rafId !== null) return;
@@ -28,12 +27,11 @@ function subscribe(cb: ScrollCallback): () => void {
     window.addEventListener("scroll", onScroll, { passive: true });
   }
   listeners.add(cb);
-  listenerCount++;
-  // Immediately call with current value
-  cb(currentScrollY);
+  // Read live window.scrollY so remounted consumers start from the
+  // actual position rather than a stale module-cached value.
+  cb((currentScrollY = window.scrollY));
   return () => {
     listeners.delete(cb);
-    listenerCount--;
     if (listeners.size === 0) {
       window.removeEventListener("scroll", onScroll);
       if (rafId !== null) {
@@ -58,6 +56,8 @@ function subscribe(cb: ScrollCallback): () => void {
 export function useScrollListener(callback: ScrollCallback): void {
   const callbackRef = useRef(callback);
 
+  // No deps array — intentionally runs every render to keep the ref
+  // fresh so the subscribe callback always calls the latest closure.
   useEffect(() => {
     callbackRef.current = callback;
   });

@@ -146,6 +146,9 @@ export function readProjectsCache(): CachedProjectsResult | null {
   }
 
   if (textEncoder.encode(rawValue).byteLength > MAX_CACHE_SIZE_BYTES) {
+    if (import.meta.env.DEV) {
+      console.warn("Discarding projects cache entry that exceeds size limit");
+    }
     storage.removeItem(PROJECTS_CACHE_KEY);
     return null;
   }
