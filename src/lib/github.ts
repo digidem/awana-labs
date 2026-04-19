@@ -11,12 +11,6 @@ import { Octokit } from "@octokit/rest";
 // Type Definitions
 // =============================================================================
 
-/** GitHub repository owner and name */
-export interface GitHubRepo {
-  owner: string;
-  name: string;
-}
-
 /** GitHub issue data */
 export interface GitHubIssue {
   number: number;
@@ -45,14 +39,6 @@ export interface GitHubRepository {
   language: string | null;
   pushed_at: string;
   default_branch: string;
-}
-
-/** GitHub rate limit status */
-export interface GitHubRateLimit {
-  limit: number;
-  remaining: number;
-  reset: number;
-  used: number;
 }
 
 function normalizeLabels(
@@ -131,8 +117,6 @@ export function isRateLimitError(error: unknown): boolean {
  */
 export class GitHubClient {
   private octokit: Octokit;
-  private userAgent: string;
-  private token?: string;
 
   /**
    * Create a new GitHub client
@@ -140,31 +124,10 @@ export class GitHubClient {
    * @param userAgent - User agent string for API requests
    */
   constructor(token?: string, userAgent = "awana-labs") {
-    this.userAgent = userAgent;
-    this.token = token;
     this.octokit = new Octokit({
       auth: token,
       userAgent,
     });
-  }
-
-  /**
-   * Set authentication token
-   * @param token - GitHub personal access token
-   */
-  setAuth(token: string): void {
-    this.token = token;
-    this.octokit = new Octokit({
-      auth: token,
-      userAgent: this.userAgent,
-    });
-  }
-
-  /**
-   * Check if client is authenticated
-   */
-  isAuthenticated(): boolean {
-    return !!this.token;
   }
 
   /**
@@ -241,44 +204,6 @@ export class GitHubClient {
   }
 
   /**
-   * Fetch a single issue by number
-   * @param owner - Repository owner
-   * @param repo - Repository name
-   * @param issueNumber - Issue number
-   */
-  async getIssue(
-    owner: string,
-    repo: string,
-    issueNumber: number,
-  ): Promise<GitHubIssue> {
-    try {
-      const response = await this.octokit.rest.issues.get({
-        owner,
-        repo,
-        issue_number: issueNumber,
-      });
-
-      const issue = response.data;
-      return {
-        number: issue.number,
-        title: issue.title,
-        body: issue.body ?? null,
-        state: issue.state || "open",
-        html_url: issue.html_url,
-        created_at: issue.created_at,
-        updated_at: issue.updated_at,
-        labels: normalizeLabels(issue.labels),
-        user: {
-          login: issue.user?.login || "",
-          type: issue.user?.type || "User",
-        },
-      };
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  /**
    * Fetch repository information
    * @param owner - Repository owner
    * @param repo - Repository name
@@ -303,19 +228,6 @@ export class GitHubClient {
         pushed_at: data.pushed_at,
         default_branch: data.default_branch,
       };
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Check current rate limit status
-   */
-  async getRateLimit(): Promise<GitHubRateLimit> {
-    try {
-      const response = await this.octokit.rest.rateLimit.get();
-      const { limit, remaining, reset, used } = response.data.resources.core;
-      return { limit, remaining, reset, used };
     } catch (error) {
       throw this.handleError(error);
     }
@@ -371,17 +283,6 @@ export class GitHubClient {
 
     return new GitHubApiError("Unknown GitHub API error", 500);
   }
-}
-
-// =============================================================================
-// Factory Functions
-// =============================================================================
-
-/**
- * Create a GitHub client with optional token
- */
-export function createGitHubClient(token?: string): GitHubClient {
-  return new GitHubClient(token);
 }
 
 // =============================================================================

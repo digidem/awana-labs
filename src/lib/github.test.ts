@@ -3,24 +3,15 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  GitHubClient,
-  GitHubApiError,
-  createGitHubClient,
-  isRateLimitError,
-} from "./github";
+import { GitHubClient, GitHubApiError, isRateLimitError } from "./github";
 
 // Use vi.hoisted to properly mock Octokit
 const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
   const mockRest = {
     issues: {
       listForRepo: vi.fn(),
-      get: vi.fn(),
     },
     repos: {
-      get: vi.fn(),
-    },
-    rateLimit: {
       get: vi.fn(),
     },
   };
@@ -73,30 +64,6 @@ describe("GitHubClient", () => {
     it("should use custom user agent", () => {
       const client = new GitHubClient(undefined, "custom-agent");
       expect(client).toBeDefined();
-    });
-  });
-
-  describe("createGitHubClient factory", () => {
-    it("should create a client without token", () => {
-      const client = createGitHubClient();
-      expect(client).toBeInstanceOf(GitHubClient);
-    });
-
-    it("should create a client with token", () => {
-      const client = createGitHubClient("test-token");
-      expect(client).toBeInstanceOf(GitHubClient);
-    });
-  });
-
-  describe("isAuthenticated", () => {
-    it("should return false when no token provided", () => {
-      const client = new GitHubClient();
-      expect(client.isAuthenticated()).toBe(false);
-    });
-
-    it("should return true when token provided", () => {
-      const client = new GitHubClient("test-token");
-      expect(client.isAuthenticated()).toBe(true);
     });
   });
 
@@ -272,44 +239,6 @@ describe("GitHubClient", () => {
     });
   });
 
-  describe("getIssue", () => {
-    it("should fetch a single issue", async () => {
-      const mockIssue = {
-        number: 1,
-        title: "Test Issue",
-        body: "Issue body",
-        state: "open",
-        html_url: "https://github.com/owner/repo/issues/1",
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-02T00:00:00Z",
-        labels: [{ name: "bug" }],
-        user: { login: "testuser", type: "User" },
-      };
-
-      mockRest.issues.get.mockResolvedValue({
-        data: mockIssue,
-      });
-
-      const issue = await client.getIssue("owner", "repo", 1);
-
-      expect(issue.number).toBe(1);
-      expect(issue.title).toBe("Test Issue");
-      expect(mockRest.issues.get).toHaveBeenCalledWith({
-        owner: "owner",
-        repo: "repo",
-        issue_number: 1,
-      });
-    });
-
-    it("should handle API errors for single issue", async () => {
-      mockRest.issues.get.mockRejectedValue(new Error("Not Found"));
-
-      await expect(client.getIssue("owner", "repo", 999)).rejects.toThrow(
-        GitHubApiError,
-      );
-    });
-  });
-
   describe("getRepository", () => {
     it("should fetch repository information", async () => {
       const mockRepo = {
@@ -343,37 +272,6 @@ describe("GitHubClient", () => {
       await expect(
         client.getRepository("owner", "nonexistent"),
       ).rejects.toThrow(GitHubApiError);
-    });
-  });
-
-  describe("getRateLimit", () => {
-    it("should fetch rate limit status", async () => {
-      const mockRateLimit = {
-        resources: {
-          core: {
-            limit: 5000,
-            remaining: 4999,
-            reset: 1704067200,
-            used: 1,
-          },
-        },
-      };
-
-      mockRest.rateLimit.get.mockResolvedValue({
-        data: mockRateLimit,
-      });
-
-      const rateLimit = await client.getRateLimit();
-
-      expect(rateLimit.limit).toBe(5000);
-      expect(rateLimit.remaining).toBe(4999);
-      expect(rateLimit.used).toBe(1);
-    });
-
-    it("should handle API errors", async () => {
-      mockRest.rateLimit.get.mockRejectedValue(new Error("Rate limit error"));
-
-      await expect(client.getRateLimit()).rejects.toThrow(GitHubApiError);
     });
   });
 
