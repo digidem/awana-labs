@@ -145,7 +145,11 @@ describe("sortProjects", () => {
     });
     const unknown = createMockProject({
       id: "unknown",
-      status: { state: "active", usage: "unknown-usage" as "experimental", notes: "" },
+      status: {
+        state: "active",
+        usage: "unknown-usage" as "experimental",
+        notes: "",
+      },
     });
 
     const result = sortProjects([known, unknown]);
@@ -201,6 +205,9 @@ describe("sortProjects", () => {
 
     const result = sortProjects([oldRepoPush, recentTimestamp]);
 
-    expect(result.map((p) => p.id)).toEqual(["recent-timestamp", "old-repo-push"]);
+    expect(result.map((p) => p.id)).toEqual([
+      "recent-timestamp",
+      "old-repo-push",
+    ]);
   });
 });
