@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
@@ -89,4 +89,4 @@ const ProjectCard = ({ project, onClick, onPrefetch }: ProjectCardProps) => {
   );
 };
 
-export default ProjectCard;
+export default memo(ProjectCard);

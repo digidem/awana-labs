@@ -59,19 +59,15 @@ const ProjectModal = ({
         (document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null);
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       closeButtonRef.current?.focus();
       return () => {
-        document.body.style.overflow = "";
+        document.body.style.overflow = previousOverflow;
         if (previousTriggerRef.current?.isConnected) {
           previousTriggerRef.current.focus({ preventScroll: true });
         }
       };
-    }
-
-    document.body.style.overflow = "";
-    if (previousTriggerRef.current?.isConnected) {
-      previousTriggerRef.current.focus({ preventScroll: true });
     }
   }, [isOpen, triggerElement]);
 

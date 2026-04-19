@@ -80,7 +80,7 @@ async function imageCacheFirst(request) {
       const headers = new Headers(response.headers);
       headers.set("sw-cache-time", String(Date.now()));
 
-      const body = await response.blob();
+      const body = response.body;
       const cachedResponse = new Response(body, {
         status: response.status,
         statusText: response.statusText,

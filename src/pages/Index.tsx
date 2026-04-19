@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import Hero from "@/components/Hero";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import GallerySkeleton from "@/components/GallerySkeleton";
 import { useProjectsWithError } from "@/hooks/useProjects";
@@ -9,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 const ProjectsGallery = lazy(() => import("@/components/ProjectsGallery"));
+const Footer = lazy(() => import("@/components/Footer"));
 
 const Index = () => {
   const { t } = useTranslation();
@@ -85,7 +85,9 @@ const Index = () => {
           <ProjectsGallery projects={projects} />
         </Suspense>
       )}
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
       <ScrollToTop />
     </main>
   );

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useScrollListener } from "@/hooks/useScrollPosition";
 
 const SCROLL_THRESHOLD = 400;
 
@@ -8,14 +9,9 @@ const ScrollToTop = () => {
   const [visible, setVisible] = useState(false);
   const { t } = useTranslation();
 
-  const handleScroll = useCallback(() => {
-    setVisible(window.scrollY > SCROLL_THRESHOLD);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+  useScrollListener((scrollY) => {
+    setVisible(scrollY > SCROLL_THRESHOLD);
+  });
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });

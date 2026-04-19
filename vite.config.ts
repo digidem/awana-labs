@@ -15,12 +15,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    visualizer({
-      filename: "stats.html",
-      template: "treemap",
-      gzipSize: true,
-      brotliSize: true,
-    }),
+    ...(process.env.ANALYZE
+      ? [visualizer({ filename: 'stats.html', template: 'treemap', gzipSize: true, brotliSize: true })]
+      : []),
   ],
   resolve: {
     alias: {
@@ -32,6 +29,9 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
+            if (id.includes("@octokit")) return "octokit";
+            if (id.includes("zod")) return "zod";
+            if (id.includes("@radix-ui")) return "radix";
             if (id.includes("@tanstack")) return "tanstack";
             if (id.includes("i18next")) return "i18n";
             if (id.includes("react-dom") || id.includes("react-router"))

@@ -43,12 +43,16 @@ type StatusFilter = "all" | "active" | "paused" | "archived";
 const ProjectsGallery = ({ projects }: ProjectsGalleryProps) => {
   const { t } = useTranslation();
 
-  const filterOptions: { value: StatusFilter; label: string }[] = [
-    { value: "all", label: t("common.all") },
-    { value: "active", label: t("status.active") },
-    { value: "paused", label: t("status.paused") },
-    { value: "archived", label: t("status.archived") },
-  ];
+  const filterOptions = useMemo(
+    () =>
+      [
+        { value: "all", label: t("common.all") },
+        { value: "active", label: t("status.active") },
+        { value: "paused", label: t("status.paused") },
+        { value: "archived", label: t("status.archived") },
+      ] as { value: StatusFilter; label: string }[],
+    [t],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
