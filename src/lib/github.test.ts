@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  GitHubClient,
-  GitHubApiError,
-  isRateLimitError,
-} from "./github";
+import { GitHubClient, GitHubApiError, isRateLimitError } from "./github";
 
 // Use vi.hoisted to properly mock Octokit
 const { mockRest, MockOctokitClass, mockPaginateIterator } = vi.hoisted(() => {
