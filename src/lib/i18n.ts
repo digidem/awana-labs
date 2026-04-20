@@ -38,11 +38,13 @@ i18n
     },
     detection: {
       // Detection order for language resolution.
-      // localStorage/sessionStorage are excluded from *caches* so that the
-      // custom LanguageProvider (which uses key "awana-labs-language") is the
-      // single source of truth for persisted language preferences.
-      order: ["querystring", "navigator", "htmlTag"],
-      // Keys or params to lookup language from
+      // localStorage is read on init (before React mounts) so the persisted
+      // preference influences the first render. The custom LanguageProvider
+      // remains the single source of truth for *writing* the preference;
+      // caches are empty so i18next never writes back on its own.
+      order: ["querystring", "localStorage", "navigator", "htmlTag"],
+      // Key used by LanguageProvider to persist language preference
+      lookupLocalStorage: "awana-labs-language",
       lookupQuerystring: "lng",
       // Do NOT cache — LanguageProvider manages persistence via "awana-labs-language"
       caches: [],

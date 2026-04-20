@@ -33,7 +33,7 @@ function ErrorDisplay({
         <p className="text-muted-foreground mb-6">
           {t("errorBoundary.description")}
         </p>
-        {error?.message && (
+        {import.meta.env.DEV && error?.message && (
           <p className="text-sm text-muted-foreground/80 mb-4 font-mono">
             {error.message}
           </p>

@@ -1,6 +1,6 @@
 # Awana Labs Improvement Plan — Progress Tracker
 
-> Auto-generated from plan `plans/2026-04-18-2026-04-18-awana-labs-improvements-v5.md`
+> Progress tracker for the Awana Labs improvement plan.
 
 **Last updated:** 2026-04-20
 
@@ -82,7 +82,7 @@
 
 ### Architectural Improvements
 
-- [x] **4.1** Consolidate language detection — disabled i18next detector caches, `awana-labs-language` is single source of truth
+- [x] **4.1** Consolidate language detection — localStorage read on init for first-render correctness, `awana-labs-language` is single source of truth for writes
 - [x] **4.2** Evaluate `@octokit/rest` — evaluated; already isolated in its own chunk (102 KB gzip: 19.85 KB), kept as-is
 - [x] **4.3** Functional ErrorBoundary wrapper — extracted `ErrorDisplay` with `useTranslation()`, removed manual `i18n.on/off`
 
