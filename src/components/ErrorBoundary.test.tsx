@@ -2,15 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const { mockI18n } = vi.hoisted(() => ({
-  mockI18n: {
-    t: vi.fn((key: string) => key),
-    on: vi.fn(),
-    off: vi.fn(),
-  },
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
-
-vi.mock("@/lib/i18n", () => ({ default: mockI18n }));
 
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
   if (shouldThrow) throw new Error("Test error");
@@ -49,6 +43,7 @@ describe("ErrorBoundary", () => {
     expect(screen.queryByText("No error")).not.toBeInTheDocument();
     expect(screen.getByText("errorBoundary.title")).toBeInTheDocument();
     expect(screen.getByText("errorBoundary.description")).toBeInTheDocument();
+    expect(screen.getByText("Test error")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "errorBoundary.retry" }),
     ).toBeInTheDocument();
@@ -140,8 +135,26 @@ describe("ErrorBoundary", () => {
 
     expect(screen.getByText("errorBoundary.title")).toBeInTheDocument();
     expect(screen.getByText("errorBoundary.description")).toBeInTheDocument();
+    expect(screen.getByText("Test error")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "errorBoundary.retry" }),
     ).toBeInTheDocument();
+  });
+
+  it("does not render error message when error has no message", () => {
+    const ThrowEmptyError = () => {
+      throw new Error();
+    };
+
+    const { container } = render(
+      <ErrorBoundary>
+        <ThrowEmptyError />
+      </ErrorBoundary>,
+    );
+
+    expect(screen.getByText("errorBoundary.title")).toBeInTheDocument();
+    // No error message paragraph should be rendered when message is empty
+    const monoElements = container.querySelectorAll(".font-mono");
+    expect(monoElements).toHaveLength(0);
   });
 });

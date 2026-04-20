@@ -16,6 +16,7 @@ interface ErrorBoundaryState {
  * without manual i18n.on("languageChanged") + forceUpdate().
  */
 function ErrorDisplay({
+  error,
   onRetry,
 }: {
   error: Error | null;
@@ -32,6 +33,11 @@ function ErrorDisplay({
         <p className="text-muted-foreground mb-6">
           {t("errorBoundary.description")}
         </p>
+        {error?.message && (
+          <p className="text-sm text-muted-foreground/80 mb-4 font-mono">
+            {error.message}
+          </p>
+        )}
         <button
           onClick={onRetry}
           className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
