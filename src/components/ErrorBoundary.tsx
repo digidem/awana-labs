@@ -1,5 +1,5 @@
 import React from "react";
-import i18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -10,6 +10,44 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+/**
+ * Functional error display component with i18n support.
+ * Extracted from the class boundary so translations update reactively
+ * without manual i18n.on("languageChanged") + forceUpdate().
+ */
+function ErrorDisplay({
+  onRetry,
+}: {
+  error: Error | null;
+  onRetry: () => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+      <div className="max-w-md text-center">
+        <h1 className="text-2xl font-bold text-destructive mb-4">
+          {t("errorBoundary.title")}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {t("errorBoundary.description")}
+        </p>
+        <button
+          onClick={onRetry}
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {t("errorBoundary.retry")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Minimal class-based error boundary shell.
+ * Only handles getDerivedStateFromError / componentDidCatch — rendering
+ * is delegated to the functional ErrorDisplay component for reactive i18n.
+ */
 export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
@@ -32,18 +70,6 @@ export class ErrorBoundary extends React.Component<
     }
   }
 
-  componentDidMount(): void {
-    i18n.on("languageChanged", this.handleLanguageChanged);
-  }
-
-  componentWillUnmount(): void {
-    i18n.off("languageChanged", this.handleLanguageChanged);
-  }
-
-  private handleLanguageChanged = () => {
-    this.forceUpdate();
-  };
-
   private handleRetry = () => {
     this.setState({ hasError: false, error: null });
   };
@@ -51,22 +77,10 @@ export class ErrorBoundary extends React.Component<
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-6">
-          <div className="max-w-md text-center">
-            <h1 className="text-2xl font-bold text-destructive mb-4">
-              {i18n.t("errorBoundary.title")}
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              {i18n.t("errorBoundary.description")}
-            </p>
-            <button
-              onClick={this.handleRetry}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              {i18n.t("errorBoundary.retry")}
-            </button>
-          </div>
-        </div>
+        <ErrorDisplay
+          error={this.state.error}
+          onRetry={this.handleRetry}
+        />
       );
     }
 

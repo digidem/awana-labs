@@ -10,7 +10,7 @@ const Footer = () => {
         <p className="text-sm sm:text-base text-muted-foreground flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
           <span className="flex items-center gap-1 sm:gap-1.5">
             {t("footer.madeWith")}{" "}
-            <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 fill-red-500" />
+            <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-destructive fill-destructive" />
           </span>
           <span className="flex items-center gap-1 sm:gap-1.5">
             {t("footer.by")}{" "}

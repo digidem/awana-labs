@@ -53,6 +53,41 @@
     --plum-dark: 338 70% 12%;
     --cream-dark: 40 30% 88%;
   }
+
+  .dark {
+    --background: 338 30% 8%;
+    --foreground: 40 30% 92%;
+
+    --card: 338 25% 12%;
+    --card-foreground: 40 30% 92%;
+
+    --popover: 338 25% 12%;
+    --popover-foreground: 40 30% 92%;
+
+    --primary: 40 30% 92%;
+    --primary-foreground: 338 61% 18%;
+
+    --secondary: 338 20% 20%;
+    --secondary-foreground: 40 30% 92%;
+
+    --muted: 338 15% 18%;
+    --muted-foreground: 40 20% 65%;
+
+    --accent: 338 20% 20%;
+    --accent-foreground: 40 30% 92%;
+
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 338 15% 22%;
+    --input: 338 15% 22%;
+    --ring: 40 30% 92%;
+
+    /* Custom tokens */
+    --plum-light: 338 30% 60%;
+    --plum-dark: 338 40% 8%;
+    --cream-dark: 338 10% 15%;
+  }
 }
 
 @layer base {

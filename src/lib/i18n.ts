@@ -37,22 +37,19 @@ i18n
       useSuspense: false, // Disable suspense for SSR compatibility
     },
     detection: {
-      // Detection order for language resolution
+      // Detection order for language resolution.
+      // localStorage/sessionStorage are excluded from *caches* so that the
+      // custom LanguageProvider (which uses key "awana-labs-language") is the
+      // single source of truth for persisted language preferences.
       order: [
         "querystring",
-        "cookie",
-        "localStorage",
-        "sessionStorage",
         "navigator",
         "htmlTag",
       ],
       // Keys or params to lookup language from
       lookupQuerystring: "lng",
-      lookupCookie: "i18next",
-      lookupLocalStorage: "i18nextLng",
-      lookupSessionStorage: "i18nextLng",
-      // Cache user language selection
-      caches: ["localStorage", "cookie"],
+      // Do NOT cache — LanguageProvider manages persistence via "awana-labs-language"
+      caches: [],
       // Normalize regional codes (e.g. pt-BR → pt) to match supportedLngs
       convertDetectedLanguage: (lng: string) => lng.split("-")[0],
     },
