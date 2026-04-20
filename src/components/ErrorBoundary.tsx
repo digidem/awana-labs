@@ -77,10 +77,7 @@ export class ErrorBoundary extends React.Component<
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <ErrorDisplay
-          error={this.state.error}
-          onRetry={this.handleRetry}
-        />
+        <ErrorDisplay error={this.state.error} onRetry={this.handleRetry} />
       );
     }
 

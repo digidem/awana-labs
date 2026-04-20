@@ -87,7 +87,9 @@ describe("ErrorBoundary", () => {
 
     // Fix the error source, then click retry
     shouldThrow = false;
-    fireEvent.click(screen.getByRole("button", { name: "errorBoundary.retry" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "errorBoundary.retry" }),
+    );
 
     // Force a re-render so the boundary re-renders its children
     rerender(

@@ -216,42 +216,66 @@ describe("sortProjects", () => {
       createMockProject({
         id: "p1",
         status: { state: "active", usage: "widely-used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-01-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-01-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p2",
         status: { state: "active", usage: "used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-12-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-12-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p3",
         status: { state: "paused", usage: "widely-used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-06-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-06-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p4",
         status: { state: "paused", usage: "used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-09-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-09-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p5",
         status: { state: "active", usage: "widely-used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-06-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-06-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p6",
         status: { state: "active", usage: "experimental", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-12-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-12-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p7",
         status: { state: "active", usage: "used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-06-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-06-01T00:00:00.000Z",
+        },
       }),
       createMockProject({
         id: "p8",
         status: { state: "archived", usage: "widely-used", notes: "" },
-        timestamps: { created_at: "2024-01-01T00:00:00.000Z", last_updated_at: "2024-12-01T00:00:00.000Z" },
+        timestamps: {
+          created_at: "2024-01-01T00:00:00.000Z",
+          last_updated_at: "2024-12-01T00:00:00.000Z",
+        },
       }),
     ];
 
@@ -267,8 +291,13 @@ describe("sortProjects", () => {
     // 7. p4 — used (1), paused (1)
     // 8. p6 — experimental (2), active (0)
     expect(result.map((p) => p.id)).toEqual([
-      "p5", "p1", "p3", "p8",
-      "p2", "p7", "p4",
+      "p5",
+      "p1",
+      "p3",
+      "p8",
+      "p2",
+      "p7",
+      "p4",
       "p6",
     ]);
   });

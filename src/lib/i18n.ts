@@ -41,11 +41,7 @@ i18n
       // localStorage/sessionStorage are excluded from *caches* so that the
       // custom LanguageProvider (which uses key "awana-labs-language") is the
       // single source of truth for persisted language preferences.
-      order: [
-        "querystring",
-        "navigator",
-        "htmlTag",
-      ],
+      order: ["querystring", "navigator", "htmlTag"],
       // Keys or params to lookup language from
       lookupQuerystring: "lng",
       // Do NOT cache — LanguageProvider manages persistence via "awana-labs-language"
