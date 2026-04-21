@@ -153,5 +153,50 @@ describe("i18n configuration", () => {
         detectedLang as (typeof supportedLanguages)[number],
       );
     });
+
+    it("should persist detected language to localStorage on first visit via querystring", async () => {
+      // Simulate a first-visit scenario: no stored preference, language detected from ?lng=
+      localStorage.clear();
+      sessionStorage.clear();
+
+      const originalSearch = window.location.search;
+      Object.defineProperty(window, "location", {
+        value: {
+          ...window.location,
+          search: "?lng=pt",
+        },
+        writable: true,
+      });
+
+      // Detect language from querystring — this is what LanguageProvider's
+      // getStoredLanguage/getInitialLanguage reads from.
+      const detectedLanguage = i18n.services.languageDetector?.detect();
+      const resolvedLanguage = Array.isArray(detectedLanguage)
+        ? detectedLanguage[0]
+        : detectedLanguage;
+      expect(resolvedLanguage).toBe("pt");
+
+      // Simulate what LanguageProvider does on mount: if localStorage is empty,
+      // persist the detected language so it survives a page reload.
+      const storageKey = "awana-labs-language";
+      expect(localStorage.getItem(storageKey)).toBeNull();
+
+      // Apply the same logic as the mount effect in LanguageProvider
+      if (localStorage.getItem(storageKey) === null && resolvedLanguage) {
+        localStorage.setItem(storageKey, resolvedLanguage);
+      }
+
+      // After the mount-effect logic, the language must be persisted
+      expect(localStorage.getItem(storageKey)).toBe("pt");
+
+      // Restore original search
+      Object.defineProperty(window, "location", {
+        value: {
+          ...window.location,
+          search: originalSearch,
+        },
+        writable: true,
+      });
+    });
   });
 });

@@ -85,6 +85,20 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
     updateDocumentLanguage(language);
   }, [language]);
 
+  // Persist the initial detected language on first visit when storage is empty.
+  // Without this, a language detected from ?lng= or navigator.language is never
+  // written to localStorage and a page reload loses the choice.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(LANGUAGE_STORAGE_KEY) === null) {
+        storeLanguage(language);
+      }
+    } catch {
+      // localStorage unavailable — ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only
+  }, []);
+
   useEffect(() => {
     const handleLanguageChanged = (nextLanguage: string) => {
       const syncedLanguage =
