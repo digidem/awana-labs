@@ -15,6 +15,8 @@ const yearsAgo = (n: number) =>
   new Date(Date.now() - n * 365 * 86400000).toISOString();
 const daysFromNow = (n: number) =>
   new Date(Date.now() + n * 86400000).toISOString();
+const yearsFromNow = (n: number) =>
+  new Date(Date.now() + n * 365 * 86400000).toISOString();
 
 describe("formatRelativeTime", () => {
   it("returns raw value for invalid date string", () => {
@@ -68,5 +70,11 @@ describe("formatRelativeTime", () => {
   it("handles future dates", () => {
     expect(formatRelativeTime(daysFromNow(1), "en", t)).toBe("tomorrow");
     expect(formatRelativeTime(daysFromNow(3), "en", t)).toBe("in 3 days");
+  });
+
+  it("handles future dates beyond 12 months (overYears branch)", () => {
+    const result = formatRelativeTime(yearsFromNow(2), "en", t);
+    expect(result).toContain("timeAgo.overYears");
+    expect(result).toContain("2");
   });
 });
