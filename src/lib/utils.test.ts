@@ -74,7 +74,9 @@ describe("formatRelativeTime", () => {
 
   it("handles future dates beyond 12 months (overYears branch)", () => {
     const result = formatRelativeTime(yearsFromNow(2), "en", t);
-    expect(result).toContain("timeAgo.overYears");
-    expect(result).toContain("2");
+    // The 12+ months branch uses Math.abs, so future dates render with the
+    // same past-tense key ("over X years ago"). This is a known limitation —
+    // the locale only defines past-tense variants for overYears.
+    expect(result).toBe('{"key":"timeAgo.overYears","count":2}');
   });
 });

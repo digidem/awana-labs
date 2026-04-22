@@ -176,20 +176,40 @@ describe("i18n configuration", () => {
         : detectedLanguage;
       expect(resolvedLanguage).toBe("pt");
 
-      // Simulate what LanguageProvider does on mount: if localStorage is empty,
-      // persist the detected language so it survives a page reload.
+      // Verify no prior stored preference
       const storageKey = "awana-labs-language";
       expect(localStorage.getItem(storageKey)).toBeNull();
 
-      // Apply the same logic as the mount effect in LanguageProvider
-      if (localStorage.getItem(storageKey) === null && resolvedLanguage) {
-        localStorage.setItem(storageKey, resolvedLanguage);
-      }
+      // Change i18n to the detected language so LanguageProvider's
+      // getInitialLanguage() picks it up from i18n.resolvedLanguage.
+      await i18n.changeLanguage("pt");
 
-      // After the mount-effect logic, the language must be persisted
+      // Render the real LanguageProvider to exercise its mount effect.
+      // The mount-only effect in useLanguage.tsx should persist the detected
+      // language when localStorage is empty.
+      const React = await import("react");
+      const { I18nextProvider } = await import("react-i18next");
+      const { LanguageProvider } = await import("@/hooks/useLanguage");
+      const { renderHook, act } = await import("@testing-library/react");
+
+      const wrapper = ({ children }: { children: React.ReactNode }) =>
+        React.createElement(
+          I18nextProvider,
+          { i18n },
+          React.createElement(LanguageProvider, null, children),
+        );
+
+      // Wait for the mount effect to fire and persist the language
+      await act(async () => {
+        renderHook(() => ({}), { wrapper });
+        // Flush microtasks so the mount-only useEffect runs
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      // After LanguageProvider mounts, the detected language must be persisted
       expect(localStorage.getItem(storageKey)).toBe("pt");
 
-      // Restore original search
+      // Restore original search and language
       Object.defineProperty(window, "location", {
         value: {
           ...window.location,
@@ -197,6 +217,7 @@ describe("i18n configuration", () => {
         },
         writable: true,
       });
+      await i18n.changeLanguage("en");
     });
   });
 });
