@@ -97,36 +97,7 @@ describe("ErrorBoundary", () => {
     expect(screen.queryByText("errorBoundary.title")).not.toBeInTheDocument();
   });
 
-  it("subscribes to languageChanged on mount", () => {
-    // With the functional ErrorDisplay component, i18n reactivity is handled
-    // by useTranslation() — no manual i18n.on() subscription needed.
-    render(
-      <ErrorBoundary>
-        <div>Child</div>
-      </ErrorBoundary>,
-    );
-
-    // The functional approach uses useTranslation() which handles reactivity
-    // internally via react-i18next — no explicit on/off calls to verify.
-    expect(screen.getByText("Child")).toBeInTheDocument();
-  });
-
-  it("unsubscribes from languageChanged on unmount", () => {
-    // With the functional ErrorDisplay component, cleanup is handled
-    // automatically by react-i18next's useTranslation() hook.
-    const { unmount } = render(
-      <ErrorBoundary>
-        <div>Child</div>
-      </ErrorBoundary>,
-    );
-
-    // Unmount should not throw — cleanup is automatic via React hook lifecycle
-    expect(() => unmount()).not.toThrow();
-  });
-
   it("displays correct translation keys in error UI", () => {
-    // With the functional ErrorDisplay, useTranslation() is used which is
-    // mocked to return the key as-is. Verify the keys appear in the DOM.
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
