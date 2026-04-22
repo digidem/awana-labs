@@ -75,6 +75,11 @@ describe("Header", () => {
 
   it("has transparent background initially (no blur)", () => {
     render(<Header />);
+    // Simulate the real hook's initial cb(window.scrollY) call that happens
+    // in useEffect on mount (useScrollPosition.ts:32).
+    act(() => {
+      scrollCallback(window.scrollY);
+    });
     const header = screen.getByRole("banner");
     expect(header).toHaveClass("bg-transparent");
     expect(header).not.toHaveClass("backdrop-blur-lg");
@@ -92,6 +97,11 @@ describe("Header", () => {
 
   it("logo container starts hidden (opacity 0)", () => {
     render(<Header />);
+    // Simulate the real hook's initial cb(window.scrollY) call that happens
+    // in useEffect on mount (useScrollPosition.ts:32).
+    act(() => {
+      scrollCallback(window.scrollY);
+    });
     const logoButton = screen.getByRole("button", { name: /hero\.title/ });
     const logoContainer = logoButton.parentElement!;
     expect(logoContainer).toHaveStyle({ opacity: "0" });
@@ -127,5 +137,23 @@ describe("Header", () => {
       top: 0,
       behavior: "smooth",
     });
+  });
+
+  it("adds blur on mount when scrollY is already past threshold", () => {
+    // Simulates a mid-page refresh: window.scrollY is already > 10
+    Object.defineProperty(window, "scrollY", {
+      writable: true,
+      configurable: true,
+      value: 50,
+    });
+    render(<Header />);
+    // Simulate the real hook's initial cb(window.scrollY) call that happens
+    // in useEffect on mount (useScrollPosition.ts:32).
+    act(() => {
+      scrollCallback(window.scrollY);
+    });
+    const header = screen.getByRole("banner");
+    expect(header).toHaveClass("backdrop-blur-lg", "border-b");
+    expect(header).not.toHaveClass("bg-transparent");
   });
 });

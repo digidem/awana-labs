@@ -73,4 +73,38 @@ describe("ScrollToTop", () => {
     act(() => scrollCallback(0));
     expect(button).toHaveAttribute("data-visible", "false");
   });
+
+  it("starts with data-visible false when mounted at scrollY 0", () => {
+    Object.defineProperty(window, "scrollY", {
+      writable: true,
+      configurable: true,
+      value: 0,
+    });
+    render(<ScrollToTop />);
+    // Simulate the real hook's initial cb(window.scrollY) call that happens
+    // in useEffect on mount (useScrollPosition.ts:32).
+    act(() => {
+      scrollCallback(window.scrollY);
+    });
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("data-visible", "false");
+  });
+
+  it("starts with data-visible true when mounted at non-zero scrollY", () => {
+    Object.defineProperty(window, "scrollY", {
+      writable: true,
+      configurable: true,
+      value: 500,
+    });
+    render(<ScrollToTop />);
+    // Simulate the real hook's initial cb(window.scrollY) call that happens
+    // in useEffect on mount (useScrollPosition.ts:32).
+    act(() => {
+      scrollCallback(window.scrollY);
+    });
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("data-visible", "true");
+  });
 });
