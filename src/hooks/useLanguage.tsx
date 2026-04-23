@@ -37,6 +37,8 @@ const getInitialLanguage = (): Language => {
   return getCurrentI18nLanguage() ?? DEFAULT_LANGUAGE;
 };
 
+const LEGACY_STORAGE_KEY = "i18nextLng";
+
 const getStoredLanguage = (): Language => {
   if (typeof window === "undefined") return getInitialLanguage();
 
@@ -44,6 +46,16 @@ const getStoredLanguage = (): Language => {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (stored && isLanguage(stored)) {
       return stored;
+    }
+
+    // Migrate legacy i18nextLng preference on first read after upgrade.
+    // The previous i18n config cached language under "i18nextLng"; this
+    // one-time migration ensures returning users keep their choice.
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy && isLanguage(legacy)) {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return legacy;
     }
   } catch (e) {
     console.warn("Failed to read language from localStorage:", e);
