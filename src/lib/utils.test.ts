@@ -72,11 +72,10 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(daysFromNow(3), "en", t)).toBe("in 3 days");
   });
 
-  it("handles future dates beyond 12 months (overYears branch)", () => {
+  it("handles future dates beyond 12 months using Intl.RelativeTimeFormat", () => {
     const result = formatRelativeTime(yearsFromNow(2), "en", t);
-    // The 12+ months branch uses Math.abs, so future dates render with the
-    // same past-tense key ("over X years ago"). This is a known limitation —
-    // the locale only defines past-tense variants for overYears.
-    expect(result).toBe('{"key":"timeAgo.overYears","count":2}');
+    // Future dates >12 months use rtf.format (positive value) which
+    // produces "in 2 years" via Intl.RelativeTimeFormat.
+    expect(result).toBe("in 2 years");
   });
 });
