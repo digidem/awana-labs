@@ -77,10 +77,10 @@ export function useTheme(): {
   const resolvedTheme: "light" | "dark" =
     theme === "system" ? systemPreference : theme;
 
-  // Re-apply on mount to stay in sync
+  // Re-apply on mount and whenever the resolved theme changes
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+  }, [resolvedTheme]);
 
   return { theme, setTheme, resolvedTheme };
 }
