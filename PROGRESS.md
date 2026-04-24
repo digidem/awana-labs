@@ -88,7 +88,7 @@
 
 ### Dark Mode
 
-- [x] **5.2** Dark mode CSS variables — added `.dark` class with inverted HSL values, replaced hardcoded colors with CSS variable tokens, updated meta tag and Tailwind config
+- [x] **5.2** Dark mode CSS variables + system preference detection — added `.dark` class with inverted HSL values, `prefers-color-scheme` media query detection in `index.html`, `useTheme` hook for runtime toggling, replaced hardcoded colors with CSS variable tokens, updated meta tag and Tailwind config
 
 ### React Query DevTools
 
@@ -107,6 +107,8 @@ All tasks from the improvement plan have been completed.
 ---
 
 ## Verification Status
+
+> Verification items are tracked separately from the 39 implementation tasks above.
 
 - [x] `npm run lint` — 0 errors
 - [x] `npm run typecheck` — 0 errors
