@@ -51,7 +51,7 @@
       (function() {
         var stored = localStorage.getItem('awana-labs-theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (stored === 'dark' || (!stored && prefersDark)) {
+        if (stored === 'dark' || ((stored === 'system' || !stored) && prefersDark)) {
           document.documentElement.classList.add('dark');
         }
       })();
