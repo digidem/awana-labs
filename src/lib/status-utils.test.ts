@@ -13,12 +13,12 @@ describe("statusColors", () => {
     expect(statusColors).toHaveProperty("archived");
   });
 
-  it("active uses primary color token classes", () => {
-    expect(statusColors.active).toContain("primary");
+  it("active uses semantic status-active color token classes", () => {
+    expect(statusColors.active).toContain("--status-active");
   });
 
-  it("paused uses secondary color token classes", () => {
-    expect(statusColors.paused).toContain("secondary");
+  it("paused uses semantic status-paused color token classes", () => {
+    expect(statusColors.paused).toContain("--status-paused");
   });
 
   it("archived includes muted classes", () => {
