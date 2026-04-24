@@ -15,8 +15,10 @@ export type {
  * Tailwind CSS classes for status badge styling
  */
 export const statusColors: Record<ProjectState, string> = {
-  active: "bg-[hsl(var(--status-active))] text-[hsl(var(--status-active-foreground))] border-[hsl(var(--status-active-border))]",
-  paused: "bg-[hsl(var(--status-paused))]/15 text-[hsl(var(--status-paused))] border-[hsl(var(--status-paused-border))]/40",
+  active:
+    "bg-[hsl(var(--status-active))] text-[hsl(var(--status-active-foreground))] border-[hsl(var(--status-active-border))]",
+  paused:
+    "bg-[hsl(var(--status-paused))]/15 text-[hsl(var(--status-paused))] border-[hsl(var(--status-paused-border))]/40",
   archived: "bg-muted text-muted-foreground border-border",
 };
 
