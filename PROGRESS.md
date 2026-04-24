@@ -102,17 +102,17 @@
 
 ## Remaining (0/39)
 
-All tasks from the improvement plan have been completed.
+All 39 implementation tasks have been completed.
 
 ---
 
 ## Verification Status
 
-> Verification items are tracked separately from the 39 implementation tasks above.
+> Verification items are tracked separately from the 39 implementation tasks above. The summary table reflects implementation progress only.
 
 - [x] `npm run lint` — 0 errors
 - [x] `npm run typecheck` — 0 errors
-- [x] `npm run test` — 278 tests passing
+- [x] `npm run test` — 284 tests passing
 - [x] `npm run build` — production build succeeds
-- [ ] E2E tests — pending CI verification
-- [ ] Lighthouse audit — pending manual verification
+- [x] E2E tests — 33/33 chromium passing (firefox/webkit/mobile skipped: browsers not installed locally)
+- [x] Lighthouse audit — Accessibility 100, Best Practices 100, SEO 100; FCP 0.6s, SI 0.8s, CLS 0 (Performance score unreliable in headless due to Lighthouse NO_LCP bug on SPAs)
