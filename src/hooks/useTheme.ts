@@ -12,7 +12,11 @@ function subscribe(callback: () => void): () => void {
 }
 
 function getThemeSnapshot(): Theme {
-  return (localStorage.getItem(STORAGE_KEY) as Theme) || "system";
+  try {
+    return (localStorage.getItem(STORAGE_KEY) as Theme) || "system";
+  } catch {
+    return "system";
+  }
 }
 
 function getServerSnapshot(): Theme {
@@ -69,7 +73,11 @@ export function useTheme(): {
   );
 
   const setTheme = useCallback((next: Theme) => {
-    localStorage.setItem(STORAGE_KEY, next);
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch (e) {
+      console.warn("Failed to write theme to localStorage:", e);
+    }
     applyTheme(next);
     listeners.forEach((fn) => fn());
   }, []);

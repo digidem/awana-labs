@@ -78,4 +78,22 @@ describe("formatRelativeTime", () => {
     // produces "in 2 years" via Intl.RelativeTimeFormat.
     expect(result).toBe("in 2 years");
   });
+
+  // Past 12+ months: implementation uses i18n key (timeAgo.overYears),
+  // NOT rtf.format, because rtf.format with negative years produces
+  // "2 years ago" — lacking the "over" qualifier the i18n key provides.
+  it("past 12+ months uses i18n key with correct count, not rtf.format", () => {
+    const result = formatRelativeTime(yearsAgo(1), "en", t);
+    expect(result).toContain("timeAgo.overYears");
+    expect(result).toContain("1");
+    // Should NOT be rtf.format output like "1 year ago"
+    expect(result).not.toBe("1 year ago");
+  });
+
+  it("exactly 12 months in the future uses rtf.format", () => {
+    const result = formatRelativeTime(daysFromNow(365), "en", t);
+    // 365 days from now → diffDays >= 0 → rtf.format path
+    // numeric: "auto" produces "next year" for +1 year
+    expect(result).toBe("next year");
+  });
 });
