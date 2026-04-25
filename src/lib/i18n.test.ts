@@ -87,19 +87,18 @@ describe("i18n configuration", () => {
   });
 
   describe("language detector", () => {
-    it("should cache language selection in localStorage", async () => {
+    it("should not cache language selection in i18nextLng (managed by LanguageProvider)", async () => {
       await i18n.changeLanguage("pt");
-      expect(localStorage.getItem("i18nextLng")).toBe("pt");
+      // LanguageProvider uses "awana-labs-language" key; i18next detector
+      // caches are disabled to avoid dual source-of-truth.
+      expect(localStorage.getItem("i18nextLng")).toBeNull();
     });
 
-    it("should persist language selection across page reloads", async () => {
+    it("should not persist language via i18nextLng key (managed by LanguageProvider)", async () => {
       // Simulate user selecting Spanish
       await i18n.changeLanguage("es");
-      expect(localStorage.getItem("i18nextLng")).toBe("es");
-
-      // Verify that the language is stored for next session
-      const storedLang = localStorage.getItem("i18nextLng");
-      expect(storedLang).toBe("es");
+      // i18next detector caches are disabled; LanguageProvider manages persistence
+      expect(localStorage.getItem("i18nextLng")).toBeNull();
     });
 
     it("should fall back to default language for unsupported languages", async () => {
@@ -153,6 +152,72 @@ describe("i18n configuration", () => {
       expect(supportedLanguages).toContain(
         detectedLang as (typeof supportedLanguages)[number],
       );
+    });
+
+    it("should persist detected language to localStorage on first visit via querystring", async () => {
+      // Simulate a first-visit scenario: no stored preference, language detected from ?lng=
+      localStorage.clear();
+      sessionStorage.clear();
+
+      const originalSearch = window.location.search;
+      Object.defineProperty(window, "location", {
+        value: {
+          ...window.location,
+          search: "?lng=pt",
+        },
+        writable: true,
+      });
+
+      // Detect language from querystring — this is what LanguageProvider's
+      // getStoredLanguage/getInitialLanguage reads from.
+      const detectedLanguage = i18n.services.languageDetector?.detect();
+      const resolvedLanguage = Array.isArray(detectedLanguage)
+        ? detectedLanguage[0]
+        : detectedLanguage;
+      expect(resolvedLanguage).toBe("pt");
+
+      // Verify no prior stored preference
+      const storageKey = "awana-labs-language";
+      expect(localStorage.getItem(storageKey)).toBeNull();
+
+      // Change i18n to the detected language so LanguageProvider's
+      // getInitialLanguage() picks it up from i18n.resolvedLanguage.
+      await i18n.changeLanguage("pt");
+
+      // Render the real LanguageProvider to exercise its mount effect.
+      // The mount-only effect in useLanguage.tsx should persist the detected
+      // language when localStorage is empty.
+      const React = await import("react");
+      const { I18nextProvider } = await import("react-i18next");
+      const { LanguageProvider } = await import("@/hooks/useLanguage");
+      const { renderHook, act } = await import("@testing-library/react");
+
+      const wrapper = ({ children }: { children: React.ReactNode }) =>
+        React.createElement(
+          I18nextProvider,
+          { i18n },
+          React.createElement(LanguageProvider, null, children),
+        );
+
+      // Wait for the mount effect to fire and persist the language
+      await act(async () => {
+        renderHook(() => ({}), { wrapper });
+        // Flush microtasks so the mount-only useEffect runs
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      // After LanguageProvider mounts, the detected language must be persisted
+      expect(localStorage.getItem(storageKey)).toBe("pt");
+
+      // Restore original search and language
+      Object.defineProperty(window, "location", {
+        value: {
+          ...window.location,
+          search: originalSearch,
+        },
+        writable: true,
+      });
+      await i18n.changeLanguage("en");
     });
   });
 });

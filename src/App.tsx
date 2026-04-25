@@ -8,6 +8,14 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import("@tanstack/react-query-devtools").then((m) => ({
+        default: m.ReactQueryDevtools,
+      })),
+    )
+  : null;
+
 const AppContent = () => {
   useDocumentMeta();
 
@@ -57,6 +65,11 @@ const App = () => {
         <LanguageProvider>
           <AppContent />
         </LanguageProvider>
+        {import.meta.env.DEV && ReactQueryDevtools && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        )}
       </QueryClientProvider>
     </ErrorBoundary>
   );

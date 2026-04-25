@@ -37,22 +37,17 @@ i18n
       useSuspense: false, // Disable suspense for SSR compatibility
     },
     detection: {
-      // Detection order for language resolution
-      order: [
-        "querystring",
-        "cookie",
-        "localStorage",
-        "sessionStorage",
-        "navigator",
-        "htmlTag",
-      ],
-      // Keys or params to lookup language from
+      // Detection order for language resolution.
+      // localStorage is read on init (before React mounts) so the persisted
+      // preference influences the first render. The custom LanguageProvider
+      // remains the single source of truth for *writing* the preference;
+      // caches are empty so i18next never writes back on its own.
+      order: ["querystring", "localStorage", "navigator", "htmlTag"],
+      // Key used by LanguageProvider to persist language preference
+      lookupLocalStorage: "awana-labs-language",
       lookupQuerystring: "lng",
-      lookupCookie: "i18next",
-      lookupLocalStorage: "i18nextLng",
-      lookupSessionStorage: "i18nextLng",
-      // Cache user language selection
-      caches: ["localStorage", "cookie"],
+      // Do NOT cache — LanguageProvider manages persistence via "awana-labs-language"
+      caches: [],
       // Normalize regional codes (e.g. pt-BR → pt) to match supportedLngs
       convertDetectedLanguage: (lng: string) => lng.split("-")[0],
     },

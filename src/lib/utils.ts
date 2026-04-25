@@ -48,7 +48,10 @@ export function formatRelativeTime(
     return rtf.format(diffMonths, "month");
   }
 
-  // 12+ months → "over a year ago" / "over 2 years ago"
-  const diffYears = Math.round(Math.abs(diffDays) / 365);
-  return t("timeAgo.overYears", { count: diffYears });
+  // 12+ months → "over a year ago" / "over 2 years ago" (past) or "in 2 years" (future)
+  const diffYears = Math.round(diffDays / 365);
+  if (diffDays >= 0) {
+    return rtf.format(diffYears, "year");
+  }
+  return t("timeAgo.overYears", { count: Math.abs(diffYears) });
 }
