@@ -53,6 +53,9 @@ describe("ErrorBoundary i18n reactivity", () => {
 
     // English text should be gone
     expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument();
+
+    // Error ID persists after language change
+    expect(screen.getByText(/^Error ID: /)).toBeInTheDocument();
   });
 
   it("does not throw on unmount after language change", async () => {

@@ -8,6 +8,7 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  errorId: string | null;
 }
 
 /**
@@ -17,9 +18,11 @@ interface ErrorBoundaryState {
  */
 function ErrorDisplay({
   error,
+  errorId,
   onRetry,
 }: {
   error: Error | null;
+  errorId: string | null;
   onRetry: () => void;
 }) {
   const { t } = useTranslation();
@@ -38,6 +41,11 @@ function ErrorDisplay({
             {error.message}
           </p>
         )}
+        {errorId && (
+          <p className="text-xs text-muted-foreground/60 mt-4 font-mono">
+            Error ID: {errorId}
+          </p>
+        )}
         <button
           onClick={onRetry}
           className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -47,6 +55,14 @@ function ErrorDisplay({
       </div>
     </div>
   );
+}
+
+function generateErrorId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  }
 }
 
 /**
@@ -60,30 +76,36 @@ export class ErrorBoundary extends React.Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorId: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    const errorId = generateErrorId();
+    return { hasError: true, error, errorId };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    const errorId = this.state.errorId;
     // Always log in production for observability; include component stack in DEV
     if (import.meta.env.DEV) {
-      console.error("[ErrorBoundary]", error, errorInfo);
+      console.error("[ErrorBoundary]", error, errorInfo, { errorId });
     } else {
-      console.error("[ErrorBoundary]", error);
+      console.error("[ErrorBoundary]", error, { errorId });
     }
   }
 
   private handleRetry = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, errorId: null });
   };
 
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <ErrorDisplay error={this.state.error} onRetry={this.handleRetry} />
+        <ErrorDisplay
+          error={this.state.error}
+          errorId={this.state.errorId}
+          onRetry={this.handleRetry}
+        />
       );
     }
 

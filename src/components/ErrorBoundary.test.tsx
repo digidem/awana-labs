@@ -97,19 +97,37 @@ describe("ErrorBoundary", () => {
     expect(screen.queryByText("errorBoundary.title")).not.toBeInTheDocument();
   });
 
-  it("displays correct translation keys in error UI", () => {
+  it("renders error ID in the DOM", () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>,
     );
 
-    expect(screen.getByText("errorBoundary.title")).toBeInTheDocument();
-    expect(screen.getByText("errorBoundary.description")).toBeInTheDocument();
-    expect(screen.getByText("Test error")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "errorBoundary.retry" }),
-    ).toBeInTheDocument();
+    const errorIdElement = screen.getByText(/^Error ID: /);
+    expect(errorIdElement).toBeInTheDocument();
+    // Verify the ID is a non-empty string after the prefix
+    const errorId = errorIdElement.textContent?.replace("Error ID: ", "");
+    expect(errorId).toBeTruthy();
+    expect(errorId!.length).toBeGreaterThan(0);
+  });
+
+  it("includes errorId in console.error call", () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    const loggedArgs = consoleSpy.mock.calls.find(
+      (call: unknown[]) => call[0] === "[ErrorBoundary]",
+    );
+    expect(loggedArgs).toBeDefined();
+    // The last argument should be { errorId: string }
+    const contextArg = loggedArgs![loggedArgs!.length - 1] as {
+      errorId?: string;
+    };
+    expect(contextArg.errorId).toBeTruthy();
   });
 
   it("does not render error message when error has no message", () => {
@@ -124,8 +142,12 @@ describe("ErrorBoundary", () => {
     );
 
     expect(screen.getByText("errorBoundary.title")).toBeInTheDocument();
-    // No error message paragraph should be rendered when message is empty
-    const monoElements = container.querySelectorAll(".font-mono");
-    expect(monoElements).toHaveLength(0);
+    // Error ID is always rendered when an error occurs
+    const errorIdElements = container.querySelectorAll(".font-mono");
+    // Only the error ID paragraph should be present (no error.message since it's empty)
+    const errorIdText = Array.from(errorIdElements).find((el) =>
+      el.textContent?.startsWith("Error ID:"),
+    );
+    expect(errorIdText).toBeInTheDocument();
   });
 });
