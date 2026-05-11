@@ -76,7 +76,11 @@ async function seedMultiStatusProjects(page: Page) {
   await page.addInitScript((data) => {
     window.localStorage.setItem(
       "awana-labs-projects-cache",
-      JSON.stringify({ version: 2, cachedAt: new Date().toISOString(), data: { projects: data } }),
+      JSON.stringify({
+        version: 2,
+        cachedAt: new Date().toISOString(),
+        data: { projects: data },
+      }),
     );
   }, projects);
 }
@@ -181,9 +185,7 @@ test.describe("Status Badges", () => {
       const cls = await badges.nth(i).getAttribute("class");
       expect(cls).toBeTruthy();
       // Each badge should have some status-related styling
-      expect(
-        cls?.includes("--status-") || cls?.includes("muted"),
-      ).toBeTruthy();
+      expect(cls?.includes("--status-") || cls?.includes("muted")).toBeTruthy();
     }
   });
 });

@@ -15,9 +15,7 @@ test.describe("Theme Toggle", () => {
     const toggle = page.getByRole("switch");
 
     // Ensure starting from a known state — clear theme storage
-    await page.evaluate(() =>
-      localStorage.removeItem("awana-labs-theme"),
-    );
+    await page.evaluate(() => localStorage.removeItem("awana-labs-theme"));
 
     // Reload to pick up cleared state (defaults to "system")
     await page.reload();
@@ -45,7 +43,9 @@ test.describe("Theme Toggle", () => {
     const toggle = page.getByRole("switch");
 
     // Set to light explicitly
-    await page.evaluate(() => localStorage.setItem("awana-labs-theme", "light"));
+    await page.evaluate(() =>
+      localStorage.setItem("awana-labs-theme", "light"),
+    );
     await page.reload();
     await page.waitForSelector("#root");
 
@@ -64,7 +64,9 @@ test.describe("Theme Toggle", () => {
     const toggle = page.getByRole("switch");
 
     // Set to light
-    await page.evaluate(() => localStorage.setItem("awana-labs-theme", "light"));
+    await page.evaluate(() =>
+      localStorage.setItem("awana-labs-theme", "light"),
+    );
     await page.reload();
     await page.waitForSelector("#root");
 
