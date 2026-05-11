@@ -13,11 +13,19 @@ describe("statusColors", () => {
     expect(statusColors).toHaveProperty("archived");
   });
 
-  it("active uses semantic status-active color token classes", () => {
+  it("active uses solid-fill status-active tokens (intentional prominence)", () => {
+    // Active badge uses full-opacity bg (no / modifier) for visual hierarchy
+    expect(statusColors.active).toContain("bg-[hsl(var(--status-active))]");
+    expect(statusColors.active).not.toContain("/15");
     expect(statusColors.active).toContain("--status-active");
   });
 
-  it("paused uses semantic status-paused color token classes", () => {
+  it("paused uses subtle-tint status-paused tokens (/15 bg, /40 border)", () => {
+    // Paused badge uses reduced opacity for subdued appearance
+    expect(statusColors.paused).toContain("bg-[hsl(var(--status-paused))]/15");
+    expect(statusColors.paused).toContain(
+      "border-[hsl(var(--status-paused-border))]/40",
+    );
     expect(statusColors.paused).toContain("--status-paused");
   });
 
