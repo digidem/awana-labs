@@ -78,6 +78,8 @@ export function useTheme(): {
     } catch (e) {
       console.warn("Failed to write theme to localStorage:", e);
     }
+    // Immediate DOM feedback before React re-renders; system-preference-driven
+    // changes flow through the useEffect below.
     applyTheme(next);
     listeners.forEach((fn) => fn());
   }, []);
@@ -85,10 +87,17 @@ export function useTheme(): {
   const resolvedTheme: "light" | "dark" =
     theme === "system" ? systemPreference : theme;
 
-  // Re-apply on mount and whenever the resolved theme changes
+  // Intentionally idempotent with the synchronous applyTheme call in
+  // setTheme('system') — this path exists for external system preference
+  // changes (OS-level toggle while theme is 'system').
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
-  }, [resolvedTheme]);
+    if (theme === "system") {
+      document.documentElement.classList.toggle(
+        "dark",
+        systemPreference === "dark",
+      );
+    }
+  }, [theme, systemPreference]);
 
   return { theme, setTheme, resolvedTheme };
 }
