@@ -36,7 +36,11 @@ const matchMediaMock = vi.fn((query: string) => {
       }),
     };
   }
-  return { matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() };
+  return {
+    matches: false,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  };
 });
 
 describe("useTheme", () => {
@@ -44,10 +48,14 @@ describe("useTheme", () => {
 
   beforeEach(() => {
     store = {};
-    localStorageMock.getItem.mockImplementation((key: string) => store[key] ?? null);
-    localStorageMock.setItem.mockImplementation((key: string, value: string) => {
-      store[key] = value;
-    });
+    localStorageMock.getItem.mockImplementation(
+      (key: string) => store[key] ?? null,
+    );
+    localStorageMock.setItem.mockImplementation(
+      (key: string, value: string) => {
+        store[key] = value;
+      },
+    );
     prefersDark = false;
     mediaListeners.clear();
 

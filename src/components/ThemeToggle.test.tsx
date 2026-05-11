@@ -105,10 +105,7 @@ describe("ThemeToggle", () => {
   it("has aria-checked=false when resolvedTheme is light", () => {
     mockResolvedTheme = "light";
     render(<ThemeToggle />);
-    expect(screen.getByRole("switch")).toHaveAttribute(
-      "aria-checked",
-      "false",
-    );
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "false");
   });
 
   it("aria-label updates with current and next theme", () => {
