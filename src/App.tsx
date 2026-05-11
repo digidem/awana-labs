@@ -65,7 +65,7 @@ const App = () => {
         <LanguageProvider>
           <AppContent />
         </LanguageProvider>
-        {import.meta.env.DEV && ReactQueryDevtools && (
+        {ReactQueryDevtools && (
           <Suspense fallback={null}>
             <ReactQueryDevtools initialIsOpen={false} />
           </Suspense>

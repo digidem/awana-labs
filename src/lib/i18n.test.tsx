@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import React from "react";
 import { I18nextProvider } from "react-i18next";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import i18n, { supportedLanguages } from "./i18n";
 
 describe("i18n configuration", () => {
@@ -197,15 +197,19 @@ describe("i18n configuration", () => {
         </I18nextProvider>
       );
 
-      // Wait for the mount effect to fire and persist the language
+      // Render LanguageProvider inside act. The mount-only useEffect persists
+      // the detected language when localStorage is empty. Note: the i18n
+      // languageChanged event may trigger an async state update that fires
+      // outside act — this is a known i18next + RTL interaction limitation.
+      // The waitFor assertion below ensures correctness regardless.
       await act(async () => {
         renderHook(() => ({}), { wrapper });
-        // Flush microtasks so the mount-only useEffect runs
-        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
-      // After LanguageProvider mounts, the detected language must be persisted
-      expect(localStorage.getItem(storageKey)).toBe("pt");
+      // Verify the detected language was persisted
+      await waitFor(() => {
+        expect(localStorage.getItem(storageKey)).toBe("pt");
+      });
 
       // Restore original search and language
       Object.defineProperty(window, "location", {
