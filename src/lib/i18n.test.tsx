@@ -1,4 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import React from "react";
+import { I18nextProvider } from "react-i18next";
+import { LanguageProvider } from "@/hooks/useLanguage";
+import { renderHook, act } from "@testing-library/react";
 import i18n, { supportedLanguages } from "./i18n";
 
 describe("i18n configuration", () => {
@@ -187,17 +191,11 @@ describe("i18n configuration", () => {
       // Render the real LanguageProvider to exercise its mount effect.
       // The mount-only effect in useLanguage.tsx should persist the detected
       // language when localStorage is empty.
-      const React = await import("react");
-      const { I18nextProvider } = await import("react-i18next");
-      const { LanguageProvider } = await import("@/hooks/useLanguage");
-      const { renderHook, act } = await import("@testing-library/react");
-
-      const wrapper = ({ children }: { children: React.ReactNode }) =>
-        React.createElement(
-          I18nextProvider,
-          { i18n },
-          React.createElement(LanguageProvider, null, children),
-        );
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <I18nextProvider i18n={i18n}>
+          <LanguageProvider>{children}</LanguageProvider>
+        </I18nextProvider>
+      );
 
       // Wait for the mount effect to fire and persist the language
       await act(async () => {
