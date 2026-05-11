@@ -12,11 +12,18 @@ export type {
 } from "@/types/project.schema";
 
 /**
- * Tailwind CSS classes for status badge styling
+ * Tailwind CSS classes for status badge styling.
+ *
+ * Design rationale — opacity tiers create visual hierarchy:
+ * - active:   solid fill (full opacity) — most prominent, draws the eye
+ * - paused:   subtle tint (/15 bg, /40 border) — visible but subdued
+ * - archived: muted semantic tokens — fully receded
  */
 export const statusColors: Record<ProjectState, string> = {
-  active: "bg-green-500/10 text-green-700 border-green-500/20",
-  paused: "bg-amber-500/10 text-amber-700 border-amber-500/20",
+  active:
+    "bg-[hsl(var(--status-active))] text-[hsl(var(--status-active-foreground))] border-[hsl(var(--status-active-border))]",
+  paused:
+    "bg-[hsl(var(--status-paused))]/15 text-[hsl(var(--status-paused-foreground))] border-[hsl(var(--status-paused-border))]/40",
   archived: "bg-muted text-muted-foreground border-border",
 };
 

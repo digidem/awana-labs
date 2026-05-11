@@ -222,13 +222,6 @@ export type ProjectsData = z.infer<typeof projectsDataSchema>;
 // ============================================================================
 
 /**
- * Validate and return project data, throwing on error
- */
-export function parseProject(data: unknown): Project {
-  return projectSchema.parse(data);
-}
-
-/**
  * Validate and return projects data, throwing on error
  */
 export function parseProjectsData(data: unknown): ProjectsData {

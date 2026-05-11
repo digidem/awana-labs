@@ -3,6 +3,7 @@ import { GithubIcon } from "./GithubIcon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useScrollListener } from "@/hooks/useScrollPosition";
 
 interface HeaderProps {
@@ -124,8 +125,9 @@ const Header = ({ className }: HeaderProps) => {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <LanguageSwitcher variant="compact" />
+            <ThemeToggle />
             <a
               href="https://github.com/digidem/awana-labs"
               target="_blank"

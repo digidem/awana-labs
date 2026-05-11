@@ -37,6 +37,8 @@ const getInitialLanguage = (): Language => {
   return getCurrentI18nLanguage() ?? DEFAULT_LANGUAGE;
 };
 
+const LEGACY_STORAGE_KEY = "i18nextLng";
+
 const getStoredLanguage = (): Language => {
   if (typeof window === "undefined") return getInitialLanguage();
 
@@ -44,6 +46,13 @@ const getStoredLanguage = (): Language => {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (stored && isLanguage(stored)) {
       return stored;
+    }
+
+    // Read-only fallback: return legacy key value without mutating storage.
+    // Actual migration happens in the LanguageProvider mount effect.
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy && isLanguage(legacy)) {
+      return legacy;
     }
   } catch (e) {
     console.warn("Failed to read language from localStorage:", e);
@@ -84,6 +93,38 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
 
     updateDocumentLanguage(language);
   }, [language]);
+
+  // One-time migration: copy legacy i18nextLng → awana-labs-language.
+  // Must run before the first-visit persistence effect below so the key
+  // is populated before that effect checks for emptiness.
+  useEffect(() => {
+    try {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy && isLanguage(legacy)) {
+        const current = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (current === null) {
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
+        }
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    } catch {
+      // localStorage unavailable — ignore
+    }
+  }, []);
+
+  // Persist the initial detected language on first visit when storage is empty.
+  // Without this, a language detected from ?lng= or navigator.language is never
+  // written to localStorage and a page reload loses the choice.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(LANGUAGE_STORAGE_KEY) === null) {
+        storeLanguage(language);
+      }
+    } catch {
+      // localStorage unavailable — ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only
+  }, []);
 
   useEffect(() => {
     const handleLanguageChanged = (nextLanguage: string) => {

@@ -1,5 +1,5 @@
 import React from "react";
-import i18n from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -8,65 +8,107 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  errorId: string | null;
 }
 
+/**
+ * Functional error display component with i18n support.
+ * Extracted from the class boundary so translations update reactively
+ * without manual i18n.on("languageChanged") + forceUpdate().
+ */
+function ErrorDisplay({
+  error,
+  errorId,
+  onRetry,
+}: {
+  error: Error | null;
+  errorId: string | null;
+  onRetry: () => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+      <div className="max-w-md text-center">
+        <h1 className="text-2xl font-bold text-destructive mb-4">
+          {t("errorBoundary.title")}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {t("errorBoundary.description")}
+        </p>
+        {import.meta.env.DEV && error?.message && (
+          <p className="text-sm text-muted-foreground/80 mb-4 font-mono">
+            {error.message}
+          </p>
+        )}
+        {errorId && (
+          <p className="text-xs text-muted-foreground/60 mt-4 font-mono">
+            Error ID: {errorId}
+          </p>
+        )}
+        <button
+          onClick={onRetry}
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {t("errorBoundary.retry")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function generateErrorId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    console.warn(
+      "[ErrorBoundary] crypto.randomUUID() unavailable — using fallback error ID",
+    );
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+}
+
+/**
+ * Minimal class-based error boundary shell.
+ * Only handles getDerivedStateFromError / componentDidCatch — rendering
+ * is delegated to the functional ErrorDisplay component for reactive i18n.
+ */
 export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorId: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    const errorId = generateErrorId();
+    return { hasError: true, error, errorId };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    const errorId = this.state.errorId;
     // Always log in production for observability; include component stack in DEV
     if (import.meta.env.DEV) {
-      console.error("[ErrorBoundary]", error, errorInfo);
+      console.error("[ErrorBoundary]", error, errorInfo, { errorId });
     } else {
-      console.error("[ErrorBoundary]", error);
+      console.error("[ErrorBoundary]", error, { errorId });
     }
   }
 
-  componentDidMount(): void {
-    i18n.on("languageChanged", this.handleLanguageChanged);
-  }
-
-  componentWillUnmount(): void {
-    i18n.off("languageChanged", this.handleLanguageChanged);
-  }
-
-  private handleLanguageChanged = () => {
-    this.forceUpdate();
-  };
-
   private handleRetry = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, errorId: null });
   };
 
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-6">
-          <div className="max-w-md text-center">
-            <h1 className="text-2xl font-bold text-destructive mb-4">
-              {i18n.t("errorBoundary.title")}
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              {i18n.t("errorBoundary.description")}
-            </p>
-            <button
-              onClick={this.handleRetry}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              {i18n.t("errorBoundary.retry")}
-            </button>
-          </div>
-        </div>
+        <ErrorDisplay
+          error={this.state.error}
+          errorId={this.state.errorId}
+          onRetry={this.handleRetry}
+        />
       );
     }
 

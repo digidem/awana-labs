@@ -8,7 +8,7 @@ import {
   parseImages,
   parseNotes,
   parseDescription,
-} from "./issue-parser";
+} from "@/lib/issue-parser";
 
 describe("slugify", () => {
   it("converts to lowercase", () => {

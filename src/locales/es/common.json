@@ -75,13 +75,17 @@
   },
   "accessibility": {
     "skipToContent": "Saltar al contenido",
-    "scrollToTop": "Volver arriba"
+    "scrollToTop": "Volver arriba",
+    "themeToggle": "Tema: {{current}}, haz clic para cambiar a {{next}}"
   },
   "aria": {
     "viewDetails": "Ver detalles de {{title}}",
     "selectLanguage": "Seleccionar idioma",
     "switchLanguage": "Cambiar a {{language}}",
-    "visitGithub": "Visitar repositorio de GitHub"
+    "visitGithub": "Visitar repositorio de GitHub",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeSystem": "Sistema"
   },
   "timeAgo": {
     "overYears_one": "hace más de un año",
