@@ -1,10 +1,13 @@
 import { test, expect } from "@playwright/test";
-import {
-  pinAppLanguage,
-  seedProjectsCache,
-  mockGitHubProjects,
-  type Page,
-} from "./fixtures";
+import { pinAppLanguage, type Page } from "./fixtures";
+
+/**
+ * Abort GitHub API requests so the background refresh fails gracefully
+ * without overwriting the seeded multi-status cache.
+ */
+async function blockGitHubAPI(page: Page) {
+  await page.route("https://api.github.com/**", (route) => route.abort());
+}
 
 /**
  * Helper: seed multiple projects with different statuses
@@ -25,7 +28,11 @@ async function seedMultiStatusProjects(page: Page) {
       status: { state: "active", usage: "widely-used", notes: "" },
       tags: ["test"],
       media: { logo: "", images: [] },
-      links: { homepage: "", repository: "", documentation: "" },
+      links: {
+        homepage: "https://example.com/project",
+        repository: "https://github.com/example/project",
+        documentation: "https://docs.example.com/project",
+      },
       timestamps: {
         created_at: "2024-01-01T00:00:00.000Z",
         last_updated_at: "2024-06-01T00:00:00.000Z",
@@ -45,7 +52,11 @@ async function seedMultiStatusProjects(page: Page) {
       status: { state: "paused", usage: "used", notes: "" },
       tags: ["test"],
       media: { logo: "", images: [] },
-      links: { homepage: "", repository: "", documentation: "" },
+      links: {
+        homepage: "https://example.com/project",
+        repository: "https://github.com/example/project",
+        documentation: "https://docs.example.com/project",
+      },
       timestamps: {
         created_at: "2024-01-01T00:00:00.000Z",
         last_updated_at: "2024-03-01T00:00:00.000Z",
@@ -65,7 +76,11 @@ async function seedMultiStatusProjects(page: Page) {
       status: { state: "archived", usage: "experimental", notes: "" },
       tags: ["test"],
       media: { logo: "", images: [] },
-      links: { homepage: "", repository: "", documentation: "" },
+      links: {
+        homepage: "https://example.com/project",
+        repository: "https://github.com/example/project",
+        documentation: "https://docs.example.com/project",
+      },
       timestamps: {
         created_at: "2023-01-01T00:00:00.000Z",
         last_updated_at: "2023-06-01T00:00:00.000Z",
@@ -94,21 +109,33 @@ test.describe("Status Badges", () => {
     page,
   }) => {
     await seedMultiStatusProjects(page);
-    await mockGitHubProjects(page);
+    await blockGitHubAPI(page);
     await page.goto("/");
     await page.waitForSelector("#projects");
 
-    // Verify badge text is visible
-    await expect(page.getByText("Active")).toBeVisible();
-    await expect(page.getByText("Paused")).toBeVisible();
-    await expect(page.getByText("Archived")).toBeVisible();
+    // Verify badge text is visible (scoped to project cards to avoid filter button ambiguity)
+    await expect(
+      page
+        .getByRole("button", { name: /view details for Active Project/i })
+        .locator(".capitalize"),
+    ).toContainText("Active");
+    await expect(
+      page
+        .getByRole("button", { name: /view details for Paused Project/i })
+        .locator(".capitalize"),
+    ).toContainText("Paused");
+    await expect(
+      page
+        .getByRole("button", { name: /view details for Archived Project/i })
+        .locator(".capitalize"),
+    ).toContainText("Archived");
   });
 
   test("active badge has solid-fill styling in light mode", async ({
     page,
   }) => {
     await seedMultiStatusProjects(page);
-    await mockGitHubProjects(page);
+    await blockGitHubAPI(page);
 
     // Ensure light mode
     await page.addInitScript(() => {
@@ -120,8 +147,7 @@ test.describe("Status Badges", () => {
 
     // Active badge should contain the status-active token
     const activeBadge = page
-      .locator("button")
-      .filter({ hasText: "Active Project" })
+      .getByRole("button", { name: /view details for Active Project/i })
       .locator(".capitalize");
 
     await expect(activeBadge).toBeVisible();
@@ -135,7 +161,7 @@ test.describe("Status Badges", () => {
     page,
   }) => {
     await seedMultiStatusProjects(page);
-    await mockGitHubProjects(page);
+    await blockGitHubAPI(page);
 
     await page.addInitScript(() => {
       localStorage.setItem("awana-labs-theme", "light");
@@ -145,8 +171,7 @@ test.describe("Status Badges", () => {
     await page.waitForSelector("#projects");
 
     const pausedBadge = page
-      .locator("button")
-      .filter({ hasText: "Paused Project" })
+      .getByRole("button", { name: /view details for Paused Project/i })
       .locator(".capitalize");
 
     await expect(pausedBadge).toBeVisible();
@@ -158,7 +183,7 @@ test.describe("Status Badges", () => {
 
   test("badges render correctly in dark mode", async ({ page }) => {
     await seedMultiStatusProjects(page);
-    await mockGitHubProjects(page);
+    await blockGitHubAPI(page);
 
     // Set dark mode
     await page.addInitScript(() => {
@@ -171,18 +196,26 @@ test.describe("Status Badges", () => {
     // Verify dark class is present
     await expect(page.locator("html")).toHaveClass(/\bdark\b/);
 
-    // All badges should be visible
-    await expect(page.getByText("Active")).toBeVisible();
-    await expect(page.getByText("Paused")).toBeVisible();
-    await expect(page.getByText("Archived")).toBeVisible();
+    // All badges should be visible (scoped to project cards to avoid filter button ambiguity)
+    const activeBadge = page
+      .getByRole("button", { name: /view details for Active Project/i })
+      .locator(".capitalize");
+    await expect(activeBadge).toBeVisible();
+
+    const pausedBadge = page
+      .getByRole("button", { name: /view details for Paused Project/i })
+      .locator(".capitalize");
+    await expect(pausedBadge).toBeVisible();
+
+    const archivedBadge = page
+      .getByRole("button", { name: /view details for Archived Project/i })
+      .locator(".capitalize");
+    await expect(archivedBadge).toBeVisible();
 
     // Verify badge elements have color-related classes (not empty/broken)
-    const badges = page.locator(".capitalize");
-    const count = await badges.count();
-    expect(count).toBeGreaterThanOrEqual(3);
-
-    for (let i = 0; i < count; i++) {
-      const cls = await badges.nth(i).getAttribute("class");
+    const allBadges = [activeBadge, pausedBadge, archivedBadge];
+    for (const badge of allBadges) {
+      const cls = await badge.getAttribute("class");
       expect(cls).toBeTruthy();
       // Each badge should have some status-related styling
       expect(cls?.includes("--status-") || cls?.includes("muted")).toBeTruthy();

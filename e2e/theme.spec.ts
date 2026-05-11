@@ -91,9 +91,10 @@ test.describe("Theme Toggle", () => {
 
     // Verify dark class persisted
     await expect(page.locator("html")).toHaveClass(/\bdark\b/);
-    await expect(
-      page.evaluate(() => localStorage.getItem("awana-labs-theme")),
-    ).toBe("dark");
+    const theme = await page.evaluate(() =>
+      localStorage.getItem("awana-labs-theme"),
+    );
+    expect(theme).toBe("dark");
   });
 
   test("system theme follows prefers-color-scheme", async ({ page }) => {
