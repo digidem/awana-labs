@@ -48,13 +48,10 @@ const getStoredLanguage = (): Language => {
       return stored;
     }
 
-    // Migrate legacy i18nextLng preference on first read after upgrade.
-    // The previous i18n config cached language under "i18nextLng"; this
-    // one-time migration ensures returning users keep their choice.
+    // Read-only fallback: return legacy key value without mutating storage.
+    // Actual migration happens in the LanguageProvider mount effect.
     const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (legacy && isLanguage(legacy)) {
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
       return legacy;
     }
   } catch (e) {
@@ -96,6 +93,24 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
 
     updateDocumentLanguage(language);
   }, [language]);
+
+  // One-time migration: copy legacy i18nextLng → awana-labs-language.
+  // Must run before the first-visit persistence effect below so the key
+  // is populated before that effect checks for emptiness.
+  useEffect(() => {
+    try {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy && isLanguage(legacy)) {
+        const current = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (current === null) {
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, legacy);
+        }
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    } catch {
+      // localStorage unavailable — ignore
+    }
+  }, []);
 
   // Persist the initial detected language on first visit when storage is empty.
   // Without this, a language detected from ?lng= or navigator.language is never
